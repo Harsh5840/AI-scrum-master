@@ -1,0 +1,28 @@
+node_modules
+.vscode
+.DS_Store
+**/.DS_Store
+**/.vscode
+**/.vscode/*
+**/*.vscode
+**/*.vscode/*
+**/*.vscode/*
+!**/.vscode/settings.json
+!**/.vscode/tasks.json
+!**/.vscode/launch.json
+!**/.vscode/extensions.json
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+# GitHub
+*.vsix
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code E        xtensions                                                     
+*.vsix                                      
