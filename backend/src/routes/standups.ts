@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getStandups, createStandup } from "../controllers/standupController";
+import { getStandups, createStandup } from "../controllers/standupController.js";
 
 const standupRouter = Router();
 
