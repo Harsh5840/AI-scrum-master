@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { type Request, type Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { summarizeStandup } from "../services/aiService";
 
