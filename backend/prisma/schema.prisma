@@ -1,16 +1,50 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-generator client {
-  provider = "prisma-client-js"
-}
+// Prisma schema for AI Scrum Master
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          Int        @id @default(autoincrement())
+  name        String
+  email       String     @unique
+  standups    Standup[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Standup {
+  id          Int        @id @default(autoincrement())
+  userId      Int
+  summary     String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user        User       @relation(fields: [userId], references: [id])
+  sprint      Sprint?    @relation("SprintStandups", fields: [sprintId], references: [id])
+  sprintId    Int?
+}
+
+model Sprint {
+  id          Int           @id @default(autoincrement())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  standups    Standup[]     @relation("SprintStandups")
+  backlogItems BacklogItem[]
+}
+
+model BacklogItem {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  completed   Boolean  @default(false)
+  sprintId    Int?
+  sprint      Sprint?  @relation(fields: [sprintId], references: [id])
+}
 
