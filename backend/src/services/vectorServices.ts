@@ -91,7 +91,8 @@ export class VectorStore {
     try {
       const { topK = 5, filter } = options;
       
-      const results = await this.vectorStore.similaritySearchWithScore(query, topK, filter);
+      const queryEmbedding = await embeddings.embedQuery(query);
+      const results = await this.vectorStore.similaritySearchVectorWithScore(queryEmbedding, topK, filter);
       
       return results.map(([doc, score]) => ({
         content: doc.pageContent,
@@ -120,10 +121,11 @@ export class VectorStore {
       filter.type = { $in: includeTypes };
     }
 
-    const results = await this.searchSimilar(query, {
-      filter: Object.keys(filter).length > 0 ? filter : undefined,
-      topK: maxResults,
-    });
+    const searchOptions: { filter?: Record<string, any>; topK: number } = { topK: maxResults };
+    if (Object.keys(filter).length > 0) {
+      searchOptions.filter = filter;
+    }
+    const results = await this.searchSimilar(query, searchOptions);
 
     // Format context for AI
     const context = results

@@ -10,7 +10,9 @@ import slackRoutes from "./src/routes/slack.js";
 import jiraRoutes from "./src/routes/jira.js";
 import blockerRoutes from "./src/routes/blockers.js";
 import aiRoutes from "./src/routes/ai.js";
+import workflowRoutes from "./src/routes/workflows.js";
 import { vectorStore } from "./src/services/vectorServices.js";
+import { queueManager } from "./src/services/queueServices.js";
 
 // Load environment variables from .env
 dotenv.config();
@@ -30,6 +32,7 @@ app.use("/api/slack", slackRoutes);
 app.use("/api/jira", jiraRoutes);
 app.use("/api/blockers", blockerRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/workflows", workflowRoutes);
 
 // Root route
 app.get("/", (_req, res) => {
@@ -47,14 +50,15 @@ app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ error: "Internal Server Error" });
 });
 
-// Initialize vector store
+// Initialize vector store and queue workers
 async function initializeServices() {
   try {
     await vectorStore.initialize();
+    await queueManager.initializeWorkers();
     console.log('🚀 All services initialized successfully');
   } catch (error) {
     console.error('❌ Failed to initialize services:', error);
-    // Continue without vector store if it fails
+    // Continue without services if they fail
   }
 }
 
