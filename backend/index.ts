@@ -1,9 +1,10 @@
-import express from "express";
+import express, { type NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import { type Request, type Response } from "express";
 
 import standupRoutes from "./src/routes/standups.js";
-import backlogRoutes from "./src/routes/backlog";
+import backlogRoutes from "./src/routes/backlog.js";
 import sprintRoutes from "./src/routes/sprints.js";
 import slackRoutes from "./src/routes/slack.js";
 import jiraRoutes from "./src/routes/jira.js";
@@ -36,7 +37,7 @@ app.use((req, res, next) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, _next) => {
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
   console.error(err.stack || err);
   res.status(500).json({ error: "Internal Server Error" });
 });
