@@ -13,14 +13,22 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@langchain/openai": "^0.6.13",
+    "@langchain/pinecone": "^0.2.0",
+    "@pinecone-database/pinecone": "^6.1.2",
     "@prisma/client": "^6.16.2",
     "@types/cors": "^2.8.19",
+    "@types/ioredis": "^5.0.0",
     "axios": "^1.12.2",
     "body-parser": "^2.2.0",
+    "bullmq": "^5.58.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "ioredis": "^5.7.0",
+    "langchain": "^0.3.34",
     "openai": "^5.21.0",
+    "redis": "^5.8.2",
     "zod": "^3.25.76"
   },
   "devDependencies": {

@@ -8,6 +8,9 @@ import backlogRoutes from "./src/routes/backlog.js";
 import sprintRoutes from "./src/routes/sprints.js";
 import slackRoutes from "./src/routes/slack.js";
 import jiraRoutes from "./src/routes/jira.js";
+import blockerRoutes from "./src/routes/blockers.js";
+import aiRoutes from "./src/routes/ai.js";
+import { vectorStore } from "./src/services/vectorServices.js";
 
 // Load environment variables from .env
 dotenv.config();
@@ -25,6 +28,8 @@ app.use("/api/backlog", backlogRoutes);
 app.use("/api/sprints", sprintRoutes);
 app.use("/api/slack", slackRoutes);
 app.use("/api/jira", jiraRoutes);
+app.use("/api/blockers", blockerRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Root route
 app.get("/", (_req, res) => {
@@ -42,7 +47,20 @@ app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ error: "Internal Server Error" });
 });
 
+// Initialize vector store
+async function initializeServices() {
+  try {
+    await vectorStore.initialize();
+    console.log('🚀 All services initialized successfully');
+  } catch (error) {
+    console.error('❌ Failed to initialize services:', error);
+    // Continue without vector store if it fails
+  }
+}
+
 // Start the server
-app.listen(PORT, () => {
-  console.log(`AI Scrum Master backend running on port ${PORT}`);
+initializeServices().then(() => {
+  app.listen(PORT, () => {
+    console.log(`AI Scrum Master backend running on port ${PORT}`);
+  });
 });

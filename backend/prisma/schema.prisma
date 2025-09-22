@@ -28,6 +28,20 @@ model Standup {
   user        User       @relation(fields: [userId], references: [id])
   sprint      Sprint?    @relation("SprintStandups", fields: [sprintId], references: [id])
   sprintId    Int?
+  blockers    Blocker[]  @relation("StandupBlockers")
+}
+
+model Blocker {
+  id          Int      @id @default(autoincrement())
+  standupId   Int
+  type        String   // "dependency", "technical", "resource", "external"
+  severity    String   // "low", "medium", "high", "critical"
+  description String
+  status      String   // "active", "resolved", "escalated"
+  detectedAt  DateTime @default(now())
+  resolvedAt  DateTime?
+  
+  standup     Standup  @relation("StandupBlockers", fields: [standupId], references: [id])
 }
 
 model Sprint {
