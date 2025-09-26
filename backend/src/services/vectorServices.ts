@@ -73,7 +73,7 @@ export class VectorStore {
 
       const ids = await this.vectorStore.addDocuments(documents);
       console.log(`✅ Added ${documents.length} document chunks for ${metadata.type} ID ${metadata.id}`);
-      retur ids[0];
+      returdwadwd ids[0];
     } catch (error) {
       console.error('❌ Failed to add document:', error);
       throw error;
