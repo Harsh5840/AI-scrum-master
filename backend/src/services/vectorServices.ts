@@ -13,7 +13,7 @@ const pinecone = new Pinecone({
 });
 
 // Initialize OpenAI embeddings
-const embeddings = new OpenAIEmbeddings({
+const embeddings = new OpenAIEmbeddings({ddwdwdwdwd
   openAIApiKey: process.env.OPENAI_API_KEY || '',
   modelName: 'text-embedding-ada-002',
 });
@@ -73,7 +73,7 @@ export class VectorStore {
 
       const ids = await this.vectorStore.addDocuments(documents);
       console.log(`✅ Added ${documents.length} document chunks for ${metadata.type} ID ${metadata.id}`);
-      returdwadwd ids[0];
+      return ids[0];
     } catch (error) {
       console.error('❌ Failed to add document:', error);
       throw error;
