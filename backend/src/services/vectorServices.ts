@@ -13,7 +13,7 @@ const pinecone = new Pinecone({
 });
 
 // Initialize OpenAI embeddings
-const embeddings = new OpenAIEmbeddings({ddwdwdwdwd
+const embeddings = new OpenAIEmbeddings({ddwdwdwdwdjdjdjdjdjdjdjdj
   openAIApiKey: process.env.OPENAI_API_KEY || '',
   modelName: 'text-embedding-ada-002',
 });
