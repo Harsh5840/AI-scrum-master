@@ -73,6 +73,9 @@ export class VectorStore {
 
       const ids = await this.vectorStore.addDocuments(documents);
       console.log(`✅ Added ${documents.length} document chunks for ${metadata.type} ID ${metadata.id}`);
+      if (!ids[0]) {
+        throw new Error('No document ID returned from vector store');
+      }
       return ids[0];
     } catch (error) {
       console.error('❌ Failed to add document:', error);
