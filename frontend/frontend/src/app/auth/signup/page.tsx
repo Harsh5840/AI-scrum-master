@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useAppDispatch } from '@/store/hooks'
-import { setCredentials } from '@/store/slices/authSlice'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { signupUser, clearError } from '@/store/slices/authSlice'
+import { authService } from '@/services/authService'
 import { 
   PersonIcon, 
   LockClosedIcon, 
@@ -20,6 +21,7 @@ import {
 export default function SignupPage() {
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const { isLoading, error } = useAppSelector((state) => state.auth)
   
   const [formData, setFormData] = useState({
     name: '',
@@ -29,54 +31,49 @@ export default function SignupPage() {
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [validationError, setValidationError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-    setError('')
+    dispatch(clearError())
+    setValidationError('')
 
     // Validation
     if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-      setError('Please fill in all fields')
-      setIsLoading(false)
+      setValidationError('Please fill in all fields')
       return
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
-      setIsLoading(false)
+      setValidationError('Passwords do not match')
       return
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters')
-      setIsLoading(false)
+      setValidationError('Password must be at least 6 characters')
       return
     }
 
     try {
-      // Mock signup - in real app, this would call an API
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Mock successful signup
-      const mockUser = {
-        id: Math.floor(Math.random() * 1000),
+      const result = await dispatch(signupUser({
         name: formData.name,
         email: formData.email,
-        createdAt: new Date().toISOString()
+        password: formData.password
+      }))
+      if (signupUser.fulfilled.match(result)) {
+        router.push('/dashboard')
       }
-      
-      const mockToken = 'mock-jwt-token'
-      
-      dispatch(setCredentials({ user: mockUser, token: mockToken }))
-      router.push('/dashboard')
     } catch (err) {
-      setError('Failed to create account. Please try again.')
-    } finally {
-      setIsLoading(false)
+      // Error is handled by the slice
+    }
+  }
+
+  const handleGoogleSignup = async () => {
+    try {
+      const googleUrl = await authService.googleLogin()
+      window.location.href = googleUrl
+    } catch (error) {
+      console.error('Google signup failed:', error)
     }
   }
 
@@ -101,9 +98,9 @@ export default function SignupPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
+              {(error || validationError) && (
                 <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-md p-3">
-                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{error || validationError}</p>
                 </div>
               )}
               
