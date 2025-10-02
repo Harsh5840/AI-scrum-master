@@ -1,5 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import type { RootState } from '../store'
+
+// Forward declaration - will be properly imported from store
+interface RootState {
+  auth: {
+    token: string | null
+  }
+}
 
 // Define base types from your backend API
 export interface User {
@@ -67,7 +73,8 @@ export interface WorkflowJob {
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
   prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as RootState).auth.token
+    const state = getState() as RootState
+    const token = state.auth.token
     if (token) {
       headers.set('authorization', `Bearer ${token}`)
     }
