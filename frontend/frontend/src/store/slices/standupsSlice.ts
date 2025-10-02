@@ -6,6 +6,7 @@ interface StandupsState {
   isLoading: boolean
   error: string | null
   selectedSprintId: number | null
+  dateFilter: string | null
 }
 
 const initialState: StandupsState = {
