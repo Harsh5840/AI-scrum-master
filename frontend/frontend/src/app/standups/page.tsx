@@ -273,10 +273,10 @@ export default function StandupsPage() {
                         <h4 className="font-medium text-blue-600 mb-2">📝 Summary</h4>
                         <p className="text-muted-foreground mb-3">{standup.summary}</p>
                         
-                        {standup.description && (
+                        {(standup as any).description && (
                           <>
                             <h4 className="font-medium text-green-600 mb-1">💡 Details</h4>
-                            <p className="text-muted-foreground">{standup.description}</p>
+                            <p className="text-muted-foreground">{(standup as any).description}</p>
                           </>
                         )}
                       </div>

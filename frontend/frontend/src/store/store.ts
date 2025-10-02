@@ -1,12 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { apiSlice } from './api/apiSlice'
-import authReducer from './slices/authSlice'
-import sprintsReducer from './slices/sprintsSlice'
-import standupsReducer from './slices/standupsSlice'
-import blockersReducer from './slices/blockersSlice'
-import aiInsightsReducer from './slices/aiInsightsSlice'
-import uiReducer from './slices/uiSlice'
+import authReducer from './slices/authSlice.js'
+import sprintsReducer from './slices/sprintsSlice.js'
+import standupsReducer from './slices/standupsSlice.js'
+import blockersReducer from './slices/blockersSlice.js'
+import aiInsightsReducer from './slices/aiInsightsSlice.js'
+import uiReducer from './slices/uiSlice.js'
 
 export const store = configureStore({
   reducer: {

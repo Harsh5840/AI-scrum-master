@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAppDispatch } from '@/store/hooks'
 import { handleOAuthCallback } from '@/store/slices/authSlice'
 
-export default function OAuthCallbackPage() {
+function CallbackHandler() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const dispatch = useAppDispatch()
@@ -116,5 +116,31 @@ export default function OAuthCallbackPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function OAuthCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-md w-full space-y-8 text-center">
+          <div>
+            <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
+              AI Scrum Master
+            </h2>
+          </div>
+          <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <div className="space-y-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Loading...
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <CallbackHandler />
+    </Suspense>
   )
 }
