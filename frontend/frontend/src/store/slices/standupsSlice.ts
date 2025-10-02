@@ -14,6 +14,7 @@ const initialState: StandupsState = {
   isLoading: false,
   error: null,
   selectedSprintId: null,
+  dateFilter: null,
 }
 
 const standupsSlice = createSlice({
@@ -42,6 +43,9 @@ const standupsSlice = createSlice({
     setSelectedSprintId: (state, action: PayloadAction<number | null>) => {
       state.selectedSprintId = action.payload
     },
+    setDateFilter: (state, action: PayloadAction<string | null>) => {
+      state.dateFilter = action.payload
+    },
     setError: (state, action: PayloadAction<string>) => {
       state.error = action.payload
     },
@@ -58,6 +62,7 @@ export const {
   updateStandup,
   deleteStandup,
   setSelectedSprintId,
+  setDateFilter,
   setError,
   clearError,
 } = standupsSlice.actions

@@ -43,35 +43,29 @@ export default function StandupsPage() {
   const dispatch = useAppDispatch()
   const { dateFilter } = useAppSelector((state) => state.standups)
   const { data: standups, isLoading, error } = useGetStandupsQuery({ 
-    date: dateFilter || format(new Date(), 'yyyy-MM-dd') 
+    sprintId: dateFilter ? undefined : undefined // For now, get all standups
   })
   const [createStandup] = useCreateStandupMutation()
   
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [formData, setFormData] = useState({
-    date: format(new Date(), 'yyyy-MM-dd'),
-    yesterday: '',
-    today: '',
-    blockers: '',
-    teamMember: ''
+    summary: '',
+    description: '',
+    userId: 1 // This should come from auth context
   })
 
   const handleCreateStandup = async () => {
     try {
       await createStandup({
-        date: formData.date,
-        yesterday: formData.yesterday,
-        today: formData.today,
-        blockers: formData.blockers || null,
-        teamMember: formData.teamMember,
+        userId: formData.userId,
+        summary: formData.summary,
+        description: formData.description || undefined,
       }).unwrap()
       setIsCreateDialogOpen(false)
       setFormData({ 
-        date: format(new Date(), 'yyyy-MM-dd'),
-        yesterday: '', 
-        today: '', 
-        blockers: '', 
-        teamMember: '' 
+        summary: '', 
+        description: '', 
+        userId: 1
       })
     } catch (error) {
       console.error('Failed to create standup:', error)
@@ -79,18 +73,18 @@ export default function StandupsPage() {
   }
 
   const getStandupStatus = (standup: any) => {
-    const standupDate = parseISO(standup.date)
+    const standupDate = parseISO(standup.createdAt)
     if (isToday(standupDate)) return { status: 'today', color: 'default', icon: CheckCircledIcon }
     if (isYesterday(standupDate)) return { status: 'yesterday', color: 'secondary', icon: ClockIcon }
     return { status: 'past', color: 'outline', icon: QuestionMarkCircledIcon }
   }
 
   const hasBlockers = (standup: any) => {
-    return standup.blockers && standup.blockers.trim().length > 0
+    return standup.blockers && standup.blockers.length > 0
   }
 
-  const getDateDisplayText = (date: string) => {
-    const standupDate = parseISO(date)
+  const getDateDisplayText = (dateString: string) => {
+    const standupDate = parseISO(dateString)
     if (isToday(standupDate)) return 'Today'
     if (isYesterday(standupDate)) return 'Yesterday'
     return format(standupDate, 'MMM dd, yyyy')
@@ -127,61 +121,30 @@ export default function StandupsPage() {
               <DialogHeader>
                 <DialogTitle>Daily Standup Update</DialogTitle>
                 <DialogDescription>
-                  Share what you worked on yesterday, plan for today, and note any blockers.
+                  Share your progress summary and any additional details.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="date">Date</Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="teamMember">Team Member</Label>
-                    <Input
-                      id="teamMember"
-                      value={formData.teamMember}
-                      onChange={(e) => setFormData({ ...formData, teamMember: e.target.value })}
-                      placeholder="Your name"
-                    />
-                  </div>
-                </div>
-                
                 <div className="grid gap-2">
-                  <Label htmlFor="yesterday">What did you work on yesterday?</Label>
+                  <Label htmlFor="summary">Summary</Label>
                   <textarea
-                    id="yesterday"
-                    value={formData.yesterday}
-                    onChange={(e) => setFormData({ ...formData, yesterday: e.target.value })}
-                    placeholder="Describe your completed work..."
-                    className="min-h-[80px] px-3 py-2 border border-input bg-background rounded-md resize-none"
+                    id="summary"
+                    value={formData.summary}
+                    onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+                    placeholder="Brief summary of your progress and plans..."
+                    className="min-h-[100px] px-3 py-2 border border-input bg-background rounded-md resize-none"
+                    required
                   />
                 </div>
                 
                 <div className="grid gap-2">
-                  <Label htmlFor="today">What will you work on today?</Label>
+                  <Label htmlFor="description">Additional Details (Optional)</Label>
                   <textarea
-                    id="today"
-                    value={formData.today}
-                    onChange={(e) => setFormData({ ...formData, today: e.target.value })}
-                    placeholder="Describe your planned work..."
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Any additional context, blockers, or notes..."
                     className="min-h-[80px] px-3 py-2 border border-input bg-background rounded-md resize-none"
-                  />
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label htmlFor="blockers">Any blockers? (Optional)</Label>
-                  <textarea
-                    id="blockers"
-                    value={formData.blockers}
-                    onChange={(e) => setFormData({ ...formData, blockers: e.target.value })}
-                    placeholder="Describe any issues blocking your progress..."
-                    className="min-h-[60px] px-3 py-2 border border-input bg-background rounded-md resize-none"
                   />
                 </div>
               </div>
@@ -293,7 +256,9 @@ export default function StandupsPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <PersonIcon className="h-4 w-4" />
-                          <span className="font-medium">{standup.teamMember}</span>
+                          <span className="font-medium">
+                            {standup.user?.name || `User ${standup.userId}`}
+                          </span>
                           <StatusIcon className="h-4 w-4 text-muted-foreground" />
                         </div>
                         {hasBlockers(standup) && (
@@ -304,26 +269,49 @@ export default function StandupsPage() {
                         )}
                       </div>
                       
-                      <div className="grid md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <h4 className="font-medium text-green-600 mb-1">✅ Yesterday</h4>
-                          <p className="text-muted-foreground">{standup.yesterday}</p>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-blue-600 mb-1">🎯 Today</h4>
-                          <p className="text-muted-foreground">{standup.today}</p>
-                        </div>
+                      <div className="text-sm">
+                        <h4 className="font-medium text-blue-600 mb-2">📝 Summary</h4>
+                        <p className="text-muted-foreground mb-3">{standup.summary}</p>
+                        
+                        {standup.description && (
+                          <>
+                            <h4 className="font-medium text-green-600 mb-1">💡 Details</h4>
+                            <p className="text-muted-foreground">{standup.description}</p>
+                          </>
+                        )}
                       </div>
                       
                       {hasBlockers(standup) && (
                         <div className="mt-3 p-3 bg-red-50 dark:bg-red-950/20 rounded-md">
-                          <h4 className="font-medium text-red-600 mb-1">🚫 Blockers</h4>
-                          <p className="text-sm text-red-700 dark:text-red-300">{standup.blockers}</p>
+                          <h4 className="font-medium text-red-600 mb-2">🚫 Blockers</h4>
+                          <div className="space-y-2">
+                            {standup.blockers?.map((blocker) => (
+                              <div key={blocker.id} className="text-sm">
+                                <div className="flex items-center space-x-2">
+                                  <Badge 
+                                    variant={blocker.severity === 'high' ? 'destructive' : 
+                                           blocker.severity === 'medium' ? 'default' : 'secondary'}
+                                    className="text-xs"
+                                  >
+                                    {blocker.severity}
+                                  </Badge>
+                                  {blocker.resolved && (
+                                    <Badge variant="outline" className="text-xs">
+                                      Resolved
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-red-700 dark:text-red-300 mt-1">
+                                  {blocker.description}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
                       
                       <div className="text-xs text-muted-foreground">
-                        Updated {format(parseISO(standup.date), 'MMM dd, yyyy')}
+                        Updated {format(parseISO(standup.createdAt), 'MMM dd, yyyy \'at\' h:mm a')}
                       </div>
                     </div>
                   )
