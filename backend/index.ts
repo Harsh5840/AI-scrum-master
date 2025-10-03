@@ -1,8 +1,10 @@
 import express, { type NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import { type Request, type Response } from "express";
 
+import authRoutes from "./src/routes/auth.js";
 import standupRoutes from "./src/routes/standups.js";
 import backlogRoutes from "./src/routes/backlog.js";
 import sprintRoutes from "./src/routes/sprints.js";
@@ -21,10 +23,17 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+app.use(cookieParser());
 
 // API Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/standups", standupRoutes);
 app.use("/api/backlog", backlogRoutes);
 app.use("/api/sprints", sprintRoutes);
