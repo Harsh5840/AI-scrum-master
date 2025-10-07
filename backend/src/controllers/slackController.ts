@@ -1,5 +1,5 @@
 import { type Request,type Response } from "express";
-import { postStandupToDB } from "../services/slackService";
+import { postStandupToDB } from "../services/slackServices.js";
 
 // POST /api/slack/slash → handle Slack slash commands
 export const handleSlashCommand = async (req: Request, res: Response) => {

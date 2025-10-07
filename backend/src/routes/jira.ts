@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createJiraTicket, getBacklogItems } from "../controllers/jiraController";
+import { createJiraTicket, getBacklogItems } from "../controllers/jiraController.js";
 
 const jiraRouter = Router();
 

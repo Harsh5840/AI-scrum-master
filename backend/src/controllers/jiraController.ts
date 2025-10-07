@@ -1,5 +1,5 @@
 import { type Request,type Response } from "express";
-import { fetchJiraBacklog, createJiraIssue } from "../services/jiraService";
+import { fetchJiraBacklog, createJiraIssue } from "../services/jiraServices.js";
 
 /**
  * GET /api/jira/backlog

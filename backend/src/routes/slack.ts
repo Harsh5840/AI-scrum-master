@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { handleSlashCommand } from "../controllers/slackController";
+import { handleSlashCommand } from "../controllers/slackController.js";
 
 const slackRouter = Router();
 
