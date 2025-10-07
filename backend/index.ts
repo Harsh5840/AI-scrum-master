@@ -59,12 +59,14 @@ app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ error: "Internal Server Error" });
 });
 
-// Initialize vector store and queue workers
+// Initialize vector store and queue workers (optional)
 async function initializeServices() {
   try {
-    await vectorStore.initialize();
-    await queueManager.initializeWorkers();
-    console.log('🚀 All services initialized successfully');
+    console.log('🚀 Initializing optional services...');
+    // Comment out for now to allow server to start
+    // await vectorStore.initialize();
+    // await queueManager.initializeWorkers();
+    console.log('✅ Services skipped for basic startup');
   } catch (error) {
     console.error('❌ Failed to initialize services:', error);
     // Continue without services if they fail
@@ -72,8 +74,8 @@ async function initializeServices() {
 }
 
 // Start the server
-initializeServices().then(() => {
-  app.listen(PORT, () => {
-    console.log(`AI Scrum Master backend running on port ${PORT}`);
-  });
+app.listen(PORT, () => {
+  console.log(`🚀 AI Scrum Master backend running on port ${PORT}`);
+  // Initialize services after server starts
+  initializeServices().catch(console.error);
 });
