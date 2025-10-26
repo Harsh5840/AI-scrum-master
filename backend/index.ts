@@ -2,8 +2,14 @@ import express, { type NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import session from "express-session";
 import { type Request, type Response } from "express";
 
+// Load environment variables from .env
+dotenv.config();
+
+import passport from "./src/config/passport.js";
+import { authMiddleware } from "./src/middleware/authMiddleware.js";
 import authRoutes from "./src/routes/auth.js";
 import standupRoutes from "./src/routes/standups.js";
 import backlogRoutes from "./src/routes/backlog.js";
@@ -15,9 +21,6 @@ import aiRoutes from "./src/routes/ai.js";
 import workflowRoutes from "./src/routes/workflows.js";
 import { vectorStore } from "./src/services/vectorServices.js";
 import { queueManager } from "./src/services/queueServices.js";
-
-// Load environment variables from .env
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -32,16 +35,36 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// Session configuration
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 // API Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/standups", standupRoutes);
-app.use("/api/backlog", backlogRoutes);
-app.use("/api/sprints", sprintRoutes);
-app.use("/api/slack", slackRoutes);
-app.use("/api/jira", jiraRoutes);
-app.use("/api/blockers", blockerRoutes);
-app.use("/api/ai", aiRoutes);
-app.use("/api/workflows", workflowRoutes);
+
+// Protected routes - require authentication
+app.use("/api/standups", authMiddleware, standupRoutes);
+app.use("/api/backlog", authMiddleware, backlogRoutes);
+app.use("/api/sprints", authMiddleware, sprintRoutes);
+app.use("/api/slack", authMiddleware, slackRoutes);
+app.use("/api/jira", authMiddleware, jiraRoutes);
+app.use("/api/blockers", authMiddleware, blockerRoutes);
+app.use("/api/ai", authMiddleware, aiRoutes);
+app.use("/api/workflows", authMiddleware, workflowRoutes);
 
 // Root route
 app.get("/", (_req, res) => {

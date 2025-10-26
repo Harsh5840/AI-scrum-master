@@ -21,7 +21,11 @@ import {
 
 export default function Home() {
   const { data: sprints, isLoading: sprintsLoading } = useGetSprintsQuery({});
-  const { data: queueStatus, isLoading: queueLoading } = useGetQueueStatusQuery();
+  const { data: queueStatus } = useGetQueueStatusQuery(undefined, {
+    // Don't fail the page if queue status fails
+    pollingInterval: 0,
+    skip: false,
+  });
 
   const activeSprints = sprints?.filter(sprint => {
     const now = new Date();
@@ -124,7 +128,7 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-900">
-                {queueLoading ? '...' : '0'}
+                0
               </div>
               <p className="text-xs text-slate-500 mt-1">
                 Active AI jobs
