@@ -1,6 +1,8 @@
 'use client'
 
 import React from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
@@ -30,7 +32,7 @@ const sidebarItems: SidebarItem[] = [
     id: 'dashboard',
     label: 'Dashboard',
     icon: DashboardIcon,
-    href: '/',
+    href: '/dashboard',
   },
   {
     id: 'sprints',
@@ -82,7 +84,8 @@ interface SidebarProps {
 
 export function Sidebar({ className }: SidebarProps) {
   const dispatch = useAppDispatch()
-  const { sidebarOpen, activeView } = useAppSelector((state) => state.ui)
+  const { sidebarOpen } = useAppSelector((state) => state.ui)
+  const pathname = usePathname()
 
   return (
     <div
@@ -115,7 +118,7 @@ export function Sidebar({ className }: SidebarProps) {
       <nav className="flex-1 space-y-1 p-2">
         {sidebarItems.map((item) => {
           const Icon = item.icon
-          const isActive = activeView === item.id
+          const isActive = pathname === item.href
 
           return (
             <Button
@@ -127,7 +130,7 @@ export function Sidebar({ className }: SidebarProps) {
               )}
               asChild
             >
-              <a href={item.href}>
+              <Link href={item.href}>
                 <Icon className={cn(
                   'h-4 w-4',
                   sidebarOpen && 'mr-2'
@@ -142,7 +145,7 @@ export function Sidebar({ className }: SidebarProps) {
                     )}
                   </>
                 )}
-              </a>
+              </Link>
             </Button>
           )
         })}

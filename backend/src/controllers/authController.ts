@@ -229,7 +229,7 @@ export class AuthController {
 
   static async logout(req: Request, res: Response) {
     try {
-      const { refreshToken } = req.body
+      const { refreshToken } = req.body || {}
       
       if (refreshToken) {
         await JWTService.removeRefreshToken(refreshToken)

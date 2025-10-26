@@ -72,19 +72,47 @@ export interface WorkflowJob {
 // Base query with auth token
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+  credentials: 'include', // Important: send cookies for session-based auth
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as RootState
     const token = state.auth.token
+    
+    // Also check localStorage as fallback
+    if (!token && typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('token')
+      if (storedToken) {
+        headers.set('authorization', `Bearer ${storedToken}`)
+        return headers
+      }
+    }
+    
     if (token) {
       headers.set('authorization', `Bearer ${token}`)
     }
+    
     return headers
   },
 })
 
+// Base query with error handling
+const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
+  let result = await baseQuery(args, api, extraOptions)
+  
+  // Log errors for debugging
+  if (result.error) {
+    console.error('API Error:', {
+      endpoint: typeof args === 'string' ? args : args.url,
+      status: result.error.status,
+      data: result.error.data,
+    })
+  }
+  
+  return result
+}
+
 export const apiSlice = createApi({
   reducerPath: 'api',
-  baseQuery,
+  baseQuery: baseQueryWithReauth,
   tagTypes: ['User', 'Sprint', 'Standup', 'Blocker', 'BacklogItem', 'AIInsight', 'Workflow'],
   endpoints: (builder) => ({}), // Individual endpoints will be injected
 })

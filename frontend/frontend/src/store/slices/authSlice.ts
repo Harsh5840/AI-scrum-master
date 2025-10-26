@@ -82,6 +82,10 @@ const authSlice = createSlice({
       state.token = null
       state.isAuthenticated = false
       state.error = null
+      // Clear localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token')
+      }
       // Call auth service logout
       authService.logout()
     },
@@ -102,6 +106,10 @@ const authSlice = createSlice({
         state.user = action.payload.user
         state.token = action.payload.token
         state.error = null
+        // Also store in localStorage as backup
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('token', action.payload.token)
+        }
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false
@@ -109,6 +117,10 @@ const authSlice = createSlice({
         state.user = null
         state.token = null
         state.error = action.payload as string
+        // Clear any stored tokens
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token')
+        }
       })
     
     // Signup
@@ -123,6 +135,10 @@ const authSlice = createSlice({
         state.user = action.payload.user
         state.token = action.payload.token
         state.error = null
+        // Also store in localStorage as backup
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('token', action.payload.token)
+        }
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.isLoading = false
@@ -130,6 +146,10 @@ const authSlice = createSlice({
         state.user = null
         state.token = null
         state.error = action.payload as string
+        // Clear any stored tokens
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token')
+        }
       })
     
     // Get current user

@@ -1,5 +1,6 @@
 'use client'
 
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,8 +36,9 @@ export default function Home() {
   }) || [];
 
   return (
-    <MainLayout title="Dashboard">
-      <div className="space-y-8">
+    <ProtectedRoute>
+      <MainLayout title="Dashboard">
+        <div className="space-y-8">
         {/* Hero Section - Jira/Linear Inspired */}
         <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-10 text-white shadow-lg">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px]" />
@@ -311,6 +313,7 @@ export default function Home() {
         </Card>
       </div>
     </MainLayout>
+    </ProtectedRoute>
   );
 }
 

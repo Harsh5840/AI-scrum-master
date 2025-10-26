@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { logout } from '@/store/slices/authSlice'
+import { toggleSidebar } from '@/store/slices/uiSlice'
 import {
   PersonIcon,
   ExitIcon,
@@ -22,7 +23,11 @@ export function Header({ title = 'Dashboard' }: HeaderProps) {
 
   const handleLogout = () => {
     dispatch(logout())
-    router.push('/auth/login')
+    router.push('/')
+  }
+
+  const handleToggleSidebar = () => {
+    dispatch(toggleSidebar())
   }
 
   return (
@@ -33,6 +38,7 @@ export function Header({ title = 'Dashboard' }: HeaderProps) {
           variant="ghost"
           size="icon"
           className="lg:hidden"
+          onClick={handleToggleSidebar}
         >
           <HamburgerMenuIcon className="h-4 w-4" />
         </Button>

@@ -4,9 +4,21 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import { type Request, type Response } from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// Load environment variables from .env
-dotenv.config();
+// Get current file path in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables from .env with explicit path
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+// Debug: Check if environment variables are loaded
+console.log('🔍 Environment Check:');
+console.log('  - JWT_SECRET:', process.env.JWT_SECRET ? 'SET ✅' : 'NOT SET ❌');
+console.log('  - DATABASE_URL:', process.env.DATABASE_URL ? 'SET ✅' : 'NOT SET ❌');
+console.log('  - SESSION_SECRET:', process.env.SESSION_SECRET ? 'SET ✅' : 'NOT SET ❌');
 
 import passport from "./src/config/passport.js";
 import { authMiddleware } from "./src/middleware/authMiddleware.js";
@@ -52,6 +64,12 @@ app.use(
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Request logging middleware
+app.use((req, _res, next) => {
+  console.log(`📥 ${req.method} ${req.url}`);
+  next();
+});
 
 // API Routes
 app.use("/api/auth", authRoutes);

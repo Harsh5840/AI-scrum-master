@@ -44,6 +44,15 @@ export default function SprintsPage() {
   const [createSprint] = useCreateSprintMutation()
   const [deleteSprint] = useDeleteSprintMutation()
   
+  // Debug logging
+  console.log('Sprints Page Debug:', { 
+    filter, 
+    sprints, 
+    isLoading, 
+    error,
+    sprintsCount: sprints?.length 
+  });
+  
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -86,9 +95,16 @@ export default function SprintsPage() {
   }
 
   if (error) {
+    console.error('Sprints API Error:', error);
     return (
       <MainLayout title="Sprints">
-        <div className="text-center text-red-500">Error loading sprints</div>
+        <div className="text-center space-y-4">
+          <div className="text-red-500">Error loading sprints</div>
+          <div className="text-sm text-slate-600">
+            {JSON.stringify(error, null, 2)}
+          </div>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
       </MainLayout>
     )
   }
