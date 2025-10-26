@@ -5,7 +5,7 @@ const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 // Create axios instance for Upstash REST API
 const upstashClient = axios.create({
-  baseURL: UPSTASH_REDIS_REST_URL,
+  baseURL: UPSTASH_REDIS_REST_URL || '',
   headers: {
     'Authorization': `Bearer ${UPSTASH_REDIS_REST_TOKEN}`,
     'Content-Type': 'application/json'
@@ -33,7 +33,7 @@ export class UpstashRedis {
   async set(key: string, value: string, options?: { ex?: number }): Promise<string> {
     const args = [key, value];
     if (options?.ex) {
-      args.push('EX', options.ex);
+      args.push('EX', options.ex.toString());
     }
     return await this.makeRequest('SET', args);
   }
