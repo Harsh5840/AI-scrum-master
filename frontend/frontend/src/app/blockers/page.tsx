@@ -13,27 +13,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ExclamationTriangleIcon, CheckCircledIcon } from "@radix-ui/react-icons";
+import { useGetBlockersQuery } from "@/store/api/blockersApi";
 
 export default function BlockersPage() {
-  // Mock data - replace with actual API calls
-  const blockers = [
-    {
-      id: 1,
-      description: "API integration blocked by missing credentials",
-      severity: "high" as const,
-      resolved: false,
-      createdAt: "2025-10-26",
-      reportedBy: "Test User",
-    },
-    {
-      id: 2,
-      description: "Database migration issues",
-      severity: "medium" as const,
-      resolved: true,
-      createdAt: "2025-10-25",
-      reportedBy: "Test User",
-    },
-  ];
+  const { data: blockers = [], isLoading } = useGetBlockersQuery();
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -102,35 +85,51 @@ export default function BlockersPage() {
                   <TableHead>Description</TableHead>
                   <TableHead>Severity</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Reported By</TableHead>
+                  <TableHead>Source</TableHead>
                   <TableHead>Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {blockers.map((blocker) => (
-                  <TableRow key={blocker.id}>
-                    <TableCell className="font-medium">{blocker.description}</TableCell>
-                    <TableCell>
-                      <Badge className={getSeverityColor(blocker.severity)}>
-                        {blocker.severity.toUpperCase()}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {blocker.resolved ? (
-                        <Badge className="bg-green-100 text-green-800 border-green-300">
-                          <CheckCircledIcon className="mr-1 h-3 w-3" />
-                          Resolved
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
-                          Active
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>{blocker.reportedBy}</TableCell>
-                    <TableCell>{blocker.createdAt}</TableCell>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center">Loading blockers...</TableCell>
                   </TableRow>
-                ))}
+                ) : blockers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8">
+                      <div className="text-center">
+                        <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+                        <h3 className="text-lg font-semibold text-slate-900 mb-2">No blockers</h3>
+                        <p className="text-slate-600 mb-4">No blockers have been reported yet.</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  blockers.map((blocker) => (
+                    <TableRow key={blocker.id}>
+                      <TableCell className="font-medium">{blocker.description}</TableCell>
+                      <TableCell>
+                        <Badge className={getSeverityColor(blocker.severity)}>
+                          {blocker.severity.toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {blocker.resolved ? (
+                          <Badge className="bg-green-100 text-green-800 border-green-300">
+                            <CheckCircledIcon className="mr-1 h-3 w-3" />
+                            Resolved
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                            Active
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>Standup #{blocker.standupId}</TableCell>
+                      <TableCell>{new Date(blocker.createdAt).toLocaleDateString()}</TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>

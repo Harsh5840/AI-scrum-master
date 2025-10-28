@@ -23,117 +23,26 @@ import {
   CheckCircledIcon,
   CrossCircledIcon
 } from '@radix-ui/react-icons'
+import type { AIInsight } from '@/store/api/apiSlice'
 
 type InsightType = 'risk' | 'opportunity' | 'recommendation' | 'alert'
 type InsightPriority = 'low' | 'medium' | 'high' | 'critical'
 
-interface AIInsight {
-  id: string
-  type: InsightType
-  priority: InsightPriority
-  title: string
-  description: string
-  actionItems?: string[]
-  confidence: number
-  createdAt: string
-  category: 'sprint' | 'team' | 'productivity' | 'planning'
-}
-
 export default function AIInsightsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'sprint' | 'team' | 'productivity' | 'planning'>('all')
+  const [selectedCategory, setSelectedCategory] = useState<'all' | string>('all')
   const [isGenerating, setIsGenerating] = useState(false)
   
-  const { data: insights, isLoading: insightsLoading, refetch } = useGetAIInsightsQuery()
+  const { data: insights = [], isLoading: insightsLoading, refetch } = useGetAIInsightsQuery()
   const { data: sprints } = useGetSprintsQuery({})
   const { data: standups } = useGetStandupsQuery({})
   const [generateInsights] = useGenerateInsightsMutation()
 
-  // Mock AI insights - in real app, these would come from your AI service
-  const mockInsights: AIInsight[] = [
-    {
-      id: '1',
-      type: 'risk',
-      priority: 'high',
-      title: 'Sprint Velocity Declining',
-      description: 'Team velocity has decreased by 23% over the last 3 sprints. Current trajectory suggests missing sprint goals.',
-      actionItems: [
-        'Review team capacity and workload distribution',
-        'Identify and address potential blockers',
-        'Consider scope reduction for current sprint'
-      ],
-      confidence: 87,
-      createdAt: new Date().toISOString(),
-      category: 'sprint'
-    },
-    {
-      id: '2',
-      type: 'opportunity',
-      priority: 'medium',
-      title: 'Optimal Sprint Planning Window',
-      description: 'Based on team patterns, scheduling sprint planning on Tuesday afternoons shows 34% better engagement.',
-      actionItems: [
-        'Schedule next sprint planning for Tuesday 2-4 PM',
-        'Send calendar invites with agenda 24h in advance'
-      ],
-      confidence: 72,
-      createdAt: new Date().toISOString(),
-      category: 'planning'
-    },
-    {
-      id: '3',
-      type: 'recommendation',
-      priority: 'medium',
-      title: 'Task Redistribution Needed',
-      description: 'John Doe has 40% more story points than team average. Sarah Smith has capacity for 2-3 additional tasks.',
-      actionItems: [
-        'Move 2 medium tasks from John to Sarah',
-        'Review workload distribution in next standup',
-        'Update capacity planning for remaining sprint'
-      ],
-      confidence: 91,
-      createdAt: new Date().toISOString(),
-      category: 'team'
-    },
-    {
-      id: '4',
-      type: 'alert',
-      priority: 'critical',
-      title: 'Blocker Escalation Required',
-      description: 'API integration blocker has been unresolved for 3 days, affecting 4 dependent tasks.',
-      actionItems: [
-        'Escalate to senior developer immediately',
-        'Prepare alternative implementation approach',
-        'Notify stakeholders of potential delay'
-      ],
-      confidence: 95,
-      createdAt: new Date().toISOString(),
-      category: 'sprint'
-    },
-    {
-      id: '5',
-      type: 'opportunity',
-      priority: 'low',
-      title: 'Team Collaboration Peak',
-      description: 'Morning standups (9-10 AM) show 45% higher participation and engagement rates.',
-      actionItems: [
-        'Continue morning standup schedule',
-        'Consider adding brief afternoon check-ins on complex days'
-      ],
-      confidence: 68,
-      createdAt: new Date().toISOString(),
-      category: 'productivity'
-    }
-  ]
-
-  const filteredInsights = selectedCategory === 'all' 
-    ? mockInsights 
-    : mockInsights.filter(insight => insight.category === selectedCategory)
+  const filteredInsights = insights
 
   const handleGenerateInsights = async () => {
     setIsGenerating(true)
     try {
-      // In real app, this would call your AI service
-      await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate AI processing
+      await generateInsights().unwrap()
       await refetch()
     } catch (error) {
       console.error('Failed to generate insights:', error)
@@ -211,7 +120,7 @@ export default function AIInsightsPage() {
               <LightningBoltIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockInsights.length}</div>
+              <div className="text-2xl font-bold">{insights.length}</div>
               <p className="text-xs text-muted-foreground">
                 AI-generated recommendations
               </p>
@@ -225,7 +134,7 @@ export default function AIInsightsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                {mockInsights.filter(i => i.priority === 'critical').length}
+                {insights.filter((i: AIInsight) => i.priority === 'critical').length}
               </div>
               <p className="text-xs text-muted-foreground">
                 Require immediate attention
@@ -240,7 +149,7 @@ export default function AIInsightsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {mockInsights.filter(i => i.type === 'opportunity').length}
+                {insights.filter((i: AIInsight) => i.type === 'opportunity').length}
               </div>
               <p className="text-xs text-muted-foreground">
                 For optimization
@@ -255,7 +164,9 @@ export default function AIInsightsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {Math.round(mockInsights.reduce((acc, i) => acc + i.confidence, 0) / mockInsights.length)}%
+                {insights.length > 0 
+                  ? Math.round(insights.reduce((acc: number, i: AIInsight) => acc + i.confidence, 0) / insights.length)
+                  : 0}%
               </div>
               <p className="text-xs text-muted-foreground">
                 AI prediction accuracy
