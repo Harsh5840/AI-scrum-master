@@ -11,7 +11,7 @@ const openai = new OpenAI({
 export const summarizeStandup = async (description: string): Promise<string> => {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-5-nano",
       messages: [
         {
           role: "system",
