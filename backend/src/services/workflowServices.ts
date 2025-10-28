@@ -378,7 +378,7 @@ class WorkflowServices {
     
     try {
       const response = await openai.chat.completions.create({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -424,7 +424,7 @@ class WorkflowServices {
     // Use AI to detect patterns
     try {
       const response = await openai.chat.completions.create({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',

@@ -13,6 +13,24 @@ export const getSprints = async (req: Request, res: Response) => {
   }
 };
 
+// GET /api/sprints/:id
+export const getSprintById = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid sprint ID" });
+    }
+    const sprint = await sprintService.getSprintWithSummary(id);
+    if (!sprint) {
+      return res.status(404).json({ error: "Sprint not found" });
+    }
+    res.json(sprint);
+  } catch (error) {
+    console.error("Error fetching sprint:", error);
+    res.status(500).json({ error: "Failed to fetch sprint" });
+  }
+};
+
 // POST /api/sprints
 export const createSprint = async (req: Request, res: Response) => {
   try {

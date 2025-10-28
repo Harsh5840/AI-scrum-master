@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getSprints, createSprint, getSprintSummary, updateSprint, deleteSprint } from "../controllers/sprintController.js";
+import { getSprints, createSprint, getSprintById, getSprintSummary, updateSprint, deleteSprint } from "../controllers/sprintController.js";
 import { validateBody, validateParams, validateQuery } from "../validation/middleware.js";
 import { createSprintSchema, updateSprintSchema, sprintIdSchema, sprintFilterSchema } from "../validation/schemas.js";
 
@@ -10,6 +10,9 @@ sprintRouter.get("/", validateQuery(sprintFilterSchema), getSprints);
 
 // POST /api/sprints → create a new sprint
 sprintRouter.post("/", validateBody(createSprintSchema), createSprint);
+
+// GET /api/sprints/:id → get single sprint
+sprintRouter.get("/:id", validateParams(sprintIdSchema), getSprintById);
 
 // GET /api/sprints/:id/summary → get sprint summary (burndown, velocity)
 sprintRouter.get("/:id/summary", validateParams(sprintIdSchema), getSprintSummary);

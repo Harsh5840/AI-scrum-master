@@ -62,7 +62,7 @@ ${context}`;
 
     // Generate response using OpenAI
     const response = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-5-nano',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: query },
@@ -110,7 +110,7 @@ ${context}
 Keep the summary under 100 words and actionable.`;
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Summarize this standup: ${description}` },
@@ -129,7 +129,7 @@ Keep the summary under 100 words and actionable.`;
 
 const generateSimpleSummary = async (description: string): Promise<string> => {
   const response = await openai.chat.completions.create({
-    model: 'gpt-4',
+    model: 'gpt-4o-mini',
     messages: [
       {
         role: 'system',
@@ -165,7 +165,7 @@ ${context}
 Provide actionable insights in bullet points.`;
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: 'Analyze this sprint and provide insights' },
