@@ -15,44 +15,7 @@ import {
 export function TeamProductivityInsights() {
   const { data: productivityData, isLoading, refetch } = useGetTeamProductivityInsightsQuery()
 
-  // Mock data when API is not available
-  const mockProductivityData = {
-    productivityScore: 78,
-    trends: [
-      {
-        metric: 'Daily Standup Participation',
-        trend: 'improving' as const,
-        change: 12,
-        recommendation: 'Continue current standup format and timing'
-      },
-      {
-        metric: 'Story Point Completion Rate',
-        trend: 'declining' as const,
-        change: -8,
-        recommendation: 'Review estimation accuracy and task complexity'
-      },
-      {
-        metric: 'Blocker Resolution Time',
-        trend: 'stable' as const,
-        change: 2,
-        recommendation: 'Maintain current escalation process'
-      },
-      {
-        metric: 'Code Review Turnaround',
-        trend: 'improving' as const,
-        change: 15,
-        recommendation: 'Great progress! Consider peer recognition program'
-      }
-    ],
-    optimization: [
-      'Schedule more pair programming sessions',
-      'Implement automated testing to reduce manual QA time',
-      'Consider breaking down large tasks into smaller chunks',
-      'Set up dedicated focus time blocks for deep work'
-    ]
-  }
-
-  const productivity = productivityData || mockProductivityData
+  const productivity = productivityData
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
@@ -105,65 +68,76 @@ export function TeamProductivityInsights() {
             <p className="text-sm text-muted-foreground mt-2">Analyzing productivity...</p>
           </div>
         ) : (
-          <>
-            {/* Productivity Score */}
-            <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <h4 className="font-medium mb-1">Overall Productivity Score</h4>
-              <p className={`text-3xl font-bold ${getProductivityScoreColor(productivity.productivityScore)}`}>
-                {productivity.productivityScore}/100
-              </p>
-              <p className="text-sm text-muted-foreground">Based on multiple performance metrics</p>
-            </div>
-
-            {/* Trends */}
-            <div>
-              <h4 className="font-medium mb-3">Performance Trends</h4>
-              <div className="space-y-2">
-                {productivity.trends.map((trend: any, index: number) => {
-                  const TrendIcon = getTrendIcon(trend.trend)
-                  const trendColor = getTrendColor(trend.trend)
-                  
-                  return (
-                    <div key={index} className="border rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-sm">{trend.metric}</span>
-                        <div className="flex items-center space-x-2">
-                          <TrendIcon className={`h-4 w-4 ${trendColor}`} />
-                          <Badge variant={getTrendBadgeColor(trend.trend) as any} className="text-xs">
-                            {trend.change > 0 ? '+' : ''}{trend.change}%
-                          </Badge>
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{trend.recommendation}</p>
-                    </div>
-                  )
-                })}
+          productivity ? (
+            <>
+              {/* Productivity Score */}
+              <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="font-medium mb-1">Overall Productivity Score</h4>
+                <p className={`text-3xl font-bold ${getProductivityScoreColor(productivity.productivityScore)}`}>
+                  {productivity.productivityScore}/100
+                </p>
+                <p className="text-sm text-muted-foreground">Based on multiple performance metrics</p>
               </div>
-            </div>
 
-            {/* Optimization Suggestions */}
-            <div>
-              <h4 className="font-medium mb-3">AI Optimization Suggestions</h4>
-              <ul className="space-y-1">
-                {productivity.optimization.map((suggestion: string, index: number) => (
-                  <li key={index} className="flex items-start space-x-2 text-sm">
-                    <span className="text-muted-foreground">•</span>
-                    <span>{suggestion}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              {/* Trends */}
+              <div>
+                <h4 className="font-medium mb-3">Performance Trends</h4>
+                <div className="space-y-2">
+                  {productivity.trends.map((trend: any, index: number) => {
+                    const TrendIcon = getTrendIcon(trend.trend)
+                    const trendColor = getTrendColor(trend.trend)
+                    
+                    return (
+                      <div key={index} className="border rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium text-sm">{trend.metric}</span>
+                          <div className="flex items-center space-x-2">
+                            <TrendIcon className={`h-4 w-4 ${trendColor}`} />
+                            <Badge variant={getTrendBadgeColor(trend.trend) as any} className="text-xs">
+                              {trend.change > 0 ? '+' : ''}{trend.change}%
+                            </Badge>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{trend.recommendation}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
 
-            <Button 
-              onClick={() => refetch()} 
-              variant="outline" 
-              size="sm" 
-              className="w-full"
-            >
-              <UpdateIcon className="h-4 w-4 mr-2" />
-              Refresh Analysis
-            </Button>
-          </>
+              {/* Optimization Suggestions */}
+              <div>
+                <h4 className="font-medium mb-3">AI Optimization Suggestions</h4>
+                <ul className="space-y-1">
+                  {productivity.optimization.map((suggestion: string, index: number) => (
+                    <li key={index} className="flex items-start space-x-2 text-sm">
+                      <span className="text-muted-foreground">•</span>
+                      <span>{suggestion}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <Button 
+                onClick={() => refetch()} 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+              >
+                <UpdateIcon className="h-4 w-4 mr-2" />
+                Refresh Analysis
+              </Button>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <div className="rounded-lg bg-gray-50 p-4 mb-3">
+                <ActivityLogIcon className="h-6 w-6 text-slate-600" />
+              </div>
+              <p className="text-sm text-slate-600">No productivity data available.</p>
+              <p className="text-xs text-slate-400 mt-1">Trigger an analysis or ensure the AI service is configured.</p>
+              <Button onClick={() => refetch()} variant="outline" size="sm" className="mt-3">Refresh Analysis</Button>
+            </div>
+          )
         )}
       </CardContent>
     </Card>

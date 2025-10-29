@@ -15,43 +15,7 @@ import {
 export function TaskPrioritization() {
   const { data: prioritizationData, isLoading, refetch } = useGetTaskPrioritizationQuery({})
 
-  // Mock data when API is not available
-  const mockPrioritizationData = [
-    {
-      taskId: 1,
-      title: 'Fix user authentication bug',
-      currentPriority: 'medium' as const,
-      suggestedPriority: 'high' as const,
-      reasoning: 'Blocking multiple user workflows, affecting 40% of users',
-      confidence: 92
-    },
-    {
-      taskId: 2,
-      title: 'Add new dashboard widget',
-      currentPriority: 'high' as const,
-      suggestedPriority: 'medium' as const,
-      reasoning: 'Nice-to-have feature, not critical for current sprint goals',
-      confidence: 78
-    },
-    {
-      taskId: 3,
-      title: 'Update API documentation',
-      currentPriority: 'low' as const,
-      suggestedPriority: 'medium' as const,
-      reasoning: 'Important for developer onboarding and team efficiency',
-      confidence: 85
-    },
-    {
-      taskId: 4,
-      title: 'Performance optimization',
-      currentPriority: 'medium' as const,
-      suggestedPriority: 'medium' as const,
-      reasoning: 'Current priority level is appropriate for the timeline',
-      confidence: 71
-    }
-  ]
-
-  const tasks = prioritizationData || mockPrioritizationData
+  const tasks = prioritizationData
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -100,55 +64,66 @@ export function TaskPrioritization() {
             <p className="text-sm text-muted-foreground mt-2">Analyzing task priorities...</p>
           </div>
         ) : (
-          <>
-            <div className="space-y-3">
-              {tasks.map((task: any) => {
-                const ChangeIcon = getPriorityChangeIcon(task.currentPriority, task.suggestedPriority)
-                const changeColor = getPriorityChangeColor(task.currentPriority, task.suggestedPriority)
-                
-                return (
-                  <div key={task.taskId} className="border rounded-lg p-3">
-                    <div className="flex items-start justify-between mb-2">
-                      <span className="font-medium text-sm flex-1">{task.title}</span>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant={getPriorityColor(task.currentPriority) as any} className="text-xs">
-                          {task.currentPriority}
+          tasks ? (
+            <>
+              <div className="space-y-3">
+                {tasks.map((task: any) => {
+                  const ChangeIcon = getPriorityChangeIcon(task.currentPriority, task.suggestedPriority)
+                  const changeColor = getPriorityChangeColor(task.currentPriority, task.suggestedPriority)
+                  
+                  return (
+                    <div key={task.taskId} className="border rounded-lg p-3">
+                      <div className="flex items-start justify-between mb-2">
+                        <span className="font-medium text-sm flex-1">{task.title}</span>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={getPriorityColor(task.currentPriority) as any} className="text-xs">
+                            {task.currentPriority}
+                          </Badge>
+                          <ChangeIcon className={`h-4 w-4 ${changeColor}`} />
+                          <Badge variant={getPriorityColor(task.suggestedPriority) as any} className="text-xs">
+                            {task.suggestedPriority}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <p className="text-xs text-muted-foreground mb-2">{task.reasoning}</p>
+                      
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className="text-xs">
+                          {task.confidence}% confidence
                         </Badge>
-                        <ChangeIcon className={`h-4 w-4 ${changeColor}`} />
-                        <Badge variant={getPriorityColor(task.suggestedPriority) as any} className="text-xs">
-                          {task.suggestedPriority}
-                        </Badge>
+                        
+                        {task.currentPriority !== task.suggestedPriority && (
+                          <Button size="sm" variant="outline" className="text-xs h-6">
+                            Apply Change
+                          </Button>
+                        )}
                       </div>
                     </div>
-                    
-                    <p className="text-xs text-muted-foreground mb-2">{task.reasoning}</p>
-                    
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="text-xs">
-                        {task.confidence}% confidence
-                      </Badge>
-                      
-                      {task.currentPriority !== task.suggestedPriority && (
-                        <Button size="sm" variant="outline" className="text-xs h-6">
-                          Apply Change
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
 
-            <Button 
-              onClick={() => refetch()} 
-              variant="outline" 
-              size="sm" 
-              className="w-full"
-            >
-              <UpdateIcon className="h-4 w-4 mr-2" />
-              Refresh Recommendations
-            </Button>
-          </>
+              <Button 
+                onClick={() => refetch()} 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+              >
+                <UpdateIcon className="h-4 w-4 mr-2" />
+                Refresh Recommendations
+              </Button>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <div className="rounded-lg bg-gray-50 p-4 mb-3">
+                <TargetIcon className="h-6 w-6 text-slate-600" />
+              </div>
+              <p className="text-sm text-slate-600">No prioritization recommendations available.</p>
+              <p className="text-xs text-slate-400 mt-1">Run an analysis or ensure AI services are configured.</p>
+              <Button onClick={() => refetch()} variant="outline" size="sm" className="mt-3">Refresh Recommendations</Button>
+            </div>
+          )
         )}
       </CardContent>
     </Card>

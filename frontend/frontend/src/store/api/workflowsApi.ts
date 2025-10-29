@@ -60,10 +60,33 @@ export interface TeamInsightsResponse {
 export interface QueueStatusResponse {
   success: boolean
   queues: {
-    aiWorkflows: any
-    notifications: any
-    analytics: any
+    aiWorkflows: {
+      waiting?: number
+      active?: number
+      completed?: number
+      failed?: number
+      delayed?: number
+    }
+    notifications: {
+      waiting?: number
+      active?: number
+      completed?: number
+      failed?: number
+      delayed?: number
+    }
+    analytics: {
+      waiting?: number
+      active?: number
+      completed?: number
+      failed?: number
+      delayed?: number
+    }
   }
+  waiting?: number
+  active?: number
+  completed?: number
+  failed?: number
+  delayed?: number
   timestamp: string
 }
 

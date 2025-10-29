@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { useGetSprintPlanningAssistanceQuery } from '@/store/api/aiApi'
 import { 
@@ -23,42 +24,7 @@ export function SprintPlanningAssistant() {
     { skip: !showSuggestions }
   )
 
-  // Mock data when API is not available
-  const mockPlanningData = {
-    suggestedCapacity: teamSize * 8, // 8 points per person
-    recommendedTasks: [
-      {
-        title: 'User Authentication System',
-        estimatedPoints: 13,
-        priority: 'high' as const,
-        reasoning: 'Critical feature blocking other development'
-      },
-      {
-        title: 'Dashboard Analytics',
-        estimatedPoints: 8,
-        priority: 'medium' as const,
-        reasoning: 'Important for user engagement metrics'
-      },
-      {
-        title: 'Email Notifications',
-        estimatedPoints: 5,
-        priority: 'medium' as const,
-        reasoning: 'Enhances user experience'
-      },
-      {
-        title: 'Performance Optimization',
-        estimatedPoints: 8,
-        priority: 'low' as const,
-        reasoning: 'Can be deferred if capacity is limited'
-      }
-    ],
-    warnings: [
-      'Suggested capacity is 15% higher than historical average',
-      'Consider buffer time for unexpected issues'
-    ]
-  }
-
-  const planning = planningData || mockPlanningData
+  const planning = planningData
 
   const handleGenerateSuggestions = () => {
     setShowSuggestions(true)
@@ -135,47 +101,68 @@ export function SprintPlanningAssistant() {
         {/* Results */}
         {showSuggestions && (
           <>
-            {/* Capacity Suggestion */}
-            <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg">
-              <h4 className="font-medium mb-1">Suggested Sprint Capacity</h4>
-              <p className="text-2xl font-bold text-blue-600">{planning.suggestedCapacity} story points</p>
-              <p className="text-sm text-muted-foreground">Based on team size and sprint duration</p>
-            </div>
-
-            {/* Recommended Tasks */}
-            <div>
-              <h4 className="font-medium mb-3">Recommended Tasks</h4>
-              <div className="space-y-2">
-                {planning.recommendedTasks.map((task: any, index: number) => (
-                  <div key={index} className="border rounded-lg p-3">
-                    <div className="flex items-start justify-between mb-2">
-                      <span className="font-medium text-sm">{task.title}</span>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="outline" className="text-xs">
-                          {task.estimatedPoints} pts
-                        </Badge>
-                        <Badge variant={getPriorityColor(task.priority) as any} className="text-xs">
-                          {task.priority}
-                        </Badge>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{task.reasoning}</p>
+            {isLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-6 w-1/2" />
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="border rounded-lg p-3">
+                    <Skeleton className="h-4 w-3/4 mb-2" />
+                    <Skeleton className="h-3 w-full mb-2" />
+                    <Skeleton className="h-3 w-1/2" />
                   </div>
                 ))}
               </div>
-            </div>
+            ) : planning ? (
+              <>
+                {/* Capacity Suggestion */}
+                <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg">
+                  <h4 className="font-medium mb-1">Suggested Sprint Capacity</h4>
+                  <p className="text-2xl font-bold text-blue-600">{planning.suggestedCapacity} story points</p>
+                  <p className="text-sm text-muted-foreground">Based on team size and sprint duration</p>
+                </div>
 
-            {/* Warnings */}
-            {planning.warnings.length > 0 && (
-              <div className="bg-yellow-50 dark:bg-yellow-950/20 p-3 rounded-lg">
-                <h4 className="font-medium mb-2 text-yellow-800 dark:text-yellow-200">⚠️ Considerations</h4>
-                <ul className="space-y-1">
-                  {planning.warnings.map((warning: string, index: number) => (
-                    <li key={index} className="text-sm text-yellow-700 dark:text-yellow-300">
-                      • {warning}
-                    </li>
-                  ))}
-                </ul>
+                {/* Recommended Tasks */}
+                <div>
+                  <h4 className="font-medium mb-3">Recommended Tasks</h4>
+                  <div className="space-y-2">
+                    {planning.recommendedTasks.map((task: any, index: number) => (
+                      <div key={index} className="border rounded-lg p-3">
+                        <div className="flex items-start justify-between mb-2">
+                          <span className="font-medium text-sm">{task.title}</span>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="outline" className="text-xs">
+                              {task.estimatedPoints} pts
+                            </Badge>
+                            <Badge variant={getPriorityColor(task.priority) as any} className="text-xs">
+                              {task.priority}
+                            </Badge>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{task.reasoning}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Warnings */}
+                {planning.warnings && planning.warnings.length > 0 && (
+                  <div className="bg-yellow-50 dark:bg-yellow-950/20 p-3 rounded-lg">
+                    <h4 className="font-medium mb-2 text-yellow-800 dark:text-yellow-200">⚠️ Considerations</h4>
+                    <ul className="space-y-1">
+                      {planning.warnings.map((warning: string, index: number) => (
+                        <li key={index} className="text-sm text-yellow-700 dark:text-yellow-300">• {warning}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="rounded-lg bg-blue-50 p-4 mb-3">
+                  <MagicWandIcon className="h-6 w-6 text-blue-600" />
+                </div>
+                <p className="text-sm text-slate-600">No suggestions available.</p>
+                <p className="text-xs text-slate-400 mt-1">If the AI service is not configured or returns no data, ensure backend AI endpoints and OpenAI billing are set up.</p>
               </div>
             )}
           </>
