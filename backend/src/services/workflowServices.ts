@@ -1,15 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import { vectorStore } from './vectorServices.js';
 import { queueManager, type SprintAnalysisJobData, type StandupAnalysisJobData, type JobResult } from './queueServices.js';
-import { OpenAI } from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 const prisma = new PrismaClient();
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export interface WorkflowInsight {
   type: 'risk' | 'opportunity' | 'recommendation' | 'alert';
@@ -377,23 +375,24 @@ class WorkflowServices {
     const text = `${standup.whatDidYesterday} ${standup.whatWillToday} ${standup.obstacles}`;
     
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-5-nano',
-        messages: [
-          {
-            role: 'system',
-            content: 'Analyze the sentiment of this standup update. Return a JSON object with score (-1 to 1, where -1 is very negative, 0 is neutral, 1 is very positive), confidence (0 to 1), and a brief summary of the sentiment analysis.',
-          },
-          {
-            role: 'user',
-            content: text,
-          },
-        ],
-        temperature: 0.1,
-      });
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      
+      const prompt = `Analyze the sentiment of this standup update. Return ONLY a JSON object (no markdown, no explanation) with:
+- score: number from -1 to 1 (where -1 is very negative, 0 is neutral, 1 is very positive)
+- confidence: number from 0 to 1
+- summary: brief description of the sentiment
 
-      const result = JSON.parse(response.choices[0]?.message?.content || '{"score": 0, "confidence": 0.5, "summary": "Unable to analyze sentiment"}');
-      return result;
+Standup text: ${text}`;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const content = response.text().trim();
+      
+      // Remove markdown code blocks if present
+      const jsonStr = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const parsed = JSON.parse(jsonStr);
+      
+      return parsed;
     } catch (error) {
       console.error('❌ Sentiment analysis failed:', error);
       return { score: 0, confidence: 0.3, summary: 'Sentiment analysis failed' };
@@ -423,22 +422,23 @@ class WorkflowServices {
     
     // Use AI to detect patterns
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-5-nano',
-        messages: [
-          {
-            role: 'system',
-            content: 'Analyze these blocker descriptions for recurring patterns. Return a JSON object with recurringPatterns (array of pattern descriptions), insights (array of observations), and recommendations (array of suggested actions).',
-          },
-          {
-            role: 'user',
-            content: `Blocker descriptions: ${blockerTexts.join('; ')}`,
-          },
-        ],
-        temperature: 0.1,
-      });
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      
+      const prompt = `Analyze these blocker descriptions for recurring patterns. Return ONLY a JSON object (no markdown) with:
+- recurringPatterns: array of pattern descriptions
+- insights: array of observations
+- recommendations: array of suggested actions
 
-      return JSON.parse(response.choices[0]?.message?.content || '{"recurringPatterns": [], "insights": [], "recommendations": []}');
+Blocker descriptions: ${blockerTexts.join('; ')}`;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const content = response.text().trim();
+      
+      // Remove markdown code blocks if present
+      const jsonStr = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      
+      return JSON.parse(jsonStr);
     } catch (error) {
       console.error('❌ Pattern detection failed:', error);
       return {

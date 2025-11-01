@@ -1,12 +1,10 @@
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { vectorStore } from './vectorServices.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export interface RAGResponse {
   answer: string;
@@ -60,18 +58,16 @@ ${context}`;
 
     const systemPrompt = options.systemPrompt || defaultSystemPrompt;
 
-    // Generate response using OpenAI
-    const response = await openai.chat.completions.create({
-      model: 'gpt-5-nano',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: query },
-      ],
-      temperature: 0.7,
-      max_tokens: 500,
-    });
+    // Generate response using Google Gemini
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    
+    const fullPrompt = `${systemPrompt}
 
-    const answer = response.choices[0]?.message?.content || 'No response generated';
+User Question: ${query}`;
+
+    const result = await model.generateContent(fullPrompt);
+    const response = await result.response;
+    const answer = response.text() || 'No response generated';
 
     return {
       answer,
@@ -107,19 +103,15 @@ export const summarizeStandupWithContext = async (
 Consider the team's recent history for context:
 ${context}
 
-Keep the summary under 100 words and actionable.`;
+Keep the summary under 100 words and actionable.
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-5-nano',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: `Summarize this standup: ${description}` },
-      ],
-      temperature: 0.5,
-      max_tokens: 150,
-    });
+Standup to summarize: ${description}`;
 
-    return response.choices[0]?.message?.content || 'Summary generation failed';
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const result = await model.generateContent(systemPrompt);
+    const response = await result.response;
+
+    return response.text() || 'Summary generation failed';
   } catch (error) {
     console.error('❌ Failed to generate contextual summary:', error);
     // Fallback to simple summarization
@@ -128,20 +120,15 @@ Keep the summary under 100 words and actionable.`;
 };
 
 const generateSimpleSummary = async (description: string): Promise<string> => {
-  const response = await openai.chat.completions.create({
-    model: 'gpt-5-nano',
-    messages: [
-      {
-        role: 'system',
-        content: 'Summarize this standup update in 2-3 sentences, focusing on accomplishments, current work, and blockers.',
-      },
-      { role: 'user', content: description },
-    ],
-    temperature: 0.5,
-    max_tokens: 100,
-  });
+  const prompt = `Summarize this standup update in 2-3 sentences, focusing on accomplishments, current work, and blockers:
 
-  return response.choices[0]?.message?.content || 'Summary generation failed';
+${description}`;
+
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+
+  return response.text() || 'Summary generation failed';
 };
 
 export const generateSprintInsights = async (sprintId: number): Promise<string> => {
@@ -162,19 +149,15 @@ export const generateSprintInsights = async (sprintId: number): Promise<string> 
 Team data:
 ${context}
 
-Provide actionable insights in bullet points.`;
+Provide actionable insights in bullet points.
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-5-nano',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: 'Analyze this sprint and provide insights' },
-      ],
-      temperature: 0.6,
-      max_tokens: 400,
-    });
+Please analyze this sprint and provide insights.`;
 
-    return response.choices[0]?.message?.content || 'Analysis failed';
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const result = await model.generateContent(systemPrompt);
+    const response = await result.response;
+
+    return response.text() || 'Analysis failed';
   } catch (error) {
     console.error('❌ Failed to generate sprint insights:', error);
     throw error;
