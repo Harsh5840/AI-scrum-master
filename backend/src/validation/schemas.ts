@@ -26,7 +26,7 @@ export const sprintFilterSchema = z.object({
 // Standup validation schemas
 export const createStandupSchema = z.object({
   userId: z.number().int().positive('User ID must be a positive integer'),
-  sprintId: z.number().int().positive('Sprint ID must be a positive integer').optional(),
+  sprintId: z.number().int().positive('Sprint ID must be a positive integer').optional().nullable(),
   description: z.string().min(1, 'Description is required').max(1000, 'Description must be less than 1000 characters'),
 });
 

@@ -375,7 +375,7 @@ class WorkflowServices {
     const text = `${standup.whatDidYesterday} ${standup.whatWillToday} ${standup.obstacles}`;
     
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
       
       const prompt = `Analyze the sentiment of this standup update. Return ONLY a JSON object (no markdown, no explanation) with:
 - score: number from -1 to 1 (where -1 is very negative, 0 is neutral, 1 is very positive)
@@ -422,7 +422,7 @@ Standup text: ${text}`;
     
     // Use AI to detect patterns
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
       
       const prompt = `Analyze these blocker descriptions for recurring patterns. Return ONLY a JSON object (no markdown) with:
 - recurringPatterns: array of pattern descriptions

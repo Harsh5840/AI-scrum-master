@@ -17,9 +17,12 @@ export const askAI = async (req: Request, res: Response) => {
     });
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error generating AI response:', error);
-    res.status(500).json({ error: 'Failed to generate AI response' });
+    res.status(500).json({ 
+      error: 'Failed to generate AI response',
+      message: error.message || 'Unknown error'
+    });
   }
 };
 
@@ -33,8 +36,11 @@ export const getSprintInsights = async (req: Request, res: Response) => {
 
     const insights = await generateSprintInsights(sprintId);
     res.json({ insights });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error generating sprint insights:', error);
-    res.status(500).json({ error: 'Failed to generate sprint insights' });
+    res.status(500).json({ 
+      error: 'Failed to generate sprint insights',
+      message: error.message || 'Unknown error'
+    });
   }
 };

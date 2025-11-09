@@ -16,6 +16,16 @@ const authHeader = {
  * Fetch backlog items from Jira
  */
 export const fetchJiraBacklog = async () => {
+  // Check if Jira is configured
+  if (!JIRA_BASE_URL || !JIRA_EMAIL || !JIRA_API_TOKEN) {
+    console.warn("⚠️  Jira is not configured. Set JIRA_BASE_URL, JIRA_EMAIL, and JIRA_API_TOKEN environment variables.");
+    return {
+      message: "Jira integration is not configured",
+      configured: false,
+      issues: []
+    };
+  }
+
   try {
     const response = await axios.get(`${JIRA_BASE_URL}/rest/api/3/search?jql=ORDER+BY+created DESC`, {
       headers: authHeader,
@@ -37,6 +47,12 @@ interface JiraTicket {
 }
 
 export const createJiraIssue = async ({ summary, description, issueType }: JiraTicket) => {
+  // Check if Jira is configured
+  if (!JIRA_BASE_URL || !JIRA_EMAIL || !JIRA_API_TOKEN || !process.env.JIRA_PROJECT_KEY) {
+    console.warn("⚠️  Jira is not configured. Set JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN, and JIRA_PROJECT_KEY environment variables.");
+    throw new Error("Jira integration is not configured");
+  }
+
   try {
     const data = {
       fields: {
