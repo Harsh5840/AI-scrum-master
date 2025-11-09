@@ -7,7 +7,7 @@ export const createSprintSchema = z.object({
   endDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid end date format'),
 }).refine((data) => {
   const start = new Date(data.startDate);
-  const end = new Date(data.endDate);dd
+  const end = new Date(data.endDate);
   return end > start;
 }, 'End date must be after start date');
 
