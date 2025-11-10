@@ -299,6 +299,77 @@ curl http://localhost:5000/api/sprints \
 4. **Clear Next.js cache**: Delete `.next` folder if frontend behaves strangely
 5. **Check database**: Use Prisma Studio (`npx prisma studio`) to view/edit data
 
+## 🧪 Testing
+
+### Running Tests
+
+The project includes comprehensive unit and integration tests for all backend services and API routes.
+
+#### Run All Tests
+```bash
+# PowerShell
+.\run-tests.ps1
+
+# Or manually
+cd backend
+npm test
+```
+
+#### Run Tests in Watch Mode
+```bash
+cd backend
+npm run test:watch
+```
+
+#### Generate Coverage Report
+```bash
+cd backend
+npm run test:coverage
+```
+
+Coverage reports are generated in `backend/coverage/` and include:
+- Line coverage
+- Branch coverage
+- Function coverage
+- Statement coverage
+
+### Test Structure
+
+```
+backend/src/__tests__/
+├── setup.ts                    # Test configuration
+├── mocks.ts                    # Mock utilities and helpers
+├── services/                   # Service unit tests
+│   ├── sprintServices.test.ts
+│   ├── standupServices.test.ts
+│   └── blockerServices.test.ts
+├── routes/                     # Integration tests
+│   ├── sprints.test.ts
+│   └── standups.test.ts
+└── validation/                 # Middleware tests
+    └── middleware.test.ts
+```
+
+### Test Coverage
+
+- **Services**: Unit tests for all business logic
+- **Controllers**: Integration tests for API endpoints
+- **Validation**: Tests for Zod schemas and middleware
+- **Error Handling**: Tests for error cases and edge conditions
+
+### CI/CD Testing
+
+Tests automatically run in the CI/CD pipeline:
+- On every push to `main` or `develop` branches
+- On all pull requests
+- Before building Docker images
+- Before deployment
+
+The pipeline will fail if:
+- Any test fails
+- Code coverage drops below thresholds
+- Linting errors are detected
+
 ## 🔄 Deployment Checklist
 
 ### Backend

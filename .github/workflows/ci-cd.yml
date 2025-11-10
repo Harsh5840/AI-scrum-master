@@ -188,6 +188,18 @@ jobs:
       #   run: |
       #     kubectl set image deployment/backend backend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
       #     kubectl set image deployment/frontend frontend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
+      
+      # AWS EC2 Deployment (Commented out - Uncomment when ready to deploy)
+      # - name: Deploy to AWS EC2 instance
+      #   uses: appleboy/ssh-action@v0.1.8
+      #   with:
+      #     host: ${{ secrets.AWS_EC2_HOST }}
+      #     username: ${{ secrets.AWS_EC2_USER }}
+      #     key: ${{ secrets.AWS_EC2_SSH_KEY }}
+      #     script: |
+      #       cd /path/to/your/app
+      #       docker-compose pull
+      #       docker-compose up -d
 
   # Security Scanning
   security-scan:

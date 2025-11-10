@@ -17,6 +17,9 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -56,6 +59,11 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        'soft-sm': '0 1px 3px rgba(23, 43, 77, 0.08)',
+        'soft-md': '0 4px 12px rgba(23, 43, 77, 0.12)',
+        'soft-lg': '0 12px 24px rgba(23, 43, 77, 0.15)',
       },
       keyframes: {
         "accordion-down": {
