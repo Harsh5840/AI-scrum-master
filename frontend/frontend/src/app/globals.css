@@ -1,5 +1,40 @@
 @import "tailwindcss";
 
+/* View Transitions API for smooth page changes */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: fade-out, scale-down;
+}
+
+::view-transition-new(root) {
+  animation-name: fade-in, scale-up;
+}
+
+@keyframes fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes scale-down {
+  to { transform: scale(0.95); }
+}
+
+@keyframes scale-up {
+  from { transform: scale(0.95); }
+}
+
 @layer base {
   :root {
     /* Light Mode - Clean Professional */
