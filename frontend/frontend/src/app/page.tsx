@@ -229,19 +229,15 @@ export default function HomePage() {
               className="flex items-center space-x-3"
               whileHover={{ scale: 1.05 }}
             >
-              <motion.div
-                className="relative"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              >
-                {/* Flaticon rocket icon - attribution: https://www.flaticon.com/ */}
-                <img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png" alt="ScrumMaster" className="h-7 w-7" />
+              <div className="relative">
+                {/* Flaticon agile icon - attribution: https://www.flaticon.com/ */}
+                <img src="https://cdn-icons-png.flaticon.com/512/4727/4727266.png" alt="ScrumMaster" className="h-8 w-8" />
                 <motion.div
                   className="absolute inset-0 blur-md bg-primary/50 -z-10"
                   animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
-              </motion.div>
+              </div>
               <span className="text-xl font-bold">
                 Scrum<span className="text-primary">Master</span>
               </span>
@@ -312,8 +308,8 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0a0a0a_1px,transparent_1px),linear-gradient(to_bottom,#0a0a0a_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000,transparent)]" />
+        {/* Grid Pattern - Same for both light and dark mode */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e5e5_1px,transparent_1px),linear-gradient(to_bottom,#e5e5e5_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#333333_1px,transparent_1px),linear-gradient(to_bottom,#333333_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000,transparent)]" />
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -431,7 +427,7 @@ export default function HomePage() {
               </motion.div>
             </motion.div>
 
-            {/* Right Content - Lottie Animation */}
+            {/* Right Content - Freepik Illustration */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8, rotateY: -30 }}
               animate={{ opacity: 1, scale: 1, rotateY: 0 }}
@@ -439,29 +435,22 @@ export default function HomePage() {
               className="relative perspective-1000"
             >
               <motion.div
-                className="relative rounded-2xl overflow-hidden border border-primary/20 shadow-2xl"
+                className="relative rounded-2xl overflow-hidden"
                 animate={{
-                  rotateY: [0, 5, 0, -5, 0],
-                  rotateX: [0, -2, 0, 2, 0]
+                  y: [0, -20, 0]
                 }}
-                transition={{ duration: 10, repeat: Infinity }}
-                style={{ transformStyle: 'preserve-3d' }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
               >
-                <div className="aspect-[4/3] bg-gradient-to-br from-card to-card/50 backdrop-blur-xl p-8">
-                  <div className="h-full flex items-center justify-center">
-                    {/* Lottie Animation - Data Analytics */}
-                    <Player
-                      autoplay
-                      loop
-                      src="https://lottie.host/a0ec63ff-ddca-48b7-b673-92b3c8e7d8e2/R9NqC3dRFU.json"
-                      style={{ height: '350px', width: '350px' }}
-                      className="opacity-90"
-                    />
-                  </div>
-                </div>
-                
+                {/* Freepik Illustration - Team Collaboration Interface 
+                    Attribution: Designed by freepik - https://www.freepik.com/ */}
+                <img 
+                  src="https://img.freepik.com/free-vector/teamwork-concept-landing-page_52683-20164.jpg" 
+                  alt="Team collaboration and project management illustration" 
+                  className="w-full h-auto rounded-2xl shadow-2xl"
+                  loading="lazy"
+                />
                 {/* Glassmorphism overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent pointer-events-none rounded-2xl" />
               </motion.div>
 
               {/* Floating cards */}
@@ -630,14 +619,16 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="relative"
             >
-              {/* Lottie Animation - Workflow */}
-              <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/5 to-primary/10 p-8">
-                <Player
-                  autoplay
-                  loop
-                  src="https://lottie.host/2c88f4ed-e72e-4fc9-95db-e1e0dd352e09/KnjqXl6ypj.json"
-                  style={{ height: '400px', width: '100%' }}
+              {/* Freepik Illustration - Sprint Planning 
+                  Attribution: Designed by pch.vector / Freepik - https://www.freepik.com/ */}
+              <div className="relative rounded-2xl overflow-hidden">
+                <img 
+                  src="https://img.freepik.com/free-vector/kanban-method-concept-illustration_114360-9863.jpg" 
+                  alt="Kanban board sprint planning illustration" 
+                  className="w-full h-auto rounded-2xl shadow-2xl"
+                  loading="lazy"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent pointer-events-none rounded-2xl" />
               </div>
             </motion.div>
           </div>
@@ -654,6 +645,16 @@ export default function HomePage() {
             }}
             transition={{ duration: 10, repeat: Infinity }}
           />
+          {/* Freepik Illustration - Background 
+              Attribution: Designed by freepik - https://www.freepik.com/ */}
+          <div className="absolute right-0 bottom-0 w-1/3 opacity-10">
+            <img 
+              src="https://img.freepik.com/free-vector/teamwork-concept-illustration_114360-8914.jpg" 
+              alt="Team collaboration background" 
+              className="w-full h-auto"
+              loading="lazy"
+            />
+          </div>
         </div>
 
         <motion.div

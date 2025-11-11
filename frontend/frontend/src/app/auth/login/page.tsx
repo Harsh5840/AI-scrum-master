@@ -149,7 +149,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full bg-primary hover:bg-primary/90 text-white font-semibold"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -176,7 +176,7 @@ export default function LoginPage() {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                className="w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
               >
