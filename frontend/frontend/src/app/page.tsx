@@ -22,14 +22,13 @@ import {
 } from '@radix-ui/react-icons';
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Player } from '@lottiefiles/react-lottie-player';
+import dynamic from 'next/dynamic';
 
-// Register GSAP plugins
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
+// Dynamic imports for client-side only
+const Player = dynamic(
+  () => import('@lottiefiles/react-lottie-player').then((mod) => mod.Player),
+  { ssr: false }
+);
 
 export default function HomePage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -69,83 +68,78 @@ export default function HomePage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const ctx = gsap.context(() => {
-      // Hero parallax effect
-      gsap.to('.hero-content', {
-        y: -100,
-        opacity: 0.8,
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 1,
-        },
-      });
+    // Dynamically import GSAP on client side only
+    import('gsap').then(({ default: gsap }) => {
+      import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+        gsap.registerPlugin(ScrollTrigger);
 
-      // Features cards stagger reveal
-      gsap.from('.feature-card', {
-        y: 100,
-        opacity: 0,
-        stagger: 0.1,
-        duration: 0.8,
-        scrollTrigger: {
-          trigger: featuresRef.current,
-          start: 'top 80%',
-          end: 'top 20%',
-          toggleActions: 'play none none reverse',
-        },
-      });
+        const ctx = gsap.context(() => {
+          // Hero parallax effect
+          gsap.to('.hero-content', {
+            y: -100,
+            opacity: 0.8,
+            scrollTrigger: {
+              trigger: heroRef.current,
+              start: 'top top',
+              end: 'bottom top',
+              scrub: 1,
+            },
+          });
 
-      // Stats counter animation
-      gsap.from('.stat-value', {
-        textContent: 0,
-        duration: 2,
-        ease: 'power1.inOut',
-        scrollTrigger: {
-          trigger: statsRef.current,
-          start: 'top 80%',
-          toggleActions: 'play none none none',
-        },
-        snap: { textContent: 1 },
-      });
+          // Features cards stagger reveal
+          gsap.from('.feature-card', {
+            y: 100,
+            opacity: 0,
+            stagger: 0.1,
+            duration: 0.8,
+            scrollTrigger: {
+              trigger: featuresRef.current,
+              start: 'top 80%',
+              end: 'top 20%',
+              toggleActions: 'play none none reverse',
+            },
+          });
 
-      // Floating elements
-      gsap.to('.float-element', {
-        y: -30,
-        duration: 2,
-        ease: 'power1.inOut',
-        stagger: 0.2,
-        repeat: -1,
-        yoyo: true,
-      });
+          // Floating elements
+          gsap.to('.float-element', {
+            y: -30,
+            duration: 2,
+            ease: 'power1.inOut',
+            stagger: 0.2,
+            repeat: -1,
+            yoyo: true,
+          });
 
-      // Magnetic effect for buttons
-      const buttons = document.querySelectorAll('.magnetic-button');
-      buttons.forEach((button) => {
-        const btn = button as HTMLElement;
-        btn.addEventListener('mouseenter', () => {
-          gsap.to(btn, { scale: 1.1, duration: 0.3 });
-        });
-        btn.addEventListener('mouseleave', () => {
-          gsap.to(btn, { scale: 1, duration: 0.3 });
-        });
-        btn.addEventListener('mousemove', (e: any) => {
-          const rect = btn.getBoundingClientRect();
-          const x = e.clientX - rect.left - rect.width / 2;
-          const y = e.clientY - rect.top - rect.height / 2;
-          gsap.to(btn, {
-            x: x * 0.2,
-            y: y * 0.2,
-            duration: 0.3,
+          // Magnetic effect for buttons
+          const buttons = document.querySelectorAll('.magnetic-button');
+          buttons.forEach((button) => {
+            const btn = button as HTMLElement;
+            btn.addEventListener('mouseenter', () => {
+              gsap.to(btn, { scale: 1.1, duration: 0.3 });
+            });
+            btn.addEventListener('mouseleave', () => {
+              gsap.to(btn, { scale: 1, duration: 0.3 });
+            });
+            btn.addEventListener('mousemove', (e: any) => {
+              const rect = btn.getBoundingClientRect();
+              const x = e.clientX - rect.left - rect.width / 2;
+              const y = e.clientY - rect.top - rect.height / 2;
+              gsap.to(btn, {
+                x: x * 0.2,
+                y: y * 0.2,
+                duration: 0.3,
+              });
+            });
+            btn.addEventListener('mouseleave', () => {
+              gsap.to(btn, { x: 0, y: 0, duration: 0.5 });
+            });
           });
         });
-        btn.addEventListener('mouseleave', () => {
-          gsap.to(btn, { x: 0, y: 0, duration: 0.5 });
-        });
+
+        // Cleanup
+        return () => ctx.revert();
       });
     });
-
-    return () => ctx.revert();
   }, []);
 
   useEffect(() => {
