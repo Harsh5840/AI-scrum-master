@@ -76,38 +76,38 @@
   }
 
   .dark {
-    /* Dark Mode - Cyberpunk Neon Green */
-    --background: 222 47% 5%;
-    --foreground: 142 86% 65%;
+    /* Dark Mode - Cyberpunk Neon Green with better contrast */
+    --background: 222 47% 8%;
+    --foreground: 142 86% 75%;
     
-    --card: 222 47% 7%;
-    --card-foreground: 142 86% 65%;
+    --card: 222 47% 10%;
+    --card-foreground: 142 86% 85%;
     
-    --popover: 222 47% 7%;
-    --popover-foreground: 142 86% 65%;
+    --popover: 222 47% 10%;
+    --popover-foreground: 142 86% 85%;
     
-    /* Neon Green Primary */
-    --primary: 142 86% 55%;
+    /* Neon Green Primary - brighter for better visibility */
+    --primary: 142 86% 58%;
     --primary-foreground: 222 47% 5%;
     
-    --secondary: 217.2 32.6% 12%;
-    --secondary-foreground: 142 86% 65%;
+    --secondary: 217.2 32.6% 15%;
+    --secondary-foreground: 142 86% 75%;
     
-    --muted: 217.2 32.6% 12%;
-    --muted-foreground: 215 20.2% 55%;
+    --muted: 217.2 32.6% 15%;
+    --muted-foreground: 215 20.2% 65%;
     
-    --accent: 217.2 32.6% 12%;
-    --accent-foreground: 142 86% 65%;
+    --accent: 217.2 32.6% 15%;
+    --accent-foreground: 142 86% 75%;
     
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 85.7% 97.3%;
     
-    --border: 217.2 32.6% 15%;
-    --input: 217.2 32.6% 15%;
-    --ring: 142 86% 55%;
+    --border: 217.2 32.6% 20%;
+    --input: 217.2 32.6% 18%;
+    --ring: 142 86% 58%;
     
-    --chart-1: 142 86% 55%;
-    --chart-2: 173 80% 45%;
+    --chart-1: 142 86% 58%;
+    --chart-2: 173 80% 50%;
     --chart-3: 197 71% 73%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
