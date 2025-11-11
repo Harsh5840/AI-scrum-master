@@ -152,37 +152,37 @@ export default function HomePage() {
 
   const features = [
     {
-      icon: <ChatBubbleIcon className="h-6 w-6" />,
+      icon: <img src="https://cdn-icons-png.flaticon.com/512/2462/2462719.png" alt="chat" className="h-6 w-6" loading="lazy" />,
       title: "Async Standups",
       description: "Team updates without meetings. Smart summaries, blocker detection, and sentiment analysis.",
       color: "from-green-500/20 to-emerald-500/20"
     },
     {
-      icon: <BarChartIcon className="h-6 w-6" />,
+      icon: <img src="https://cdn-icons-png.flaticon.com/512/1828/1828911.png" alt="analytics" className="h-6 w-6" loading="lazy" />,
       title: "Real-time Analytics",
       description: "Burndown charts, velocity tracking, and performance metrics updated live.",
       color: "from-blue-500/20 to-cyan-500/20"
     },
     {
-      icon: <LightningBoltIcon className="h-6 w-6" />,
+      icon: <img src="https://cdn-icons-png.flaticon.com/512/888/888879.png" alt="auto" className="h-6 w-6" loading="lazy" />,
       title: "Auto Blockers",
       description: "Detect blockers before they impact delivery. Get suggestions to resolve them.",
       color: "from-yellow-500/20 to-orange-500/20"
     },
     {
-      icon: <CalendarIcon className="h-6 w-6" />,
+      icon: <img src="https://cdn-icons-png.flaticon.com/512/2922/2922563.png" alt="calendar" className="h-6 w-6" loading="lazy" />,
       title: "Smart Planning",
       description: "Velocity predictions, capacity planning, and data-driven sprint goals.",
       color: "from-purple-500/20 to-pink-500/20"
     },
     {
-      icon: <MixerHorizontalIcon className="h-6 w-6" />,
+      icon: <img src="https://cdn-icons-png.flaticon.com/512/2462/2462714.png" alt="assistant" className="h-6 w-6" loading="lazy" />,
       title: "Team Assistant",
       description: "Ask questions about sprints. Get contextual answers from your data.",
       color: "from-indigo-500/20 to-violet-500/20"
     },
     {
-      icon: <ReaderIcon className="h-6 w-6" />,
+      icon: <img src="https://cdn-icons-png.flaticon.com/512/747/747376.png" alt="docs" className="h-6 w-6" loading="lazy" />,
       title: "Auto Docs",
       description: "Generate sprint reports and retrospectives automatically.",
       color: "from-red-500/20 to-rose-500/20"
@@ -190,10 +190,10 @@ export default function HomePage() {
   ];
 
   const stats = [
-    { value: "10k+", label: "Active Teams", icon: <PersonIcon className="h-5 w-5" /> },
-    { value: "500k+", label: "Sprints Managed", icon: <CalendarIcon className="h-5 w-5" /> },
-    { value: "99.9%", label: "Uptime", icon: <GlobeIcon className="h-5 w-5" /> },
-    { value: "<2min", label: "Setup Time", icon: <TimerIcon className="h-5 w-5" /> }
+    { value: "10k+", label: "Active Teams", icon: <img src="https://cdn-icons-png.flaticon.com/512/747/747376.png" alt="teams" className="h-5 w-5" loading="lazy" /> },
+    { value: "500k+", label: "Sprints Managed", icon: <img src="https://cdn-icons-png.flaticon.com/512/3047/3047145.png" alt="sprints" className="h-5 w-5" loading="lazy" /> },
+    { value: "99.9%", label: "Uptime", icon: <img src="https://cdn-icons-png.flaticon.com/512/1048/1048316.png" alt="uptime" className="h-5 w-5" loading="lazy" /> },
+    { value: "<2min", label: "Setup Time", icon: <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" alt="setup" className="h-5 w-5" loading="lazy" /> }
   ];
 
   return (
@@ -234,7 +234,8 @@ export default function HomePage() {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
               >
-                <RocketIcon className="h-7 w-7 text-primary" />
+                {/* Flaticon rocket icon - attribution: https://www.flaticon.com/ */}
+                <img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png" alt="ScrumMaster" className="h-7 w-7" />
                 <motion.div
                   className="absolute inset-0 blur-md bg-primary/50 -z-10"
                   animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
@@ -333,7 +334,7 @@ export default function HomePage() {
                   animate={{ rotate: 360 }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                 >
-                  <LightningBoltIcon className="h-4 w-4 text-primary" />
+                  <img src="https://cdn-icons-png.flaticon.com/512/888/888879.png" alt="automation" className="h-4 w-4 text-primary" loading="lazy" />
                 </motion.div>
                 <span className="text-sm font-medium text-primary">Intelligent Sprint Management</span>
               </motion.div>
@@ -423,7 +424,7 @@ export default function HomePage() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.7 + i * 0.1 }}
                   >
-                    <CheckCircledIcon className="h-5 w-5 text-primary" />
+                    <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="check" className="h-5 w-5 text-primary" loading="lazy" />
                     <span>{item}</span>
                   </motion.div>
                 ))}
@@ -481,7 +482,7 @@ export default function HomePage() {
                 transition={{ duration: 5, repeat: Infinity }}
               >
                 <div className="flex items-center space-x-3">
-                  <CheckCircledIcon className="h-5 w-5 text-primary" />
+                  <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="check" className="h-5 w-5 text-primary" loading="lazy" />
                   <span className="text-sm font-medium">23 tasks completed</span>
                 </div>
               </motion.div>
@@ -590,8 +591,8 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="space-y-6"
             >
-              <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full border border-primary/50 bg-primary/10">
-                <LightningBoltIcon className="h-4 w-4 text-primary" />
+                <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full border border-primary/50 bg-primary/10">
+                <img src="https://cdn-icons-png.flaticon.com/512/888/888879.png" alt="automation" className="h-4 w-4 text-primary" loading="lazy" />
                 <span className="text-sm font-medium text-primary">Automated Workflow</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold">
@@ -616,7 +617,7 @@ export default function HomePage() {
                     viewport={{ once: true }}
                     className="flex items-center space-x-3"
                   >
-                    <CheckCircledIcon className="h-5 w-5 text-primary flex-shrink-0" />
+                    <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="check" className="h-5 w-5 text-primary flex-shrink-0" loading="lazy" />
                     <span>{item}</span>
                   </motion.li>
                 ))}
