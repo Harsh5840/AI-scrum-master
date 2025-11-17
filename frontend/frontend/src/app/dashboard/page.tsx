@@ -23,7 +23,7 @@ import { useAppSelector } from "@/store/hooks";
 
 export default function Home() {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const { data: sprints, isLoading: sprintsLoading } = useGetSprintsQuery(undefined, {
+  const { data: sprints, isLoading: sprintsLoading } = useGetSprintsQuery({}, {
     skip: !isAuthenticated,
     refetchOnMountOrArgChange: true,
   });
