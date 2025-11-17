@@ -105,6 +105,13 @@ export const authService = {
     if (refreshToken) {
       Cookies.set('refresh_token', refreshToken, { expires: 30, secure: true, sameSite: 'strict' })
     }
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('token', token)
+      if (refreshToken) {
+        localStorage.setItem('refresh_token', refreshToken)
+      }
+    }
     
     return response.data
   },
