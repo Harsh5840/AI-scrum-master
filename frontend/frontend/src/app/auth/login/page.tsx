@@ -46,13 +46,10 @@ export default function LoginPage() {
     }
   }
 
-  const handleGoogleLogin = async () => {
-    try {
-      const googleUrl = await authService.googleLogin()
-      window.location.href = googleUrl
-    } catch (error) {
-      console.error('Google login failed:', error)
-    }
+  const handleGoogleLogin = () => {
+    // Redirect directly to backend Google OAuth endpoint
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+    window.location.href = `${backendUrl}/auth/google`
   }
 
   return (

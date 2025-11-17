@@ -68,13 +68,10 @@ export default function SignupPage() {
     }
   }
 
-  const handleGoogleSignup = async () => {
-    try {
-      const googleUrl = await authService.googleLogin()
-      window.location.href = googleUrl
-    } catch (error) {
-      console.error('Google signup failed:', error)
-    }
+  const handleGoogleSignup = () => {
+    // Redirect directly to backend Google OAuth endpoint
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+    window.location.href = `${backendUrl}/auth/google`
   }
 
   return (
@@ -210,7 +207,7 @@ export default function SignupPage() {
               </div>
               <Button
                 type="submit"
-                className="w-full bg-primary text-white font-semibold hover:bg-primary/80 transition-colors mt-6"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md transition-colors mt-6 shadow-md"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -229,9 +226,9 @@ export default function SignupPage() {
               </div>
               <Button
                 type="button"
-                className="w-full flex items-center justify-center gap-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-border transition-colors hover:bg-primary/10 hover:scale-105 hover:shadow-lg"
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border-2 border-gray-300 dark:border-gray-600 py-3 hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={handleGoogleSignup}
-                aria-label="Continue with Google"
               >
                 <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Google" className="h-5 w-5" />
                 Continue with Google
