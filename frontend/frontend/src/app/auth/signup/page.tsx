@@ -210,7 +210,7 @@ export default function SignupPage() {
               </div>
               <Button
                 type="submit"
-                className="w-full bg-primary text-white font-semibold hover:bg-primary/80 transition-colors"
+                className="w-full bg-primary text-white font-semibold hover:bg-primary/80 transition-colors mt-6"
                 disabled={isLoading}
               >
                 {isLoading ? (

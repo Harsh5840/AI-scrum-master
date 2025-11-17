@@ -183,6 +183,10 @@ const authSlice = createSlice({
         state.user = action.payload.user
         state.token = action.payload.token
         state.error = null
+        // Store in localStorage like regular login/signup
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('token', action.payload.token)
+        }
       })
       .addCase(handleOAuthCallback.rejected, (state, action) => {
         state.isLoading = false
@@ -190,6 +194,10 @@ const authSlice = createSlice({
         state.user = null
         state.token = null
         state.error = action.payload as string
+        // Clear any stored tokens
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token')
+        }
       })
   },
 })
