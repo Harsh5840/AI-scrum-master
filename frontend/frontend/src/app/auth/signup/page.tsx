@@ -78,21 +78,21 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+
+    <div className="min-h-screen flex items-center justify-center bg-background text-foreground py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="mt-6 text-3xl font-bold text-primary">
             AI Scrum Master
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             Create your account
           </p>
         </div>
-        
-        <Card>
+        <Card className="bg-card border border-border rounded-xl shadow-lg">
           <CardHeader>
-            <CardTitle>Get started</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-primary text-2xl">Get started</CardTitle>
+            <CardDescription className="text-muted-foreground">
               Create your account to start managing your scrum projects
             </CardDescription>
           </CardHeader>
@@ -103,11 +103,10 @@ export default function SignupPage() {
                   <p className="text-sm text-red-600 dark:text-red-400">{error || validationError}</p>
                 </div>
               )}
-              
               <div className="space-y-2">
-                <Label htmlFor="name">Full name</Label>
+                <Label htmlFor="name" className="text-foreground">Full name</Label>
                 <div className="relative">
-                  <PersonIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <PersonIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="name"
                     type="text"
@@ -116,15 +115,14 @@ export default function SignupPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Enter your full name"
-                    className="pl-10"
+                    className="pl-10 bg-background border border-border text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
               </div>
-
               <div className="space-y-2">
-                <Label htmlFor="email">Email address</Label>
+                <Label htmlFor="email" className="text-foreground">Email address</Label>
                 <div className="relative">
-                  <EnvelopeClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <EnvelopeClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
@@ -133,15 +131,14 @@ export default function SignupPage() {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="Enter your email"
-                    className="pl-10"
+                    className="pl-10 bg-background border border-border text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
               </div>
-
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-foreground">Password</Label>
                 <div className="relative">
-                  <LockClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <LockClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
@@ -150,7 +147,7 @@ export default function SignupPage() {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder="Create a password"
-                    className="pl-10 pr-10"
+                    className="pl-10 pr-10 bg-background border border-border text-foreground placeholder:text-muted-foreground"
                   />
                   <button
                     type="button"
@@ -158,18 +155,17 @@ export default function SignupPage() {
                     className="absolute right-3 top-1/2 transform -translate-y-1/2"
                   >
                     {showPassword ? (
-                      <EyeNoneIcon className="h-4 w-4 text-gray-400" />
+                      <EyeNoneIcon className="h-4 w-4 text-muted-foreground" />
                     ) : (
-                      <EyeOpenIcon className="h-4 w-4 text-gray-400" />
+                      <EyeOpenIcon className="h-4 w-4 text-muted-foreground" />
                     )}
                   </button>
                 </div>
               </div>
-
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm password</Label>
+                <Label htmlFor="confirmPassword" className="text-foreground">Confirm password</Label>
                 <div className="relative">
-                  <LockClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <LockClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
@@ -178,7 +174,7 @@ export default function SignupPage() {
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                     placeholder="Confirm your password"
-                    className="pl-10 pr-10"
+                    className="pl-10 pr-10 bg-background border border-border text-foreground placeholder:text-muted-foreground"
                   />
                   <button
                     type="button"
@@ -186,37 +182,35 @@ export default function SignupPage() {
                     className="absolute right-3 top-1/2 transform -translate-y-1/2"
                   >
                     {showConfirmPassword ? (
-                      <EyeNoneIcon className="h-4 w-4 text-gray-400" />
+                      <EyeNoneIcon className="h-4 w-4 text-muted-foreground" />
                     ) : (
-                      <EyeOpenIcon className="h-4 w-4 text-gray-400" />
+                      <EyeOpenIcon className="h-4 w-4 text-muted-foreground" />
                     )}
                   </button>
                 </div>
               </div>
-
               <div className="flex items-center">
                 <input
                   id="agree-terms"
                   name="agree-terms"
                   type="checkbox"
                   required
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                 />
-                <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                <label htmlFor="agree-terms" className="ml-2 block text-sm text-foreground">
                   I agree to the{' '}
-                  <Link href="/terms" className="text-blue-600 hover:text-blue-500">
+                  <Link href="/terms" className="text-primary hover:underline">
                     Terms of Service
                   </Link>{' '}
                   and{' '}
-                  <Link href="/privacy" className="text-blue-600 hover:text-blue-500">
+                  <Link href="/privacy" className="text-primary hover:underline">
                     Privacy Policy
                   </Link>
                 </label>
               </div>
-
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full bg-primary text-white font-semibold hover:bg-primary/80 transition-colors"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -228,11 +222,24 @@ export default function SignupPage() {
                   'Create account'
                 )}
               </Button>
-
+              <div className="my-6 flex items-center">
+                <div className="flex-grow border-t border-border" />
+                <span className="mx-4 text-muted-foreground text-sm">or</span>
+                <div className="flex-grow border-t border-border" />
+              </div>
+              <Button
+                type="button"
+                className="w-full flex items-center justify-center gap-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                onClick={handleGoogleSignup}
+                aria-label="Continue with Google"
+              >
+                <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Google" className="h-5 w-5" />
+                Continue with Google
+              </Button>
               <div className="text-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="text-sm text-muted-foreground">
                   Already have an account?{' '}
-                  <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
+                  <Link href="/auth/login" className="font-medium text-primary hover:underline">
                     Sign in
                   </Link>
                 </span>
@@ -240,9 +247,8 @@ export default function SignupPage() {
             </form>
           </CardContent>
         </Card>
-        
         <div className="text-center">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-muted-foreground">
             Demo mode: Any valid information will create a mock account
           </p>
         </div>
