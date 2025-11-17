@@ -19,13 +19,17 @@ import {
   PersonIcon,
   MagicWandIcon
 } from "@radix-ui/react-icons";
+import { useAppSelector } from "@/store/hooks";
 
 export default function Home() {
-  const { data: sprints, isLoading: sprintsLoading } = useGetSprintsQuery({});
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { data: sprints, isLoading: sprintsLoading } = useGetSprintsQuery(undefined, {
+    skip: !isAuthenticated,
+    refetchOnMountOrArgChange: true,
+  });
   const { data: queueStatus } = useGetQueueStatusQuery(undefined, {
-    // Don't fail the page if queue status fails
+    skip: !isAuthenticated,
     pollingInterval: 0,
-    skip: false,
   });
 
   const activeSprints = sprints?.filter(sprint => {

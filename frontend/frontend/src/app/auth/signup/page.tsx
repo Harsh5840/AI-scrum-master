@@ -219,7 +219,7 @@ export default function SignupPage() {
                     Creating account...
                   </>
                 ) : (
-                  'Create account'
+                  'Sign Up'
                 )}
               </Button>
               <div className="my-6 flex items-center">
@@ -229,7 +229,7 @@ export default function SignupPage() {
               </div>
               <Button
                 type="button"
-                className="w-full flex items-center justify-center gap-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-border transition-colors hover:bg-primary/10 hover:scale-105 hover:shadow-lg"
                 onClick={handleGoogleSignup}
                 aria-label="Continue with Google"
               >
