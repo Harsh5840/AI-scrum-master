@@ -18,9 +18,24 @@ router.get('/google',
 
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
-  (req, res) => {
-    // Successful authentication, redirect to dashboard
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard`)
+  async (req, res) => {
+    // Successful authentication, generate token and redirect to frontend callback
+    const user = req.user as any
+    
+    // Import JWTService
+    const { JWTService } = await import('../services/jwtService.js')
+    
+    const accessToken = JWTService.generateAccessToken({
+      userId: user.id,
+      email: user.email
+    })
+    
+    const refreshToken = JWTService.generateRefreshToken()
+    await JWTService.saveRefreshToken(user.id, refreshToken)
+    
+    // Redirect to frontend callback with token
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+    res.redirect(`${frontendUrl}/auth/callback?token=${accessToken}&refreshToken=${refreshToken}`)
   }
 )
 

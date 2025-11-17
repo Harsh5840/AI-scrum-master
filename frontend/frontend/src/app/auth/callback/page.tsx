@@ -14,8 +14,8 @@ function CallbackHandler() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      const code = searchParams.get('code')
-      const state = searchParams.get('state')
+      const token = searchParams.get('token')
+      const refreshToken = searchParams.get('refreshToken')
       const errorParam = searchParams.get('error')
 
       if (errorParam) {
@@ -24,28 +24,46 @@ function CallbackHandler() {
         return
       }
 
-      if (!code) {
+      if (!token) {
         setStatus('error')
-        setError('Authorization code not found')
+        setError('Authentication token not found')
         return
       }
 
       try {
-        const result = await dispatch(handleOAuthCallback({ code, state: state || undefined }))
-        
-        if (handleOAuthCallback.fulfilled.match(result)) {
-          setStatus('success')
-          // Redirect to dashboard after a brief delay to show success
-          setTimeout(() => {
-            router.push('/dashboard')
-          }, 2000)
-        } else {
-          setStatus('error')
-          setError(result.payload as string || 'Authentication failed')
+        // Store token in localStorage
+        localStorage.setItem('token', token)
+        if (refreshToken) {
+          localStorage.setItem('refreshToken', refreshToken)
         }
+
+        // Fetch user info with the token
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/auth/me`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch user info')
+        }
+
+        const user = await response.json()
+
+        // Update Redux store
+        dispatch({ type: 'auth/setCredentials', payload: { user, token } })
+        
+        setStatus('success')
+        // Redirect to dashboard after a brief delay to show success
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 1500)
       } catch (err) {
         setStatus('error')
         setError('An unexpected error occurred')
+        // Clear any stored tokens on error
+        localStorage.removeItem('token')
+        localStorage.removeItem('refreshToken')
       }
     }
 
