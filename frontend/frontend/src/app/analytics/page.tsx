@@ -51,9 +51,13 @@ export default function AnalyticsPage() {
     const elapsedDays = Math.min(differenceInDays(today, startDate), totalDays)
     const remainingDays = Math.max(totalDays - elapsedDays, 0)
     
-    // Mock story points data - in real app, this would come from API
-    const totalStoryPoints = 100
-    const completedStoryPoints = Math.floor((elapsedDays / totalDays) * 80) // 80% completion rate
+    // Calculate story points from actual backlog items
+    const backlogItems = sprint.backlogItems || []
+    const totalStoryPoints = backlogItems.reduce((sum: number, item: any) => sum + (item.storyPoints || 0), 0)
+    const completedStoryPoints = backlogItems
+      .filter((item: any) => item.completed || item.status === 'done')
+      .reduce((sum: number, item: any) => sum + (item.storyPoints || 0), 0)
+    
     const idealBurndownLine = Array.from({ length: totalDays + 1 }, (_, i) => 
       totalStoryPoints - (totalStoryPoints * i / totalDays)
     )
@@ -68,7 +72,7 @@ export default function AnalyticsPage() {
       totalStoryPoints,
       completedStoryPoints,
       remainingStoryPoints: totalStoryPoints - completedStoryPoints,
-      completionRate: Math.round((completedStoryPoints / totalStoryPoints) * 100),
+      completionRate: totalStoryPoints > 0 ? Math.round((completedStoryPoints / totalStoryPoints) * 100) : 0,
       velocity: Math.round(completedStoryPoints / Math.max(elapsedDays / 7, 1)), // points per week
       idealBurndownLine,
       actualBurndownLine
@@ -81,12 +85,20 @@ export default function AnalyticsPage() {
   const calculateVelocityTrend = () => {
     if (!sprints) return []
     
-    return sprints.slice(0, 5).map((sprint, index) => ({
-      sprintName: sprint.name,
-      planned: 100 - (index * 5), // Mock data
-      completed: 85 - (index * 8),
-      velocity: 85 - (index * 8)
-    })).reverse()
+    return sprints.slice(0, 5).map((sprint) => {
+      const backlogItems = sprint.backlogItems || []
+      const planned = backlogItems.reduce((sum: number, item: any) => sum + (item.storyPoints || 0), 0)
+      const completed = backlogItems
+        .filter((item: any) => item.completed || item.status === 'done')
+        .reduce((sum: number, item: any) => sum + (item.storyPoints || 0), 0)
+      
+      return {
+        sprintName: sprint.name,
+        planned,
+        completed,
+        velocity: completed
+      }
+    }).reverse()
   }
 
   const velocityData = calculateVelocityTrend()

@@ -49,6 +49,13 @@ export interface BacklogItem {
   description?: string
   completed: boolean
   sprintId?: number
+  storyPoints?: number
+  priority?: 'low' | 'medium' | 'high'
+  status?: 'todo' | 'in-progress' | 'done'
+  assignee?: string
+  tags?: string[]
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface AIInsight {

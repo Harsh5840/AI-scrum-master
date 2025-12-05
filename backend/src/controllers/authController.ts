@@ -8,7 +8,7 @@ const prisma = new PrismaClient()
 const googleOAuth = new GoogleOAuthService()
 
 export class AuthController {
-  static async login(req: Request, res: Response) {
+  static async login(req: Request, res: Response) {  
     try {
       const { email, password } = req.body
 

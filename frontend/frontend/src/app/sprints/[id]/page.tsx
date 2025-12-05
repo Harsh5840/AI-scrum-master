@@ -26,6 +26,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useGetSprintQuery } from '@/store/api/sprintsApi'
+import { useGetBacklogItemsQuery, useCreateBacklogItemMutation } from '@/store/api/backlogApi'
 import { format } from 'date-fns'
 import { 
   ArrowLeftIcon,
@@ -38,70 +39,44 @@ import {
   StarIcon
 } from '@radix-ui/react-icons'
 
-type BacklogItem = {
-  id: number
-  title: string
-  description: string
-  priority: 'high' | 'medium' | 'low'
-  status: 'todo' | 'in-progress' | 'done'
-  assignee?: string
-  storyPoints?: number
-  tags: string[]
-}
-
 export default function SprintDetailPage() {
   const params = useParams()
   const sprintId = parseInt(params.id as string)
   const { data: sprintData, isLoading, error } = useGetSprintQuery(sprintId)
   const sprint = sprintData?.sprint
   
+  // Fetch backlog items for this sprint
+  const { data: backlogItems = [], isLoading: backlogLoading } = useGetBacklogItemsQuery({ sprintId })
+  const [createBacklogItem] = useCreateBacklogItemMutation()
+  
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false)
   const [newItem, setNewItem] = useState({
     title: '',
     description: '',
-    priority: 'medium' as const,
-    storyPoints: 0
+    priority: 'medium' as 'low' | 'medium' | 'high',
+    storyPoints: 0,
+    assignee: '',
+    tags: [] as string[]
   })
 
-  // Mock backlog items - in real app, this would come from API
-  const [backlogItems] = useState<BacklogItem[]>([
-    {
-      id: 1,
-      title: "User Authentication System",
-      description: "Implement login, signup, and password reset functionality",
-      priority: 'high',
-      status: 'in-progress',
-      assignee: 'John Doe',
-      storyPoints: 8,
-      tags: ['auth', 'security']
-    },
-    {
-      id: 2,
-      title: "Dashboard Analytics",
-      description: "Create analytics dashboard with charts and metrics",
-      priority: 'medium',
-      status: 'todo',
-      assignee: 'Jane Smith',
-      storyPoints: 5,
-      tags: ['analytics', 'ui']
-    },
-    {
-      id: 3,
-      title: "API Rate Limiting",
-      description: "Implement rate limiting for all API endpoints",
-      priority: 'low',
-      status: 'done',
-      assignee: 'Bob Wilson',
-      storyPoints: 3,
-      tags: ['api', 'security']
+  const handleAddItem = async () => {
+    try {
+      await createBacklogItem({
+        title: newItem.title,
+        description: newItem.description,
+        priority: newItem.priority,
+        storyPoints: newItem.storyPoints,
+        assignee: newItem.assignee || undefined,
+        tags: newItem.tags,
+        sprintId,
+        status: 'todo'
+      }).unwrap()
+      
+      setIsAddItemDialogOpen(false)
+      setNewItem({ title: '', description: '', priority: 'medium', storyPoints: 0, assignee: '', tags: [] })
+    } catch (err) {
+      console.error('Failed to create backlog item:', err)
     }
-  ])
-
-  const handleAddItem = () => {
-    // In real app, this would call an API
-    console.log('Adding item:', newItem)
-    setIsAddItemDialogOpen(false)
-    setNewItem({ title: '', description: '', priority: 'medium', storyPoints: 0 })
   }
 
   const getSprintStatus = (sprint: any) => {

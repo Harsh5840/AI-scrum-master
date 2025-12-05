@@ -1,7 +1,7 @@
 import express, { type NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import cookieParser from "cookie-parser";
+import cookieParser from "cookie-parser";  
 import session from "express-session";
 import { type Request, type Response } from "express";
 import path from "path";
@@ -14,11 +14,13 @@ const __dirname = path.dirname(__filename);
 // Load environment variables from .env with explicit path
 dotenv.config({ path: path.join(__dirname, '.env') });
 
-// Debug: Check if environment variables are loaded
-console.log('🔍 Environment Check:');
-console.log('  - JWT_SECRET:', process.env.JWT_SECRET ? 'SET ✅' : 'NOT SET ❌');
-console.log('  - DATABASE_URL:', process.env.DATABASE_URL ? 'SET ✅' : 'NOT SET ❌');
-console.log('  - SESSION_SECRET:', process.env.SESSION_SECRET ? 'SET ✅' : 'NOT SET ❌');
+// Debug: Check if environment variables are loaded (development only)
+if (process.env.NODE_ENV !== 'production') {
+  console.log('🔍 Environment Check:');
+  console.log('  - JWT_SECRET:', process.env.JWT_SECRET ? 'SET ✅' : 'NOT SET ❌');
+  console.log('  - DATABASE_URL:', process.env.DATABASE_URL ? 'SET ✅' : 'NOT SET ❌');
+  console.log('  - SESSION_SECRET:', process.env.SESSION_SECRET ? 'SET ✅' : 'NOT SET ❌');
+}
 
 import passport from "./src/config/passport.js";
 import { authMiddleware } from "./src/middleware/authMiddleware.js";
@@ -55,11 +57,11 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'))
     }
   },
-  credentials: true,
+  credentials: true, 
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
-app.use(express.json());
+app.use(express.json()); 
 app.use(cookieParser());
 
 // Session configuration
@@ -77,12 +79,12 @@ app.use(
 );
 
 // Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.initialize()); 
+app.use(passport.session());  
 
 // Request logging middleware
 app.use((req, _res, next) => {
-  console.log(`📥 ${req.method} ${req.url}`);
+  console.log(` ${req.method} ${req.url}`);
   next();
 });
 
@@ -119,10 +121,19 @@ app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
 async function initializeServices() {
   try {
     console.log('🚀 Initializing optional services...');
-    // Comment out for now to allow server to start
-    // await vectorStore.initialize();
-    // await queueManager.initializeWorkers();
-    console.log('✅ Services skipped for basic startup');
+    
+    // Queue manager (simple in-memory, no external dependencies)
+    await queueManager.initializeWorkers();
+    
+    // Vector store (requires PINECONE_API_KEY and OPENAI_API_KEY)
+    if (process.env.PINECONE_API_KEY && process.env.OPENAI_API_KEY) {
+      await vectorStore.initialize();
+      console.log('✅ Vector store initialized');
+    } else {
+      console.log('⚠️  Vector store skipped (API keys not configured)');
+    }
+    
+    console.log('✅ Services initialization complete');
   } catch (error) {
     console.error('❌ Failed to initialize services:', error);
     // Continue without services if they fail

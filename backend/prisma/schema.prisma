@@ -16,12 +16,11 @@ model User {
   password    String?    // Optional for OAuth users
   googleId    String?    @unique
   avatar      String?
-  standups    Standup[]
+  standups    Standup[]  
   refreshTokens RefreshToken[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-
-  @@map("users")
+  @@map("users")  
 }
 
 model RefreshToken {
@@ -41,8 +40,7 @@ model Standup {
   userId      Int
   summary     String
   createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
+  updatedAt   DateTime   @updatedAt  
   user        User       @relation(fields: [userId], references: [id])
   sprint      Sprint?    @relation("SprintStandups", fields: [sprintId], references: [id])
   sprintId    Int?
@@ -78,5 +76,12 @@ model BacklogItem {
   completed   Boolean  @default(false)
   sprintId    Int?
   sprint      Sprint?  @relation(fields: [sprintId], references: [id])
+  storyPoints Int?     @default(0)
+  priority    String?  @default("medium") // low, medium, high
+  status      String?  @default("todo") // todo, in-progress, done
+  assignee    String?
+  tags        String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 

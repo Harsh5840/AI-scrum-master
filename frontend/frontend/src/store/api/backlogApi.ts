@@ -16,6 +16,11 @@ export const backlogApi = apiSlice.injectEndpoints({
       title: string
       description?: string
       sprintId?: number
+      storyPoints?: number
+      priority?: 'low' | 'medium' | 'high'
+      status?: 'todo' | 'in-progress' | 'done'
+      assignee?: string
+      tags?: string[]
     }>({
       query: (newItem) => ({
         url: '/backlog',
@@ -31,11 +36,16 @@ export const backlogApi = apiSlice.injectEndpoints({
       title?: string
       description?: string
       completed?: boolean
-      sprintId?: number
+      sprintId?: number | null
+      storyPoints?: number
+      priority?: 'low' | 'medium' | 'high'
+      status?: 'todo' | 'in-progress' | 'done'
+      assignee?: string
+      tags?: string[]
     }>({
       query: ({ id, ...patch }) => ({
         url: `/backlog/${id}`,
-        method: 'PUT',
+        method: 'PATCH',
         body: patch,
       }),
       invalidatesTags: ['BacklogItem'],
