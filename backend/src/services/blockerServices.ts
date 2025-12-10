@@ -186,3 +186,20 @@ export const resolveBlocker = async (blockerId: number) => {
     }
   });
 };
+
+export const createBlocker = async (data: {
+  description: string;
+  severity: string;
+  type?: string;
+  standupId?: number;
+}) => {
+  return prisma.blocker.create({
+    data: {
+      description: data.description,
+      severity: data.severity,
+      type: data.type || 'manual',
+      status: 'active',
+      standupId: data.standupId
+    }
+  });
+};

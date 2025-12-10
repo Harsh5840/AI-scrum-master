@@ -49,7 +49,7 @@ model Standup {
 
 model Blocker {
   id          Int      @id @default(autoincrement())
-  standupId   Int
+  standupId   Int?
   type        String   // "dependency", "technical", "resource", "external"
   severity    String   // "low", "medium", "high", "critical"
   description String
@@ -57,7 +57,7 @@ model Blocker {
   detectedAt  DateTime @default(now())
   resolvedAt  DateTime?
   
-  standup     Standup  @relation("StandupBlockers", fields: [standupId], references: [id])
+  standup     Standup?  @relation("StandupBlockers", fields: [standupId], references: [id])
 }
 
 model Sprint {

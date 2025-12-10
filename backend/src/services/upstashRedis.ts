@@ -1,117 +1,103 @@
-import axios from 'axios';
+import { Redis } from '@upstash/redis';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-// Create axios instance for Upstash REST API
-const upstashClient = axios.create({
-  baseURL: UPSTASH_REDIS_REST_URL || '',
-  headers: {
-    'Authorization': `Bearer ${UPSTASH_REDIS_REST_TOKEN}`,
-    'Content-Type': 'application/json'
-  }
+if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) {
+  console.warn('⚠️ Upstash Redis credentials missing in .env file');
+}
+
+// Initialize Upstash Redis client
+const redis = new Redis({
+  url: UPSTASH_REDIS_REST_URL || '',
+  token: UPSTASH_REDIS_REST_TOKEN || '',
 });
 
-export class UpstashRedis {
-  private async makeRequest(command: string, args: any[] = []): Promise<any> {
-    try {
-      const response = await upstashClient.post('/', {
-        [command]: args
-      });
-      return response.data.result;
-    } catch (error) {
-      console.error('Upstash Redis error:', error);
-      throw error;
-    }
-  }
-
+export class UpstashRedisWrapper {
   // Basic Redis operations
   async get(key: string): Promise<string | null> {
-    return await this.makeRequest('GET', [key]);
+    return await redis.get(key);
   }
 
-  async set(key: string, value: string, options?: { ex?: number }): Promise<string> {
-    const args = [key, value];
+  async set(key: string, value: string, options?: { ex?: number }): Promise<string | null> {
     if (options?.ex) {
-      args.push('EX', options.ex.toString());
+      return await redis.set(key, value, { ex: options.ex });
     }
-    return await this.makeRequest('SET', args);
+    return await redis.set(key, value);
   }
 
   async del(key: string): Promise<number> {
-    return await this.makeRequest('DEL', [key]);
+    return await redis.del(key);
   }
 
   async exists(key: string): Promise<number> {
-    return await this.makeRequest('EXISTS', [key]);
+    return await redis.exists(key);
   }
 
   async expire(key: string, seconds: number): Promise<number> {
-    return await this.makeRequest('EXPIRE', [key, seconds]);
+    return await redis.expire(key, seconds);
   }
 
   async ttl(key: string): Promise<number> {
-    return await this.makeRequest('TTL', [key]);
+    return await redis.ttl(key);
   }
 
   // Hash operations
   async hget(hash: string, field: string): Promise<string | null> {
-    return await this.makeRequest('HGET', [hash, field]);
+    return await redis.hget(hash, field);
   }
 
   async hset(hash: string, field: string, value: string): Promise<number> {
-    return await this.makeRequest('HSET', [hash, field, value]);
+    return await redis.hset(hash, { [field]: value });
   }
 
-  async hgetall(hash: string): Promise<Record<string, string>> {
-    const result = await this.makeRequest('HGETALL', [hash]);
-    const obj: Record<string, string> = {};
-    for (let i = 0; i < result.length; i += 2) {
-      obj[result[i]] = result[i + 1];
-    }
-    return obj;
+  async hgetall(hash: string): Promise<Record<string, string> | null> {
+    return await redis.hgetall(hash);
   }
 
   async hdel(hash: string, field: string): Promise<number> {
-    return await this.makeRequest('HDEL', [hash, field]);
+    return await redis.hdel(hash, field);
   }
 
   // List operations
   async lpush(key: string, value: string): Promise<number> {
-    return await this.makeRequest('LPUSH', [key, value]);
+    return await redis.lpush(key, value);
   }
 
   async rpush(key: string, value: string): Promise<number> {
-    return await this.makeRequest('RPUSH', [key, value]);
+    return await redis.rpush(key, value);
   }
 
   async lpop(key: string): Promise<string | null> {
-    return await this.makeRequest('LPOP', [key]);
+    return await redis.lpop(key);
   }
 
   async rpop(key: string): Promise<string | null> {
-    return await this.makeRequest('RPOP', [key]);
+    return await redis.rpop(key);
   }
 
   async llen(key: string): Promise<number> {
-    return await this.makeRequest('LLEN', [key]);
+    return await redis.llen(key);
   }
 
   // Set operations
   async sadd(key: string, member: string): Promise<number> {
-    return await this.makeRequest('SADD', [key, member]);
+    return await redis.sadd(key, member);
   }
 
   async srem(key: string, member: string): Promise<number> {
-    return await this.makeRequest('SREM', [key, member]);
+    return await redis.srem(key, member);
   }
 
   async smembers(key: string): Promise<string[]> {
-    return await this.makeRequest('SMEMBERS', [key]);
+    return await redis.smembers(key);
   }
 
   async sismember(key: string, member: string): Promise<number> {
-    return await this.makeRequest('SISMEMBER', [key, member]);
+    return await redis.sismember(key, member);
   }
 
   // Connection methods (no-op for REST API)
@@ -124,9 +110,9 @@ export class UpstashRedis {
   }
 
   async ping(): Promise<string> {
-    return await this.makeRequest('PING', []);
+    return await redis.ping();
   }
 }
 
 // Export singleton instance
-export const upstashRedis = new UpstashRedis();
+export const upstashRedis = new UpstashRedisWrapper();

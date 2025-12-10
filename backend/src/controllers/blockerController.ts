@@ -33,6 +33,29 @@ export const resolveBlocker = async (req: Request, res: Response) => {
   }
 };
 
+// POST /api/blockers
+export const createBlocker = async (req: Request, res: Response) => {
+  try {
+    const { description, severity, type, standupId } = req.body;
+    
+    if (!description || !severity) {
+      return res.status(400).json({ error: 'Description and severity are required' });
+    }
+    
+    const blocker = await blockerService.createBlocker({
+      description,
+      severity,
+      type,
+      standupId
+    });
+    
+    res.status(201).json(blocker);
+  } catch (error) {
+    console.error('Error creating blocker:', error);
+    res.status(500).json({ error: 'Failed to create blocker' });
+  }
+};
+
 // POST /api/blockers/detect
 export const detectBlockersInText = async (req: Request, res: Response) => {
   try {

@@ -22,6 +22,16 @@ export const blockersApi = apiSlice.injectEndpoints({
       providesTags: ['Blocker'],
     }),
 
+    // Create new blocker
+    createBlocker: builder.mutation<Blocker, Partial<Blocker>>({
+      query: (body) => ({
+        url: '/blockers',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Blocker'],
+    }),
+
     // Mark blocker as resolved
     resolveBlocker: builder.mutation<Blocker, number>({
       query: (id) => ({
@@ -45,6 +55,7 @@ export const blockersApi = apiSlice.injectEndpoints({
 export const {
   useGetBlockersQuery,
   useGetBlockerPatternsQuery,
+  useCreateBlockerMutation,
   useResolveBlockerMutation,
   useDeleteBlockerMutation,
 } = blockersApi

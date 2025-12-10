@@ -125,8 +125,8 @@ async function initializeServices() {
     // Queue manager (simple in-memory, no external dependencies)
     await queueManager.initializeWorkers();
     
-    // Vector store (requires PINECONE_API_KEY and OPENAI_API_KEY)
-    if (process.env.PINECONE_API_KEY && process.env.OPENAI_API_KEY) {
+    // Vector store (requires PINECONE_API_KEY and GEMINI_API_KEY)
+    if (process.env.PINECONE_API_KEY && process.env.GEMINI_API_KEY) {
       await vectorStore.initialize();
       console.log('✅ Vector store initialized');
     } else {

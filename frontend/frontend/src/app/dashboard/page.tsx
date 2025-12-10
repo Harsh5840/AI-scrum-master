@@ -39,6 +39,19 @@ export default function Home() {
     return startDate <= now && endDate >= now;
   }) || [];
 
+  const calculateSprintProgress = (sprint: any) => {
+    const now = new Date().getTime();
+    const start = new Date(sprint.startDate).getTime();
+    const end = new Date(sprint.endDate).getTime();
+    const total = end - start;
+    const elapsed = now - start;
+    return Math.min(Math.max((elapsed / total) * 100, 0), 100);
+  };
+
+  const averageProgress = activeSprints.length > 0 
+    ? activeSprints.reduce((acc, sprint) => acc + calculateSprintProgress(sprint), 0) / activeSprints.length 
+    : 0;
+
   return (
     <ProtectedRoute>
       <MainLayout title="Dashboard">
@@ -100,7 +113,10 @@ export default function Home() {
                 Currently in progress
               </p>
               <div className="mt-4 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-600 rounded-full transition-all duration-500" style={{ width: '75%' }} />
+                <div 
+                  className="h-full bg-blue-600 rounded-full transition-all duration-500" 
+                  style={{ width: `${averageProgress}%` }} 
+                />
               </div>
             </CardContent>
           </Card>
@@ -119,9 +135,7 @@ export default function Home() {
               <p className="text-xs text-slate-500 mt-1">
                 All time count
               </p>
-              <div className="mt-4 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-600 rounded-full transition-all duration-500" style={{ width: '60%' }} />
-              </div>
+              {/* Removed meaningless progress bar */}
             </CardContent>
           </Card>
 
@@ -134,14 +148,12 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-900">
-                0
+                {queueStatus ? (queueStatus.active + queueStatus.waiting) : 0}
               </div>
               <p className="text-xs text-slate-500 mt-1">
-                Active AI jobs
+                Active & queued jobs
               </p>
-              <div className="mt-4 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-violet-600 rounded-full transition-all duration-500" style={{ width: '40%' }} />
-              </div>
+              {/* Removed meaningless progress bar */}
             </CardContent>
           </Card>
 
@@ -157,9 +169,7 @@ export default function Home() {
               <p className="text-xs text-slate-500 mt-1">
                 Completed today
               </p>
-              <div className="mt-4 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-600 rounded-full transition-all duration-500" style={{ width: '25%' }} />
-              </div>
+              {/* Removed meaningless progress bar */}
             </CardContent>
           </Card>
         </div>

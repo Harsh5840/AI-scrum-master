@@ -74,29 +74,21 @@ export default function HomePage() {
         gsap.registerPlugin(ScrollTrigger);
 
         const ctx = gsap.context(() => {
-          // Hero parallax effect
-          gsap.to('.hero-content', {
-            y: -100,
-            opacity: 0.8,
-            scrollTrigger: {
-              trigger: heroRef.current,
-              start: 'top top',
-              end: 'bottom top',
-              scrub: 1,
-            },
-          });
+          // Hero parallax effect - REMOVED to prevent conflict with Framer Motion and scroll issues
+          // The Framer Motion animations handle the entrance, and we don't need complex scroll scrubbing here
+          // which was causing the text to disappear on scroll up.
 
           // Features cards stagger reveal
           gsap.from('.feature-card', {
-            y: 100,
+            y: 50, // Reduced movement
             opacity: 0,
             stagger: 0.1,
-            duration: 0.8,
+            duration: 0.6,
             scrollTrigger: {
               trigger: featuresRef.current,
-              start: 'top 80%',
+              start: 'top 85%', // Trigger earlier
               end: 'top 20%',
-              toggleActions: 'play none none reverse',
+              toggleActions: 'play none none reverse', // Keep reverse for nice exit, but ensure it plays again
             },
           });
 
@@ -285,78 +277,48 @@ export default function HomePage() {
       </motion.nav>
 
       {/* Hero Section - 3D Layered */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center px-6 lg:px-8 overflow-hidden">
-        {/* Animated Gradient Background */}
-        <div className="absolute inset-0">
-          <motion.div
-            className="absolute top-1/4 -left-48 w-96 h-96 bg-primary/30 rounded-full blur-3xl float-element"
-            animate={{
-              scale: [1, 1.2, 1],
-              x: [0, 50, 0],
-              y: [0, -50, 0]
-            }}
-            transition={{ duration: 10, repeat: Infinity }}
-          />
-          <motion.div
-            className="absolute bottom-1/4 -right-48 w-96 h-96 bg-primary/20 rounded-full blur-3xl float-element"
-            animate={{
-              scale: [1, 1.3, 1],
-              x: [0, -50, 0],
-              y: [0, 50, 0]
-            }}
-            transition={{ duration: 12, repeat: Infinity }}
-          />
+      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center px-6 lg:px-8 overflow-hidden pt-20">
+        {/* Animated Gradient Background - Enhanced */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-[30%] -left-[10%] w-[70%] h-[70%] rounded-full bg-purple-500/20 blur-[120px] animate-pulse" />
+          <div className="absolute top-[20%] -right-[10%] w-[60%] h-[60%] rounded-full bg-blue-500/20 blur-[120px] animate-pulse delay-1000" />
+          <div className="absolute -bottom-[20%] left-[20%] w-[50%] h-[50%] rounded-full bg-indigo-500/20 blur-[120px] animate-pulse delay-2000" />
         </div>
 
-        {/* Grid Pattern - Same for both light and dark mode */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e5e5_1px,transparent_1px),linear-gradient(to_bottom,#e5e5e5_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#333333_1px,transparent_1px),linear-gradient(to_bottom,#333333_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000,transparent)]" />
+        {/* Grid Pattern - Enhanced visibility */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000,transparent)] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto relative z-10 w-full">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Left Content */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="space-y-8 hero-content"
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="space-y-8 hero-content text-center lg:text-left"
             >
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="inline-flex items-center space-x-2 px-4 py-2 rounded-full border border-primary/50 bg-primary/10 backdrop-blur-sm"
+                className="inline-flex items-center space-x-2 px-4 py-2 rounded-full border border-primary/20 bg-background/50 backdrop-blur-md shadow-sm mx-auto lg:mx-0"
               >
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                >
-                  <img src="https://cdn-icons-png.flaticon.com/512/888/888879.png" alt="automation" className="h-4 w-4 text-primary" loading="lazy" />
-                </motion.div>
-                <span className="text-sm font-medium text-primary">Intelligent Sprint Management</span>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <span className="text-sm font-medium text-foreground/80">AI-Powered Scrum Master v2.0</span>
               </motion.div>
 
               <motion.h1
-                className="text-5xl md:text-7xl font-bold leading-tight"
+                className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1]"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <span className="text-foreground">Build Better</span>
-                <br />
-                <span className="relative">
-                  <motion.span
-                    className="text-primary"
-                    animate={{
-                      textShadow: [
-                        "0 0 10px hsl(var(--primary))",
-                        "0 0 20px hsl(var(--primary))",
-                        "0 0 10px hsl(var(--primary))"
-                      ]
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    Ship Faster
-                  </motion.span>
+                <span className="block text-foreground drop-shadow-sm">Automate Your</span>
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 pb-2">
+                  Agile Workflow
                 </span>
               </motion.h1>
 
@@ -364,67 +326,41 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-xl text-muted-foreground leading-relaxed"
+                className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto lg:mx-0"
               >
-                Automate standups, detect blockers, and get intelligent insights. 
-                The modern way to manage sprints for high-performing teams.
+                Stop wasting time in standups. Let AI analyze updates, detect blockers, 
+                and generate sprint insights in real-time.
               </motion.p>
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="flex flex-col sm:flex-row gap-4"
+                className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
               >
                 <Link href="/auth/signup">
-                  <motion.div
-                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px hsl(var(--primary))" }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button size="lg" className="group w-full sm:w-auto px-8 magnetic-button">
-                      Start Free Trial
-                      <motion.div
-                        className="ml-2"
-                        animate={{ x: [0, 5, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      >
-                        <ArrowRightIcon className="h-5 w-5" />
-                      </motion.div>
-                    </Button>
-                  </motion.div>
+                  <Button size="lg" className="h-12 px-8 text-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 rounded-full">
+                    Start Free Trial
+                    <ArrowRightIcon className="ml-2 h-5 w-5" />
+                  </Button>
                 </Link>
                 <Link href="/dashboard">
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button size="lg" variant="outline" className="w-full sm:w-auto px-8 magnetic-button">
-                      <DashboardIcon className="mr-2 h-5 w-5" />
-                      View Demo
-                    </Button>
-                  </motion.div>
+                  <Button size="lg" variant="outline" className="h-12 px-8 text-lg border-2 hover:bg-accent/50 rounded-full">
+                    View Demo
+                  </Button>
                 </Link>
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground"
-              >
-                {['Free forever', 'No credit card', '2 min setup'].map((item, i) => (
-                  <motion.div
-                    key={item}
-                    className="flex items-center space-x-2"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.7 + i * 0.1 }}
-                  >
-                    <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="check" className="h-5 w-5 text-primary" loading="lazy" />
-                    <span>{item}</span>
-                  </motion.div>
-                ))}
-              </motion.div>
+              <div className="pt-8 flex items-center justify-center lg:justify-start gap-8 text-muted-foreground/60">
+                <div className="flex items-center gap-2">
+                  <CheckCircledIcon className="w-5 h-5 text-green-500" />
+                  <span>No credit card required</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircledIcon className="w-5 h-5 text-green-500" />
+                  <span>14-day free trial</span>
+                </div>
+              </div>
             </motion.div>
 
             {/* Right Content - Freepik Illustration */}

@@ -1,5 +1,5 @@
 import { Pinecone } from '@pinecone-database/pinecone';
-import { OpenAIEmbeddings } from '@langchain/openai';
+import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
 import { PineconeStore } from '@langchain/pinecone';
 import { Document } from 'langchain/document';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
@@ -12,10 +12,10 @@ const pinecone = new Pinecone({
   apiKey: process.env.PINECONE_API_KEY || '',
 });
 
-// Initialize OpenAI embeddings
-const embeddings = new OpenAIEmbeddings({
-  openAIApiKey: process.env.OPENAI_API_KEY || '',
-  modelName: 'text-embedding-ada-002',
+// Initialize Gemini embeddings
+const embeddings = new GoogleGenerativeAIEmbeddings({
+  apiKey: process.env.GEMINI_API_KEY || '',
+  modelName: 'text-embedding-004', // Updated to newer model
 });
 
 // Text splitter for chunking documents
