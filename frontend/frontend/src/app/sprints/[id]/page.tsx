@@ -308,13 +308,13 @@ export default function SprintDetailPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getPriorityColor(item.priority) as any}>
-                        {item.priority}
+                      <Badge variant={getPriorityColor(item.priority || 'medium') as any}>
+                        {item.priority || 'medium'}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getStatusColor(item.status) as any}>
-                        {item.status.replace('-', ' ')}
+                      <Badge variant={getStatusColor(item.status || 'todo') as any}>
+                        {(item.status || 'todo').replace('-', ' ')}
                       </Badge>
                     </TableCell>
                     <TableCell>
