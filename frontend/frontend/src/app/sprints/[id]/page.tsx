@@ -326,7 +326,7 @@ export default function SprintDetailPage() {
                     <TableCell>{item.storyPoints}</TableCell>
                     <TableCell>
                       <div className="flex space-x-1">
-                        {item.tags.map((tag) => (
+                        {(item.tags || []).map((tag) => (
                           <Badge key={tag} variant="outline" className="text-xs">
                             {tag}
                           </Badge>
