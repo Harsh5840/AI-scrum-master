@@ -148,7 +148,9 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-900">
-                {queueStatus ? (queueStatus.active + queueStatus.waiting) : 0}
+                {queueStatus?.queues?.aiWorkflows ? 
+                  ((queueStatus.queues.aiWorkflows.active || 0) + (queueStatus.queues.aiWorkflows.waiting || 0)) : 
+                  0}
               </div>
               <p className="text-xs text-slate-500 mt-1">
                 Active & queued jobs
