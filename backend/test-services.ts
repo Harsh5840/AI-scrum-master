@@ -58,7 +58,7 @@ async function testRedisAndBullMQ() {
 
   const connection = new IORedis(redisUrl, {
     maxRetriesPerRequest: null,
-    retryStrategy: (times) => {
+    retryStrategy: (times: number) => {
       if (times > 3) {
         return null; // Stop retrying after 3 attempts
       }
@@ -66,7 +66,7 @@ async function testRedisAndBullMQ() {
     }
   });
 
-  connection.on('error', (err) => {
+  connection.on('error', (err: Error) => {
     // Suppress unhandled error events to prevent crash
     // console.error('Redis Client Error:', err.message);
   });

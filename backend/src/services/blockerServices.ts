@@ -193,13 +193,18 @@ export const createBlocker = async (data: {
   type?: string;
   standupId?: number;
 }) => {
+  const createData: any = {
+    description: data.description,
+    severity: data.severity,
+    type: data.type || 'manual',
+    status: 'active'
+  };
+
+  if (data.standupId !== undefined) {
+    createData.standupId = data.standupId;
+  }
+
   return prisma.blocker.create({
-    data: {
-      description: data.description,
-      severity: data.severity,
-      type: data.type || 'manual',
-      status: 'active',
-      standupId: data.standupId
-    }
+    data: createData
   });
 };
