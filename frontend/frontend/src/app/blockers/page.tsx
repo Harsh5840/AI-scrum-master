@@ -32,7 +32,11 @@ export default function BlockersPage() {
   const [createBlocker] = useCreateBlockerMutation();
   const [resolveBlocker] = useResolveBlockerMutation();
   const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    description: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    type: string;
+  }>({
     description: '',
     severity: 'medium',
     type: 'technical'
@@ -42,7 +46,7 @@ export default function BlockersPage() {
     try {
       await createBlocker(formData).unwrap();
       setIsOpen(false);
-      setFormData({ description: '', severity: 'medium', type: 'technical' });
+      setFormData({ description: '', severity: 'medium' as const, type: 'technical' });
     } catch (error) {
       console.error('Failed to create blocker:', error);
     }
@@ -105,7 +109,7 @@ export default function BlockersPage() {
                     id="severity"
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                     value={formData.severity}
-                    onChange={(e) => setFormData({ ...formData, severity: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, severity: e.target.value as 'low' | 'medium' | 'high' | 'critical' })}
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>

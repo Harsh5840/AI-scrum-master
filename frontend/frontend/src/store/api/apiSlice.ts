@@ -36,9 +36,9 @@ export interface Standup {
 
 export interface Blocker {
   id: number
-  standupId: number
+  standupId?: number
   description: string
-  severity: 'low' | 'medium' | 'high'
+  severity: 'low' | 'medium' | 'high' | 'critical'
   resolved: boolean
   createdAt: string
 }
