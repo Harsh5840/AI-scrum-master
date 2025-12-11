@@ -1,6 +1,6 @@
 import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
 import { Queue, Worker } from 'bullmq';
-import IORedis from 'ioredis';
+import { Redis } from 'ioredis';
 import { upstashRedis } from './src/services/upstashRedis.js';
 import dotenv from 'dotenv';
 
@@ -56,7 +56,7 @@ async function testRedisAndBullMQ() {
   const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
   console.log(`Connecting to Redis at: ${redisUrl}`);
 
-  const connection = new IORedis(redisUrl, {
+  const connection = new Redis(redisUrl, {
     maxRetriesPerRequest: null,
     retryStrategy: (times: number) => {
       if (times > 3) {
