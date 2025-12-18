@@ -33,16 +33,16 @@ export function StatCard({
 }: StatCardProps) {
   if (loading) {
     return (
-      <Card className={cn('bg-zinc-950 border-zinc-800', className)}>
+      <Card className={cn('bg-white/[0.02] border-white/5', className)}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-zinc-400">
+          <CardTitle className="text-sm font-medium text-white/40">
             {title}
           </CardTitle>
-          {icon && <div className="h-4 w-4 text-zinc-500">{icon}</div>}
+          {icon && <div className="h-4 w-4 text-white/30">{icon}</div>}
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-8 w-20 bg-zinc-800 mb-1" />
-          <Skeleton className="h-3 w-32 bg-zinc-800" />
+          <Skeleton className="h-8 w-20 bg-white/10 mb-1" />
+          <Skeleton className="h-3 w-32 bg-white/5" />
         </CardContent>
       </Card>
     );
@@ -51,30 +51,42 @@ export function StatCard({
   return (
     <Card
       className={cn(
-        'bg-zinc-950 border-zinc-800 transition-all hover:border-zinc-700',
-        alert && 'border-red-900/50 bg-red-950/10',
+        'bg-white/[0.02] border-white/5 transition-all hover:border-white/10 hover:bg-white/[0.03]',
+        alert && 'border-red-500/30 bg-red-500/5',
         className
       )}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-zinc-400">
+        <CardTitle className="text-sm font-medium text-white/50">
           {title}
         </CardTitle>
-        {icon && <div className="h-4 w-4 text-zinc-500">{icon}</div>}
+        {icon && (
+          <div className={cn(
+            "h-4 w-4",
+            alert ? "text-red-400" : "text-white/30"
+          )}>
+            {icon}
+          </div>
+        )}
       </CardHeader>
       <CardContent>
-        <div className={cn("text-2xl font-bold text-zinc-100", alert && "text-red-400")}>{value}</div>
+        <div className={cn(
+          "text-2xl font-bold text-white",
+          alert && "text-red-400"
+        )}>
+          {value}
+        </div>
         {(description || trend) && (
-          <div className="flex items-center text-xs text-zinc-500 mt-1">
+          <div className="flex items-center text-xs text-white/40 mt-1">
             {trend && (
               <span
                 className={cn(
                   'flex items-center mr-2',
                   trend.direction === 'up'
-                    ? 'text-green-500'
+                    ? 'text-emerald-400'
                     : trend.direction === 'down'
-                      ? 'text-red-500'
-                      : 'text-zinc-500'
+                      ? 'text-red-400'
+                      : 'text-white/40'
                 )}
               >
                 {trend.direction === 'up' ? (

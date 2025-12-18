@@ -83,20 +83,20 @@ export default function Dashboard() {
           {/* Header Actions */}
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h2 className="text-2xl font-semibold tracking-tight text-zinc-100">
+              <h2 className="text-2xl font-semibold tracking-tight text-white">
                 Engineering Cockpit
               </h2>
-              <p className="text-sm text-zinc-400">
+              <p className="text-sm text-white/40">
                 Overview of your team's velocity and health.
               </p>
             </div>
             <div className="flex items-center space-x-2">
-              <Button asChild variant="outline" className="border-zinc-800 bg-zinc-950 text-zinc-100 hover:bg-zinc-900">
+              <Button asChild variant="outline" className="border-white/10 bg-white/[0.02] text-white hover:bg-white/5 hover:border-white/20">
                 <Link href="/sprints">
                   View Board
                 </Link>
               </Button>
-              <Button className="bg-zinc-100 text-zinc-900 hover:bg-zinc-300">
+              <Button className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white">
                 <PlusIcon className="mr-2 h-4 w-4" /> New Issue
               </Button>
             </div>
@@ -159,72 +159,80 @@ export default function Dashboard() {
           {/* Main Layout Grid */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
             {/* Recent Activity */}
-            <Card className="col-span-4 bg-zinc-950 border-zinc-800">
+            <Card className="col-span-4 bg-white/[0.02] border-white/5">
               <CardHeader>
-                <CardTitle className="text-zinc-100">Recent Activity</CardTitle>
+                <CardTitle className="text-white">Recent Activity</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {standupsLoading ? (
-                    <div className="text-zinc-500 text-sm">Loading activity...</div>
+                    <div className="text-white/40 text-sm">Loading activity...</div>
                   ) : standups && standups.length > 0 ? (
                     standups.slice(0, 5).map((standup: any) => (
                       <div key={standup.id} className="flex items-start space-x-4">
-                        <Avatar className="h-9 w-9 border border-zinc-800">
+                        <Avatar className="h-9 w-9 border border-white/10">
                           <AvatarImage src={standup.user?.avatarUrl} alt={standup.userId} />
-                          <AvatarFallback className="bg-zinc-900 text-zinc-400 text-xs">
+                          <AvatarFallback className="bg-gradient-to-br from-purple-500/30 to-cyan-500/30 text-white/70 text-xs">
                             {standup.userId ? standup.userId.substring(0, 2).toUpperCase() : 'U'}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium text-zinc-100 leading-none">
-                            {standup.userId} {/* Ideally map to real name if available */}
-                          </p>
-                          <p className="text-sm text-zinc-400">
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium text-white leading-none">
+                              {standup.userId}
+                            </p>
+                            <p className="text-xs text-white/30">
+                              {formatDistanceToNow(new Date(standup.date), { addSuffix: true })}
+                            </p>
+                          </div>
+                          <p className="text-sm text-white/50">
                             posted a standup update
                           </p>
-                          <p className="text-xs text-zinc-500">
-                            {formatDistanceToNow(new Date(standup.date), { addSuffix: true })}
-                          </p>
-                          <div className="mt-2 text-sm text-zinc-300 bg-zinc-900/50 p-2 rounded border border-zinc-800/50">
-                            <p><span className="text-green-500 font-mono text-xs">DONE:</span> {standup.yesterday}</p>
-                            <p className="mt-1"><span className="text-blue-500 font-mono text-xs">TODO:</span> {standup.today}</p>
+                          <div className="mt-2 text-sm text-white/60 bg-white/[0.03] p-3 rounded-lg border border-white/5">
+                            <p><span className="text-emerald-400 font-mono text-xs">DONE:</span> {standup.yesterday}</p>
+                            <p className="mt-1"><span className="text-cyan-400 font-mono text-xs">TODO:</span> {standup.today}</p>
                           </div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="text-zinc-500 text-sm">No recent activity</div>
+                    <div className="text-white/40 text-sm">No recent activity</div>
                   )}
                 </div>
               </CardContent>
             </Card>
 
             {/* Quick Insights / Secondary Column */}
-            <Card className="col-span-3 bg-zinc-950 border-zinc-800">
+            <Card className="col-span-3 bg-white/[0.02] border-white/5">
               <CardHeader>
-                <CardTitle className="text-zinc-100">AI Insights</CardTitle>
+                <div className="flex items-center gap-2">
+                  <LightningBoltIcon className="h-4 w-4 text-purple-400" />
+                  <CardTitle className="text-white">AI Insights</CardTitle>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="rounded-lg border border-purple-900/30 bg-purple-950/10 p-4">
+                  <div className="rounded-lg border border-purple-500/20 bg-purple-500/5 p-4">
                     <div className="flex items-center space-x-2 text-purple-400 mb-2">
-                      <LightningBoltIcon className="h-4 w-4" />
                       <span className="text-sm font-medium">Sprint Forecast</span>
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-purple-500/20">AI</span>
                     </div>
-                    <p className="text-sm text-zinc-300">
-                      Based on current velocity, the team is likely to complete <strong>92%</strong> of the committed points.
+                    <p className="text-sm text-white/60">
+                      Based on current velocity, the team is likely to complete <strong className="text-white">92%</strong> of the committed points.
                     </p>
                   </div>
 
-                  <div className="rounded-lg border border-zinc-800 bg-zinc-900/30 p-4">
-                    <div className="flex items-center space-x-2 text-zinc-400 mb-2">
+                  <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
+                    <div className="flex items-center space-x-2 text-amber-400 mb-2">
                       <ExclamationTriangleIcon className="h-4 w-4" />
                       <span className="text-sm font-medium">Risk Detected</span>
                     </div>
-                    <p className="text-sm text-zinc-300">
-                      Ticket <strong>ASM-102</strong> has been in "In Progress" for 5 days. Consider checking in.
+                    <p className="text-sm text-white/60">
+                      Ticket <strong className="text-white">ASM-102</strong> has been in "In Progress" for 5 days.
                     </p>
+                    <button className="mt-3 text-xs text-amber-400 hover:text-amber-300 transition-colors">
+                      View details →
+                    </button>
                   </div>
                 </div>
               </CardContent>

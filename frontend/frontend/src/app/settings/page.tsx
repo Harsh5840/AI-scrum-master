@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAppSelector } from "@/store/hooks"
-import { GearIcon, PersonIcon, BellIcon, LockClosedIcon } from "@radix-ui/react-icons"
+import { GearIcon, PersonIcon, BellIcon, LockClosedIcon, CheckIcon } from "@radix-ui/react-icons"
 
 export default function SettingsPage() {
   const { user } = useAppSelector((state) => state.auth)
@@ -14,112 +14,126 @@ export default function SettingsPage() {
   return (
     <MainLayout title="Settings">
       <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <h2 className="text-2xl font-semibold text-white">Settings</h2>
+          <p className="text-white/40 text-sm mt-1">Manage your account and preferences</p>
+        </div>
+
         {/* Profile Settings */}
-        <Card>
+        <Card className="bg-white/[0.02] border-white/5">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PersonIcon className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-white">
+              <PersonIcon className="h-5 w-5 text-purple-400" />
               Profile Settings
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-white/40">
               Manage your account information
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" defaultValue={user?.name || ''} />
+              <Label htmlFor="name" className="text-white/70">Name</Label>
+              <Input id="name" defaultValue={user?.name || ''} className="bg-white/5 border-white/10 text-white" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" defaultValue={user?.email || ''} disabled />
+              <Label htmlFor="email" className="text-white/70">Email</Label>
+              <Input id="email" type="email" defaultValue={user?.email || ''} disabled className="bg-white/5 border-white/10 text-white/50" />
             </div>
-            <Button>Save Changes</Button>
+            <Button className="bg-gradient-to-r from-purple-500 to-cyan-500 text-white">Save Changes</Button>
           </CardContent>
         </Card>
 
         {/* Notification Settings */}
-        <Card>
+        <Card className="bg-white/[0.02] border-white/5">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BellIcon className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-white">
+              <BellIcon className="h-5 w-5 text-cyan-400" />
               Notifications
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-white/40">
               Configure how you receive notifications
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/5">
               <div>
-                <p className="font-medium">Email Notifications</p>
-                <p className="text-sm text-muted-foreground">Receive updates via email</p>
+                <p className="font-medium text-white">Email Notifications</p>
+                <p className="text-sm text-white/40">Receive updates via email</p>
               </div>
-              <Button variant="outline">Configure</Button>
+              <Button variant="outline" className="border-white/10 text-white/70 hover:bg-white/5">Configure</Button>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/5">
               <div>
-                <p className="font-medium">Slack Integration</p>
-                <p className="text-sm text-muted-foreground">Get notifications in Slack</p>
+                <p className="font-medium text-white">Slack Integration</p>
+                <p className="text-sm text-white/40">Get notifications in Slack</p>
               </div>
-              <Button variant="outline">Connect</Button>
+              <Button variant="outline" className="border-white/10 text-white/70 hover:bg-white/5">Connect</Button>
             </div>
           </CardContent>
         </Card>
 
         {/* Security Settings */}
-        <Card>
+        <Card className="bg-white/[0.02] border-white/5">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <LockClosedIcon className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-white">
+              <LockClosedIcon className="h-5 w-5 text-amber-400" />
               Security
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-white/40">
               Manage your security preferences
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="current-password">Current Password</Label>
-              <Input id="current-password" type="password" />
+              <Label htmlFor="current-password" className="text-white/70">Current Password</Label>
+              <Input id="current-password" type="password" className="bg-white/5 border-white/10 text-white" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="new-password">New Password</Label>
-              <Input id="new-password" type="password" />
+              <Label htmlFor="new-password" className="text-white/70">New Password</Label>
+              <Input id="new-password" type="password" className="bg-white/5 border-white/10 text-white" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
-              <Input id="confirm-password" type="password" />
+              <Label htmlFor="confirm-password" className="text-white/70">Confirm Password</Label>
+              <Input id="confirm-password" type="password" className="bg-white/5 border-white/10 text-white" />
             </div>
-            <Button>Update Password</Button>
+            <Button variant="outline" className="border-white/10 text-white/70 hover:bg-white/5">Update Password</Button>
           </CardContent>
         </Card>
 
         {/* Integration Settings */}
-        <Card>
+        <Card className="bg-white/[0.02] border-white/5">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <GearIcon className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-white">
+              <GearIcon className="h-5 w-5 text-emerald-400" />
               Integrations
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-white/40">
               Connect with external tools
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Jira Integration</p>
-                <p className="text-sm text-muted-foreground">Sync with Jira projects</p>
+            <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/5">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm">J</div>
+                <div>
+                  <p className="font-medium text-white">Jira Integration</p>
+                  <p className="text-sm text-white/40">Sync with Jira projects</p>
+                </div>
               </div>
-              <Button variant="outline">Configure</Button>
+              <Button variant="outline" className="border-white/10 text-white/70 hover:bg-white/5">Configure</Button>
             </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Google OAuth</p>
-                <p className="text-sm text-muted-foreground">Connected as {user?.email}</p>
+            <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/5">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded bg-gradient-to-br from-purple-500/20 to-cyan-500/20 flex items-center justify-center">
+                  <CheckIcon className="h-4 w-4 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-white">Google OAuth</p>
+                  <p className="text-sm text-white/40">Connected as {user?.email}</p>
+                </div>
               </div>
-              <Button variant="outline" disabled>Connected</Button>
+              <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400">Connected</span>
             </div>
           </CardContent>
         </Card>

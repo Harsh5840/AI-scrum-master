@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -16,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { 
+import {
   Table,
   TableBody,
   TableCell,
@@ -24,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ExclamationTriangleIcon, CheckCircledIcon } from "@radix-ui/react-icons";
+import { ExclamationTriangleIcon, CheckCircledIcon, PlusIcon } from "@radix-ui/react-icons";
 import { useGetBlockersQuery, useCreateBlockerMutation, useResolveBlockerMutation } from "@/store/api/blockersApi";
 
 export default function BlockersPage() {
@@ -62,10 +61,11 @@ export default function BlockersPage() {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-300';
-      case 'medium': return 'bg-amber-100 text-amber-800 border-amber-300';
-      case 'low': return 'bg-blue-100 text-blue-800 border-blue-300';
-      default: return 'bg-slate-100 text-slate-800 border-slate-300';
+      case 'critical': return 'bg-red-500/20 text-red-400';
+      case 'high': return 'bg-orange-500/20 text-orange-400';
+      case 'medium': return 'bg-amber-500/20 text-amber-400';
+      case 'low': return 'bg-white/10 text-white/60';
+      default: return 'bg-white/10 text-white/60';
     }
   };
 
@@ -75,66 +75,71 @@ export default function BlockersPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Blockers</h2>
-            <p className="text-slate-600">Track and resolve team blockers</p>
+            <h2 className="text-2xl font-semibold text-white">Blockers</h2>
+            <p className="text-white/40 text-sm mt-1">Track and resolve team blockers</p>
           </div>
-          
+
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <ExclamationTriangleIcon className="mr-2 h-4 w-4" />
+              <Button className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white">
+                <PlusIcon className="mr-2 h-4 w-4" />
                 Report Blocker
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-[#0a0a0f] border-white/10">
               <DialogHeader>
-                <DialogTitle>Report a Blocker</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-white">Report a Blocker</DialogTitle>
+                <DialogDescription className="text-white/50">
                   Describe the issue blocking your progress.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description" className="text-white/70">Description</Label>
                   <Input
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="e.g., API endpoint returning 500 error"
+                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="severity">Severity</Label>
+                  <Label htmlFor="severity" className="text-white/70">Severity</Label>
                   <select
                     id="severity"
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-purple-500/50 focus:outline-none"
                     value={formData.severity}
                     onChange={(e) => setFormData({ ...formData, severity: e.target.value as 'low' | 'medium' | 'high' | 'critical' })}
                   >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="critical">Critical</option>
+                    <option value="low" className="bg-[#0a0a0f]">Low</option>
+                    <option value="medium" className="bg-[#0a0a0f]">Medium</option>
+                    <option value="high" className="bg-[#0a0a0f]">High</option>
+                    <option value="critical" className="bg-[#0a0a0f]">Critical</option>
                   </select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="type">Type</Label>
+                  <Label htmlFor="type" className="text-white/70">Type</Label>
                   <select
                     id="type"
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-purple-500/50 focus:outline-none"
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   >
-                    <option value="technical">Technical</option>
-                    <option value="dependency">Dependency</option>
-                    <option value="resource">Resource</option>
-                    <option value="external">External</option>
+                    <option value="technical" className="bg-[#0a0a0f]">Technical</option>
+                    <option value="dependency" className="bg-[#0a0a0f]">Dependency</option>
+                    <option value="resource" className="bg-[#0a0a0f]">Resource</option>
+                    <option value="external" className="bg-[#0a0a0f]">External</option>
                   </select>
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-                <Button onClick={handleCreate}>Report Blocker</Button>
+                <Button variant="outline" onClick={() => setIsOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+                  Cancel
+                </Button>
+                <Button onClick={handleCreate} className="bg-gradient-to-r from-red-500 to-orange-500 text-white">
+                  Report Blocker
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -142,93 +147,98 @@ export default function BlockersPage() {
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-3">
-          <Card>
+          <Card className="bg-white/[0.02] border-white/5">
             <CardHeader className="pb-3">
-              <CardDescription>Active Blockers</CardDescription>
-              <CardTitle className="text-3xl">
+              <CardDescription className="text-white/50">Active Blockers</CardDescription>
+              <CardTitle className="text-3xl text-white">
                 {blockers.filter(b => !b.resolved).length}
               </CardTitle>
             </CardHeader>
           </Card>
-          <Card>
+          <Card className="bg-white/[0.02] border-white/5">
             <CardHeader className="pb-3">
-              <CardDescription>Resolved This Week</CardDescription>
-              <CardTitle className="text-3xl">
+              <CardDescription className="text-white/50">Resolved This Week</CardDescription>
+              <CardTitle className="text-3xl text-emerald-400">
                 {blockers.filter(b => b.resolved).length}
               </CardTitle>
             </CardHeader>
           </Card>
-          <Card>
+          <Card className="bg-white/[0.02] border-white/5">
             <CardHeader className="pb-3">
-              <CardDescription>High Priority</CardDescription>
-              <CardTitle className="text-3xl">
-                {blockers.filter(b => b.severity === 'high' && !b.resolved).length}
+              <CardDescription className="text-white/50">High Priority</CardDescription>
+              <CardTitle className="text-3xl text-red-400">
+                {blockers.filter(b => (b.severity === 'high' || b.severity === 'critical') && !b.resolved).length}
               </CardTitle>
             </CardHeader>
           </Card>
         </div>
 
         {/* Blockers Table */}
-        <Card>
+        <Card className="bg-white/[0.02] border-white/5">
           <CardHeader>
-            <CardTitle>All Blockers</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-white">All Blockers</CardTitle>
+            <CardDescription className="text-white/40">
               Current and resolved blockers from your team
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Severity</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Actions</TableHead>
+                <TableRow className="border-white/5 hover:bg-transparent">
+                  <TableHead className="text-white/50">Description</TableHead>
+                  <TableHead className="text-white/50">Severity</TableHead>
+                  <TableHead className="text-white/50">Status</TableHead>
+                  <TableHead className="text-white/50">Source</TableHead>
+                  <TableHead className="text-white/50">Date</TableHead>
+                  <TableHead className="text-white/50">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center">Loading blockers...</TableCell>
+                  <TableRow className="border-white/5">
+                    <TableCell colSpan={6} className="text-center text-white/40">Loading blockers...</TableCell>
                   </TableRow>
                 ) : blockers.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
+                  <TableRow className="border-white/5">
+                    <TableCell colSpan={6} className="text-center py-12">
                       <div className="text-center">
-                        <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-slate-400 mb-4" />
-                        <h3 className="text-lg font-semibold text-slate-900 mb-2">No blockers</h3>
-                        <p className="text-slate-600 mb-4">No blockers have been reported yet.</p>
+                        <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-white/20 mb-4" />
+                        <h3 className="text-lg font-semibold text-white mb-2">No blockers</h3>
+                        <p className="text-white/40 mb-4">No blockers have been reported yet.</p>
                       </div>
                     </TableCell>
                   </TableRow>
                 ) : (
                   blockers.map((blocker) => (
-                    <TableRow key={blocker.id}>
-                      <TableCell className="font-medium">{blocker.description}</TableCell>
+                    <TableRow key={blocker.id} className="border-white/5 hover:bg-white/[0.02]">
+                      <TableCell className="font-medium text-white">{blocker.description}</TableCell>
                       <TableCell>
-                        <Badge className={getSeverityColor(blocker.severity)}>
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getSeverityColor(blocker.severity)}`}>
                           {blocker.severity.toUpperCase()}
-                        </Badge>
+                        </span>
                       </TableCell>
                       <TableCell>
                         {blocker.resolved ? (
-                          <Badge className="bg-green-100 text-green-800 border-green-300">
-                            <CheckCircledIcon className="mr-1 h-3 w-3" />
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">
+                            <CheckCircledIcon className="h-3 w-3" />
                             Resolved
-                          </Badge>
+                          </span>
                         ) : (
-                          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400">
                             Active
-                          </Badge>
+                          </span>
                         )}
                       </TableCell>
-                      <TableCell>Standup #{blocker.standupId || 'Manual'}</TableCell>
-                      <TableCell>{new Date(blocker.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-white/60">Standup #{blocker.standupId || 'Manual'}</TableCell>
+                      <TableCell className="text-white/60">{new Date(blocker.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell>
                         {!blocker.resolved && (
-                          <Button size="sm" variant="outline" onClick={() => handleResolve(blocker.id)}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleResolve(blocker.id)}
+                            className="border-white/10 text-white/70 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/30"
+                          >
                             Resolve
                           </Button>
                         )}
