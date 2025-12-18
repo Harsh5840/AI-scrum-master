@@ -3,25 +3,26 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { loginUser, clearError } from '@/store/slices/authSlice'
 import { authService } from '@/services/authService'
-import { 
-  PersonIcon, 
-  LockClosedIcon, 
-  EyeOpenIcon, 
-  EyeNoneIcon 
+import {
+  PersonIcon,
+  LockClosedIcon,
+  EyeOpenIcon,
+  EyeNoneIcon,
+  ArrowRightIcon,
 } from '@radix-ui/react-icons'
 
 export default function LoginPage() {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { isLoading, error } = useAppSelector((state) => state.auth)
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -47,42 +48,81 @@ export default function LoginPage() {
   }
 
   const handleGoogleLogin = () => {
-    // Redirect directly to backend Google OAuth endpoint
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
     window.location.href = `${backendUrl}/auth/google`
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
-            AI Scrum Master
-          </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Sign in to your account
-          </p>
+    <div className="min-h-screen flex items-center justify-center bg-[#09090B] relative overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0 z-0">
+        {/* Grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
+            `,
+            backgroundSize: '64px 64px',
+          }}
+        />
+
+        {/* Gradient orbs */}
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-600/20 blur-[150px] rounded-full" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-cyan-500/15 blur-[150px] rounded-full" />
+      </div>
+
+      {/* Content */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative z-10 w-full max-w-md px-6"
+      >
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm">
+              AI
+            </div>
+            <span className="text-xl font-semibold text-white group-hover:text-white/80 transition-colors">
+              Scrum Master
+            </span>
+          </Link>
         </div>
-        
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-gray-900 dark:text-white text-2xl">Welcome back</CardTitle>
-            <CardDescription className="text-gray-600 dark:text-gray-300">
-              Enter your credentials to access your scrum dashboard
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+
+        {/* Card */}
+        <div className="relative">
+          {/* Gradient border effect */}
+          <div className="absolute -inset-[1px] bg-gradient-to-b from-white/20 via-white/5 to-white/10 rounded-2xl" />
+
+          <div className="relative bg-[#0a0a0f]/90 backdrop-blur-xl rounded-2xl p-8 border border-white/10">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-bold text-white mb-2">Welcome back</h1>
+              <p className="text-white/50 text-sm">
+                Sign in to continue shipping faster
+              </p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-md p-3">
-                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-                </div>
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-3 rounded-lg bg-red-500/10 border border-red-500/30"
+                >
+                  <p className="text-sm text-red-400">{error}</p>
+                </motion.div>
               )}
-              
+
+              {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700 dark:text-gray-200">Email address</Label>
+                <Label htmlFor="email" className="text-white/70 text-sm">Email</Label>
                 <div className="relative">
-                  <PersonIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <PersonIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
                   <Input
                     id="email"
                     type="email"
@@ -90,16 +130,22 @@ export default function LoginPage() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="Enter your email"
-                    className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                    placeholder="you@company.com"
+                    className="pl-10 h-11 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-purple-500/50 focus:ring-purple-500/20 transition-colors"
                   />
                 </div>
               </div>
 
+              {/* Password */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-700 dark:text-gray-200">Password</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-white/70 text-sm">Password</Label>
+                  <Link href="/auth/forgot-password" className="text-xs text-purple-400 hover:text-purple-300 transition-colors">
+                    Forgot password?
+                  </Link>
+                </div>
                 <div className="relative">
-                  <LockClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <LockClosedIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
@@ -107,75 +153,61 @@ export default function LoginPage() {
                     required
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder="Enter your password"
-                    className="pl-10 pr-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                    placeholder="••••••••"
+                    className="pl-10 pr-10 h-11 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-purple-500/50 focus:ring-purple-500/20 transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 focus:outline-none"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
                   >
                     {showPassword ? (
-                      <EyeNoneIcon className="h-4 w-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" />
+                      <EyeNoneIcon className="h-4 w-4" />
                     ) : (
-                      <EyeOpenIcon className="h-4 w-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" />
+                      <EyeOpenIcon className="h-4 w-4" />
                     )}
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                    Remember me
-                  </label>
-                </div>
-
-                <div className="text-sm">
-                  <Link href="/auth/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
-                    Forgot your password?
-                  </Link>
-                </div>
-              </div>
-
+              {/* Submit */}
               <Button
                 type="submit"
-                className="w-full bg-primary hover:bg-primary/90 text-white font-semibold"
                 disabled={isLoading}
+                className="w-full h-11 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-medium transition-all duration-300"
               >
                 {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Signing in...
-                  </>
+                  </div>
                 ) : (
-                  'Sign in'
+                  <span className="flex items-center gap-2">
+                    Sign in
+                    <ArrowRightIcon className="w-4 h-4" />
+                  </span>
                 )}
               </Button>
 
-              <div className="relative">
+              {/* Divider */}
+              <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-gray-300 dark:border-gray-600" />
+                  <div className="w-full border-t border-white/10" />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white dark:bg-gray-800 px-2 text-gray-600 dark:text-gray-400">
-                    Or continue with
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-[#0a0a0f] px-4 text-white/40">
+                    or continue with
                   </span>
                 </div>
               </div>
 
+              {/* Google */}
               <Button
                 type="button"
                 variant="outline"
-                className="w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
+                className="w-full h-11 bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20 transition-all"
               >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                   <path
@@ -197,25 +229,23 @@ export default function LoginPage() {
                 </svg>
                 Continue with Google
               </Button>
-
-              <div className="text-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Don't have an account?{' '}
-                  <Link href="/auth/signup" className="font-medium text-blue-600 hover:text-blue-500">
-                    Sign up
-                  </Link>
-                </span>
-              </div>
             </form>
-          </CardContent>
-        </Card>
-        
-        <div className="text-center">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Demo credentials: any email/password combination
-          </p>
+
+            {/* Footer */}
+            <p className="mt-8 text-center text-sm text-white/40">
+              Don't have an account?{' '}
+              <Link href="/auth/signup" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
+                Sign up for free
+              </Link>
+            </p>
+          </div>
         </div>
-      </div>
+
+        {/* Demo hint */}
+        <p className="mt-6 text-center text-xs text-white/30">
+          Demo: Use any email/password combination
+        </p>
+      </motion.div>
     </div>
   )
 }

@@ -15,7 +15,7 @@ export function MainLayout({ children, title }: MainLayoutProps) {
   const sidebarOpen = useAppSelector((state) => state.ui.sidebarOpen)
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-[#09090B]">
       {/* Sidebar */}
       <div className={cn(
         'hidden lg:block transition-all duration-300',
@@ -29,7 +29,7 @@ export function MainLayout({ children, title }: MainLayoutProps) {
         'fixed inset-0 z-50 lg:hidden',
         sidebarOpen ? 'block' : 'hidden'
       )}>
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
         <div className="relative w-64">
           <Sidebar />
         </div>
@@ -38,7 +38,7 @@ export function MainLayout({ children, title }: MainLayoutProps) {
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header title={title} />
-        <main className="flex-1 overflow-auto p-4 lg:p-6">
+        <main className="flex-1 overflow-auto p-4 lg:p-6 bg-[#09090B]">
           {children}
         </main>
       </div>
