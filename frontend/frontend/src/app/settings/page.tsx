@@ -1,12 +1,14 @@
 'use client'
 
+import Link from 'next/link'
 import { MainLayout } from "@/components/layout/MainLayout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAppSelector } from "@/store/hooks"
-import { GearIcon, PersonIcon, BellIcon, LockClosedIcon, CheckIcon } from "@radix-ui/react-icons"
+import { GearIcon, PersonIcon, BellIcon, LockClosedIcon, CheckIcon, GroupIcon } from "@radix-ui/react-icons"
+
 
 export default function SettingsPage() {
   const { user } = useAppSelector((state) => state.auth)
@@ -20,7 +22,47 @@ export default function SettingsPage() {
           <p className="text-white/40 text-sm mt-1">Manage your account and preferences</p>
         </div>
 
+        {/* Team Settings */}
+        <Link href="/settings/team">
+          <Card className="bg-white/[0.02] border-white/5 cursor-pointer hover:border-purple-500/30 transition-all group">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-cyan-500/20 flex items-center justify-center group-hover:from-purple-500/30 group-hover:to-cyan-500/30 transition-all">
+                  <PersonIcon className="h-5 w-5 text-purple-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-white">Team Settings</CardTitle>
+                  <CardDescription className="text-white/40">Manage members and invites</CardDescription>
+                </div>
+              </div>
+              <span className="text-white/30 group-hover:text-white/60 transition-colors">→</span>
+            </CardHeader>
+          </Card>
+        </Link>
+
+        {/* Integrations */}
+        <Link href="/settings/integrations">
+          <Card className="bg-white/[0.02] border-white/5 cursor-pointer hover:border-cyan-500/30 transition-all group">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#4A154B]/30 to-[#611f69]/30 flex items-center justify-center group-hover:from-[#4A154B]/50 group-hover:to-[#611f69]/50 transition-all">
+                  <svg className="w-5 h-5 text-[#E01E5A]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52z" />
+                  </svg>
+                </div>
+                <div>
+                  <CardTitle className="text-white">Integrations</CardTitle>
+                  <CardDescription className="text-white/40">Connect Slack, Jira, GitHub</CardDescription>
+                </div>
+              </div>
+              <span className="text-white/30 group-hover:text-white/60 transition-colors">→</span>
+            </CardHeader>
+          </Card>
+        </Link>
+
         {/* Profile Settings */}
+
+
         <Card className="bg-white/[0.02] border-white/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">

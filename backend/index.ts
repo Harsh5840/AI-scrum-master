@@ -33,6 +33,8 @@ import jiraRoutes from "./src/routes/jira.js";
 import blockerRoutes from "./src/routes/blockers.js";
 import aiRoutes from "./src/routes/ai.js";
 import workflowRoutes from "./src/routes/workflows.js";
+import organizationRoutes from "./src/routes/organizations.js";
+import inviteRoutes from "./src/routes/invites.js";
 import { vectorStore } from "./src/services/vectorServices.js";
 import { queueManager } from "./src/services/queueServices.js";
 
@@ -100,6 +102,8 @@ app.use("/api/jira", authMiddleware, jiraRoutes);
 app.use("/api/blockers", authMiddleware, blockerRoutes);
 app.use("/api/ai", authMiddleware, aiRoutes);
 app.use("/api/workflows", authMiddleware, workflowRoutes);
+app.use("/api/organizations", authMiddleware, organizationRoutes);
+app.use("/api/invites", inviteRoutes); // Partially public
 
 // Root route
 app.get("/", (_req, res) => {
