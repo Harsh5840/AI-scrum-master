@@ -9,17 +9,87 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id          Int        @id @default(autoincrement())
+// ============== ORGANIZATION & TEAM ==============
+
+model Organization {
+  id          Int      @id @default(autoincrement())
   name        String
-  email       String     @unique
-  password    String?    // Optional for OAuth users
-  googleId    String?    @unique
-  avatar      String?
-  standups    Standup[]  
+  slug        String   @unique
+  logo        String?
+  plan        String   @default("free") // free, pro, enterprise
+  members     Member[]
+  sprints     Sprint[]
+  standups    Standup[]
+  blockers    Blocker[]
+  invites     Invite[]
+  integrations Integration[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("organizations")
+}
+
+model Member {
+  id        Int          @id @default(autoincrement())
+  userId    Int
+  orgId     Int
+  role      String       @default("member") // owner, admin, member
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+  
+  @@unique([userId, orgId])
+  @@map("members")
+}
+
+model Invite {
+  id        Int          @id @default(autoincrement())
+  email     String
+  orgId     Int
+  role      String       @default("member")
+  token     String       @unique @default(uuid())
+  status    String       @default("pending") // pending, accepted, expired
+  invitedBy Int
+  expiresAt DateTime
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  inviter   User         @relation("InvitesSent", fields: [invitedBy], references: [id])
+  createdAt DateTime     @default(now())
+  
+  @@map("invites")
+}
+
+model Integration {
+  id          Int          @id @default(autoincrement())
+  orgId       Int
+  type        String       // slack, jira, github, notion
+  accessToken String?
+  config      Json?
+  status      String       @default("active") // active, disconnected
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  @@unique([orgId, type])
+  @@map("integrations")
+}
+
+// ============== USER ==============
+
+model User {
+  id            Int        @id @default(autoincrement())
+  name          String
+  email         String     @unique
+  password      String?    // Optional for OAuth users
+  googleId      String?    @unique
+  avatar        String?
+  currentOrgId  Int?       // Active organization context
+  memberships   Member[]
+  standups      Standup[]  
   refreshTokens RefreshToken[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  invitesSent   Invite[]   @relation("InvitesSent")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
   @@map("users")  
 }
 
@@ -35,38 +105,54 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
+// ============== STANDUPS & BLOCKERS ==============
+
 model Standup {
-  id          Int        @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   userId      Int
+  orgId       Int?
   summary     String
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt  
-  user        User       @relation(fields: [userId], references: [id])
-  sprint      Sprint?    @relation("SprintStandups", fields: [sprintId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt  
+  user        User          @relation(fields: [userId], references: [id])
+  org         Organization? @relation(fields: [orgId], references: [id])
+  sprint      Sprint?       @relation("SprintStandups", fields: [sprintId], references: [id])
   sprintId    Int?
-  blockers    Blocker[]  @relation("StandupBlockers")
+  blockers    Blocker[]     @relation("StandupBlockers")
+  
+  @@map("standups")
 }
 
 model Blocker {
-  id          Int      @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   standupId   Int?
-  type        String   // "dependency", "technical", "resource", "external"
-  severity    String   // "low", "medium", "high", "critical"
+  orgId       Int?
+  type        String        // "dependency", "technical", "resource", "external"
+  severity    String        // "low", "medium", "high", "critical"
   description String
-  status      String   // "active", "resolved", "escalated"
-  detectedAt  DateTime @default(now())
+  status      String        // "active", "resolved", "escalated"
+  detectedAt  DateTime      @default(now())
   resolvedAt  DateTime?
   
-  standup     Standup?  @relation("StandupBlockers", fields: [standupId], references: [id])
+  standup     Standup?      @relation("StandupBlockers", fields: [standupId], references: [id])
+  org         Organization? @relation(fields: [orgId], references: [id])
+  
+  @@map("blockers")
 }
 
+// ============== SPRINTS & BACKLOG ==============
+
 model Sprint {
-  id          Int           @id @default(autoincrement())
-  name        String
-  startDate   DateTime
-  endDate     DateTime
-  standups    Standup[]     @relation("SprintStandups")
+  id           Int           @id @default(autoincrement())
+  name         String
+  orgId        Int?
+  startDate    DateTime
+  endDate      DateTime
+  standups     Standup[]     @relation("SprintStandups")
   backlogItems BacklogItem[]
+  org          Organization? @relation(fields: [orgId], references: [id])
+  
+  @@map("sprints")
 }
 
 model BacklogItem {
@@ -83,5 +169,6 @@ model BacklogItem {
   tags        String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  @@map("backlog_items")
 }
-

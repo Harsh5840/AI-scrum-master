@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { toggleSidebar } from '@/store/slices/uiSlice'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { OrgSwitcher } from './OrgSwitcher'
 import {
   DashboardIcon,
   CalendarIcon,
@@ -19,6 +20,7 @@ import {
   LightningBoltIcon,
   ChevronRightIcon,
 } from '@radix-ui/react-icons'
+
 
 interface SidebarItem {
   id: string
@@ -117,8 +119,14 @@ export function Sidebar({ className }: SidebarProps) {
         </Button>
       </div>
 
+      {/* Organization Switcher */}
+      <div className="border-b border-white/5 px-2 py-2">
+        <OrgSwitcher collapsed={!sidebarOpen} />
+      </div>
+
       {/* Navigation */}
       <nav className="flex-1 space-y-0.5 p-2 overflow-y-auto">
+
         {sidebarItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
