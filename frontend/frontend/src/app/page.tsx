@@ -3,6 +3,7 @@
 import { HeroSection } from '@/components/landing/HeroSection';
 import { LogoMarquee } from '@/components/landing/LogoMarquee';
 import { BentoFeatures } from '@/components/landing/BentoFeatures';
+import { ProductWorkflow } from '@/components/landing/ProductWorkflow';
 import { VideoDemo } from '@/components/landing/VideoDemo';
 import { TestimonialCarousel } from '@/components/landing/TestimonialCarousel';
 import { PricingCalculator } from '@/components/landing/PricingCalculator';
@@ -12,28 +13,31 @@ import { CommandPalette } from '@/components/landing/CommandPalette';
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#09090B] text-white overflow-x-hidden">
-      {/* Command Palette (⌘K) - No visible nav */}
+      {/* Command Palette (⌘K) */}
       <CommandPalette />
 
-      {/* S2: Shader Hero */}
+      {/* Hero with Dashboard Mockup */}
       <HeroSection />
 
-      {/* S3: Infinite Logo Scroll */}
+      {/* Social Proof - Logos */}
       <LogoMarquee />
 
-      {/* S4: Bento Features */}
+      {/* Features - Bento Grid */}
       <BentoFeatures />
 
-      {/* S5: Video Demo */}
+      {/* How It Works */}
+      <ProductWorkflow />
+
+      {/* Video Demo */}
       <VideoDemo />
 
-      {/* S6: Testimonials Carousel */}
+      {/* Testimonials - 3 Row Marquee */}
       <TestimonialCarousel />
 
-      {/* S7: Pricing Calculator */}
+      {/* Pricing */}
       <PricingCalculator />
 
-      {/* S8: Footer CTA */}
+      {/* Footer CTA */}
       <FooterCTA />
     </div>
   );

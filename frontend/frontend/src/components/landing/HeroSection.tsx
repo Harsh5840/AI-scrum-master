@@ -32,7 +32,7 @@ function DashboardMockup() {
             initial={{ opacity: 0, y: 60, rotateX: 45 }}
             animate={{ opacity: 1, y: 0, rotateX: 8 }}
             transition={{ duration: 1, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="relative mt-12 mx-auto max-w-4xl perspective-1000"
+            className="relative mt-12 mx-auto max-w-5xl px-4 perspective-1000"
             style={{ transformStyle: 'preserve-3d' }}
         >
             {/* Glow effect behind dashboard */}
@@ -41,7 +41,7 @@ function DashboardMockup() {
             {/* Dashboard container */}
             <div className="relative rounded-xl border border-white/10 bg-[#0a0a0a] shadow-2xl overflow-hidden">
                 {/* Window controls */}
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5 bg-white/[0.02]">
                     <div className="flex gap-1.5">
                         <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
                         <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
@@ -49,82 +49,184 @@ function DashboardMockup() {
                     </div>
                     <div className="flex-1 flex justify-center">
                         <div className="px-4 py-1 rounded-md bg-white/5 text-xs text-white/40">
-                            app.scrummaster.ai
+                            app.scrummaster.ai/dashboard
                         </div>
                     </div>
+                    <div className="text-xs text-white/20">⌘K</div>
                 </div>
 
                 {/* Mock dashboard content */}
-                <div className="p-6 space-y-4">
-                    {/* Toolbar */}
-                    <div className="flex items-center justify-between">
+                <div className="p-4 lg:p-6">
+                    {/* Top bar */}
+                    <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500" />
-                            <div className="space-y-1">
-                                <div className="h-3 w-24 rounded bg-white/10" />
-                                <div className="h-2 w-16 rounded bg-white/5" />
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-white text-xs font-bold">AI</div>
+                            <div>
+                                <div className="text-sm font-medium text-white">Sprint 24</div>
+                                <div className="text-xs text-white/40">8 days remaining</div>
                             </div>
                         </div>
                         <div className="flex gap-2">
-                            <div className="px-3 py-1.5 rounded-md bg-white/5 text-xs text-white/40">Sprint 23</div>
-                            <div className="px-3 py-1.5 rounded-md bg-purple-500/20 text-xs text-purple-400">+ New Standup</div>
+                            <div className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 flex items-center gap-1.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                On Track
+                            </div>
+                            <div className="px-3 py-1.5 rounded-lg bg-purple-500/20 text-xs text-purple-400">+ Standup</div>
                         </div>
                     </div>
 
-                    {/* Stats row */}
-                    <div className="grid grid-cols-4 gap-3">
-                        {[
-                            { label: 'Velocity', value: '42', change: '+12%', color: 'text-emerald-400' },
-                            { label: 'Blockers', value: '3', change: '-2', color: 'text-amber-400' },
-                            { label: 'Completed', value: '18', change: '+5', color: 'text-cyan-400' },
-                            { label: 'Team Health', value: '94%', change: '+3%', color: 'text-purple-400' },
-                        ].map((stat, i) => (
-                            <motion.div
-                                key={stat.label}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 1.2 + i * 0.1 }}
-                                className="p-3 rounded-lg bg-white/[0.03] border border-white/5"
-                            >
-                                <div className="text-xs text-white/40 mb-1">{stat.label}</div>
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-xl font-semibold text-white">{stat.value}</span>
-                                    <span className={`text-xs ${stat.color}`}>{stat.change}</span>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
+                    <div className="grid grid-cols-12 gap-4">
+                        {/* Left column - Main metrics */}
+                        <div className="col-span-8 space-y-4">
+                            {/* Sprint Health & Velocity */}
+                            <div className="grid grid-cols-2 gap-3">
+                                {/* Sprint Progress */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 1.0 }}
+                                    className="p-4 rounded-lg bg-white/[0.03] border border-white/5"
+                                >
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="text-xs text-white/40">Sprint Progress</span>
+                                        <span className="text-xs text-emerald-400">+12% vs last</span>
+                                    </div>
+                                    <div className="flex items-end gap-3">
+                                        <span className="text-3xl font-bold text-white">68%</span>
+                                        <span className="text-sm text-white/40 mb-1">24/35 pts</span>
+                                    </div>
+                                    <div className="mt-3 h-2 rounded-full bg-white/10 overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: '68%' }}
+                                            transition={{ delay: 1.5, duration: 0.8 }}
+                                            className="h-full rounded-full bg-gradient-to-r from-purple-500 to-cyan-500"
+                                        />
+                                    </div>
+                                </motion.div>
 
-                    {/* Activity feed */}
-                    <div className="space-y-2">
-                        {[
-                            { avatar: 'A', name: 'Alex', action: 'completed task', item: 'API Integration', time: '2m ago' },
-                            { avatar: 'S', name: 'Sarah', action: 'flagged blocker', item: 'Auth Issue', time: '5m ago' },
-                            { avatar: 'M', name: 'Mike', action: 'joined standup', item: 'Sprint 23', time: '8m ago' },
-                        ].map((item, i) => (
+                                {/* Team Velocity */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 1.1 }}
+                                    className="p-4 rounded-lg bg-white/[0.03] border border-white/5"
+                                >
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="text-xs text-white/40">Velocity Trend</span>
+                                        <span className="text-xs text-cyan-400">Last 5 sprints</span>
+                                    </div>
+                                    <div className="flex items-end gap-1 h-10">
+                                        {[28, 32, 30, 38, 42].map((v, i) => (
+                                            <motion.div
+                                                key={i}
+                                                initial={{ height: 0 }}
+                                                animate={{ height: `${(v / 45) * 100}%` }}
+                                                transition={{ delay: 1.3 + i * 0.1, duration: 0.4 }}
+                                                className={`flex-1 rounded-t ${i === 4 ? 'bg-gradient-to-t from-purple-500 to-cyan-500' : 'bg-white/20'}`}
+                                            />
+                                        ))}
+                                    </div>
+                                    <div className="flex justify-between mt-2">
+                                        <span className="text-xs text-white/30">S20</span>
+                                        <span className="text-xs text-white/50 font-medium">42 pts avg</span>
+                                        <span className="text-xs text-white/30">S24</span>
+                                    </div>
+                                </motion.div>
+                            </div>
+
+                            {/* AI Blocker Alert */}
                             <motion.div
-                                key={i}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 1.5 + i * 0.1 }}
-                                className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/[0.02] transition-colors"
+                                transition={{ delay: 1.3 }}
+                                className="p-4 rounded-lg bg-amber-500/5 border border-amber-500/30"
                             >
-                                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500/30 to-cyan-500/30 flex items-center justify-center text-xs text-white/60">
-                                    {item.avatar}
+                                <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400 text-sm flex-shrink-0">⚠️</div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-sm font-medium text-amber-400">AI Detected Blocker</span>
+                                            <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-xs text-amber-400">High Priority</span>
+                                        </div>
+                                        <p className="text-sm text-white/50 mb-2">Auth API dependency blocking 3 stories. Estimated 2-day delay if unresolved.</p>
+                                        <div className="flex gap-2">
+                                            <button className="px-3 py-1 rounded-md bg-amber-500/20 text-xs text-amber-400 hover:bg-amber-500/30 transition-colors">Escalate to Lead</button>
+                                            <button className="px-3 py-1 rounded-md bg-white/5 text-xs text-white/50 hover:bg-white/10 transition-colors">View Details</button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex-1 text-sm">
-                                    <span className="text-white/70">{item.name}</span>
-                                    <span className="text-white/30"> {item.action} </span>
-                                    <span className="text-white/50">{item.item}</span>
-                                </div>
-                                <span className="text-xs text-white/20">{item.time}</span>
                             </motion.div>
-                        ))}
+
+                            {/* Team Standup Summary */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 1.4 }}
+                                className="p-4 rounded-lg bg-white/[0.03] border border-white/5"
+                            >
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="text-xs text-white/40">Today's Standup Summary</span>
+                                    <span className="text-xs text-emerald-400">8/10 submitted</span>
+                                </div>
+                                <p className="text-sm text-white/60 leading-relaxed">
+                                    <span className="text-purple-400">AI:</span> "Team progressing well on payment module. Alex needs design review before EOD. Sarah flagged API dependency - recommend syncing with backend team."
+                                </p>
+                            </motion.div>
+                        </div>
+
+                        {/* Right column - Team & Activity */}
+                        <div className="col-span-4 space-y-4">
+                            {/* Team Pulse */}
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 1.2 }}
+                                className="p-4 rounded-lg bg-white/[0.03] border border-white/5"
+                            >
+                                <div className="text-xs text-white/40 mb-3">Team Pulse</div>
+                                <div className="space-y-2">
+                                    {[
+                                        { name: 'Alex', mood: '😊', status: 'Crushing it', load: 85 },
+                                        { name: 'Sarah', mood: '😐', status: 'Blocked', load: 40 },
+                                        { name: 'Mike', mood: '🙂', status: 'On track', load: 70 },
+                                        { name: 'Lisa', mood: '😊', status: 'Ahead', load: 90 },
+                                    ].map((member, i) => (
+                                        <div key={i} className="flex items-center gap-2">
+                                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/30 to-cyan-500/30 flex items-center justify-center text-[10px] text-white/60">{member.name[0]}</div>
+                                            <span className="text-xs text-white/60 flex-1">{member.name}</span>
+                                            <span className="text-sm">{member.mood}</span>
+                                            <div className="w-12 h-1 rounded-full bg-white/10 overflow-hidden">
+                                                <div className={`h-full rounded-full ${member.load > 80 ? 'bg-amber-400' : 'bg-emerald-400'}`} style={{ width: `${member.load}%` }} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.div>
+
+                            {/* Quick Actions */}
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 1.3 }}
+                                className="p-4 rounded-lg bg-white/[0.03] border border-white/5"
+                            >
+                                <div className="text-xs text-white/40 mb-3">Quick Actions</div>
+                                <div className="space-y-2">
+                                    <button className="w-full px-3 py-2 rounded-lg bg-purple-500/10 border border-purple-500/30 text-xs text-purple-400 text-left hover:bg-purple-500/20 transition-colors">
+                                        📊 Generate Sprint Report
+                                    </button>
+                                    <button className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-white/50 text-left hover:bg-white/10 transition-colors">
+                                        💬 Ask AI about sprint
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
                     </div>
                 </div>
 
                 {/* Gradient overlay at bottom */}
-                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#09090B] to-transparent pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#09090B] to-transparent pointer-events-none" />
             </div>
         </motion.div>
     );
