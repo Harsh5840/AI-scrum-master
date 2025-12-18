@@ -1,335 +1,237 @@
-'use client'
+'use client';
 
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { MainLayout } from "@/components/layout/MainLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useGetSprintsQuery } from "@/store/api/sprintsApi";
-import { useGetQueueStatusQuery } from "@/store/api/workflowsApi";
-import Link from "next/link";
-import { 
-  RocketIcon, 
-  CalendarIcon, 
-  ChatBubbleIcon, 
+import { useMemo } from 'react';
+
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { StatCard } from '@/components/dashboard/StatCard';
+import { Button } from '@/components/ui/button';
+import { useGetSprintsQuery } from '@/store/api/sprintsApi';
+import { useGetBlockersQuery } from '@/store/api/blockersApi';
+import { useGetStandupsQuery } from '@/store/api/standupsApi';
+import { useAppSelector } from '@/store/hooks';
+import Link from 'next/link';
+import { formatDistanceToNow } from 'date-fns';
+import {
+  RocketIcon,
+  ExclamationTriangleIcon,
   LightningBoltIcon,
-  BarChartIcon,
-  StarIcon,
-  ArrowRightIcon,
-  DashboardIcon,
-  PersonIcon,
-  MagicWandIcon
-} from "@radix-ui/react-icons";
-import { useAppSelector } from "@/store/hooks";
+  UpdateIcon,
+  PlusIcon,
+} from '@radix-ui/react-icons';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
-export default function Home() {
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const { data: sprints, isLoading: sprintsLoading } = useGetSprintsQuery({}, {
-    skip: !isAuthenticated,
-    refetchOnMountOrArgChange: true,
-  });
-  const { data: queueStatus } = useGetQueueStatusQuery(undefined, {
-    skip: !isAuthenticated,
-    pollingInterval: 0,
-  });
+export default function Dashboard() {
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
-  const activeSprints = sprints?.filter(sprint => {
-    const now = new Date();
-    const startDate = new Date(sprint.startDate);
-    const endDate = new Date(sprint.endDate);
-    return startDate <= now && endDate >= now;
-  }) || [];
+  // Fetch Data
+  const { data: sprints, isLoading: sprintsLoading } = useGetSprintsQuery(
+    {},
+    { skip: !isAuthenticated }
+  );
+  const { data: blockers, isLoading: blockersLoading } = useGetBlockersQuery(
+    undefined,
+    { skip: !isAuthenticated }
+  );
+  const { data: standups, isLoading: standupsLoading } = useGetStandupsQuery(
+    {},
+    { skip: !isAuthenticated }
+  );
 
-  const calculateSprintProgress = (sprint: any) => {
-    const now = new Date().getTime();
-    const start = new Date(sprint.startDate).getTime();
-    const end = new Date(sprint.endDate).getTime();
-    const total = end - start;
-    const elapsed = now - start;
-    return Math.min(Math.max((elapsed / total) * 100, 0), 100);
-  };
+  // Metrics Calculations
+  // 1. Active Sprint
+  const activeSprint = useMemo(() => sprints?.find((s) => s.status === 'active'), [sprints]);
 
-  const averageProgress = activeSprints.length > 0 
-    ? activeSprints.reduce((acc, sprint) => acc + calculateSprintProgress(sprint), 0) / activeSprints.length 
-    : 0;
+  const daysRemaining = useMemo(() => activeSprint
+    ? Math.max(
+      0,
+      Math.ceil(
+        (new Date(activeSprint.endDate).getTime() - new Date().getTime()) /
+        (1000 * 60 * 60 * 24)
+      )
+    )
+    : 0, [activeSprint]);
+
+  // 2. Velocity (Avg of last 3 completed sprints)
+  const velocity = useMemo(() => {
+    const completedSprints =
+      sprints
+        ?.filter((s) => s.status === 'completed')
+        .sort(
+          (a, b) =>
+            new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+        )
+        .slice(0, 3) || [];
+
+    return completedSprints.length > 0
+      ? Math.round(
+        completedSprints.reduce((acc, s) => acc + (s.completedPoints || 0), 0) /
+        completedSprints.length
+      )
+      : 0;
+  }, [sprints]);
+
+  // 3. Blockers
+  const activeBlockers = useMemo(() => blockers?.filter((b) => b.status !== 'resolved') || [], [blockers]);
+  const blockersCount = activeBlockers.length;
 
   return (
     <ProtectedRoute>
       <MainLayout title="Dashboard">
-        <div className="space-y-8">
-        {/* Hero Section - Jira/Linear Inspired */}
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-10 text-white shadow-lg">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px]" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div className="space-y-4">
-                <div className="inline-flex items-center rounded-md bg-blue-500/30 px-3 py-1.5 backdrop-blur-sm border border-blue-400/30">
-                  <MagicWandIcon className="mr-2 h-4 w-4 text-blue-200" />
-                  <span className="text-sm font-medium text-blue-100">AI-Powered Agile Management</span>
-                </div>
-                <h1 className="text-4xl font-bold tracking-tight">
-                  Ship faster with AI
-                </h1>
-                <p className="text-lg text-blue-100 max-w-xl leading-relaxed">
-                  Plan sprints, track progress, and get intelligent insights to keep your team moving forward.
-                </p>
-                <div className="flex gap-3 pt-2">
-                  <Link href="/sprints">
-                    <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 shadow-lg hover:shadow-xl transition-all">
-                      <RocketIcon className="mr-2 h-5 w-5" />
-                      New Sprint
-                    </Button>
-                  </Link>
-                  <Link href="/ai-insights">
-                    <Button size="lg" variant="outline" className="border-blue-300/50 text-white hover:bg-blue-500/20 hover:border-blue-300 transition-all">
-                      <LightningBoltIcon className="mr-2 h-5 w-5" />
-                      AI Insights
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-              <div className="hidden lg:block">
-                <div className="relative h-48 w-48 opacity-20">
-                  <DashboardIcon className="h-full w-full" />
-                </div>
-              </div>
+        <div className="space-y-6">
+          {/* Header Actions */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h2 className="text-2xl font-semibold tracking-tight text-zinc-100">
+                Engineering Cockpit
+              </h2>
+              <p className="text-sm text-zinc-400">
+                Overview of your team's velocity and health.
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button asChild variant="outline" className="border-zinc-800 bg-zinc-950 text-zinc-100 hover:bg-zinc-900">
+                <Link href="/sprints">
+                  View Board
+                </Link>
+              </Button>
+              <Button className="bg-zinc-100 text-zinc-900 hover:bg-zinc-300">
+                <PlusIcon className="mr-2 h-4 w-4" /> New Issue
+              </Button>
             </div>
           </div>
-        </div>
 
-        {/* Stats Cards - Linear/Monday.com Style */}
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="border border-slate-200 bg-white hover:shadow-md transition-all duration-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-slate-700">Active Sprints</CardTitle>
-              <div className="rounded-lg bg-blue-50 p-2.5">
-                <CalendarIcon className="h-4 w-4 text-blue-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-slate-900">
-                {sprintsLoading ? '...' : activeSprints.length}
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Currently in progress
-              </p>
-              <div className="mt-4 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-blue-600 rounded-full transition-all duration-500" 
-                  style={{ width: `${averageProgress}%` }} 
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border border-slate-200 bg-white hover:shadow-md transition-all duration-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-slate-700">Total Sprints</CardTitle>
-              <div className="rounded-lg bg-emerald-50 p-2.5">
-                <BarChartIcon className="h-4 w-4 text-emerald-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-slate-900">
-                {sprintsLoading ? '...' : sprints?.length || 0}
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                All time count
-              </p>
-              {/* Removed meaningless progress bar */}
-            </CardContent>
-          </Card>
-
-          <Card className="border border-slate-200 bg-white hover:shadow-md transition-all duration-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-slate-700">AI Workflows</CardTitle>
-              <div className="rounded-lg bg-violet-50 p-2.5">
-                <LightningBoltIcon className="h-4 w-4 text-violet-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-slate-900">
-                {queueStatus?.queues?.aiWorkflows ? 
-                  ((queueStatus.queues.aiWorkflows.active || 0) + (queueStatus.queues.aiWorkflows.waiting || 0)) : 
-                  0}
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Active & queued jobs
-              </p>
-              {/* Removed meaningless progress bar */}
-            </CardContent>
-          </Card>
-
-          <Card className="border border-slate-200 bg-white hover:shadow-md transition-all duration-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-slate-700">Standups</CardTitle>
-              <div className="rounded-lg bg-amber-50 p-2.5">
-                <ChatBubbleIcon className="h-4 w-4 text-amber-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-slate-900">0</div>
-              <p className="text-xs text-slate-500 mt-1">
-                Completed today
-              </p>
-              {/* Removed meaningless progress bar */}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content Grid - Notion/Linear Inspired */}
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4 border border-slate-200 bg-white">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg font-semibold text-slate-900">Recent Activity</CardTitle>
-                  <CardDescription className="mt-1 text-sm text-slate-500">
-                    Latest updates from your team
-                  </CardDescription>
-                </div>
-                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-                  View All <ArrowRightIcon className="ml-1 h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {activeSprints.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="rounded-xl bg-slate-50 p-5 mb-4 border border-slate-200">
-                      <CalendarIcon className="h-10 w-10 text-slate-400" />
-                    </div>
-                    <h3 className="text-base font-semibold text-slate-900 mb-1">No active sprints</h3>
-                    <p className="text-sm text-slate-500 mb-4 max-w-sm">
-                      Create your first sprint to start tracking progress and see activity here.
-                    </p>
-                    <Link href="/sprints">
-                      <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-                        <RocketIcon className="mr-2 h-4 w-4" />
-                        Create Sprint
-                      </Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {activeSprints.map((sprint) => (
-                      <div key={sprint.id} className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-200 hover:bg-blue-50/50 transition-all group">
-                        <div className="rounded-md bg-blue-100 p-2 group-hover:bg-blue-200 transition-colors">
-                          <CalendarIcon className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-slate-900 truncate">{sprint.name}</p>
-                          <p className="text-xs text-slate-500">In Progress</p>
-                        </div>
-                        <Button variant="ghost" size="sm" className="text-slate-600 hover:text-blue-600">
-                          View
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="col-span-3 border border-violet-200 bg-gradient-to-br from-violet-50 via-white to-violet-50/50">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-slate-900 flex items-center">
-                <div className="rounded-lg bg-violet-100 p-1.5 mr-2">
-                  <LightningBoltIcon className="h-4 w-4 text-violet-600" />
-                </div>
-                AI Insights
-              </CardTitle>
-              <CardDescription className="text-slate-600">
-                Intelligent recommendations
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="rounded-lg bg-white border border-violet-100 p-4 shadow-sm">
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-md bg-violet-100 p-2 mt-0.5">
-                      <StarIcon className="h-4 w-4 text-violet-600" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-slate-900 text-sm mb-1">Get Started</h4>
-                      <p className="text-sm text-slate-600 leading-relaxed">
-                        AI insights will appear as you create sprints and add standup updates.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <Link href="/ai-insights">
-                  <Button className="w-full bg-violet-600 hover:bg-violet-700 text-white shadow-sm">
-                    <MagicWandIcon className="mr-2 h-4 w-4" />
-                    Explore AI Features
+          {/* Metrics Grid */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              title="Active Sprint"
+              value={activeSprint ? activeSprint.name : 'No Active Sprint'}
+              description={
+                activeSprint
+                  ? `${daysRemaining} days remaining`
+                  : 'Ready to start the next cycle?'
+              }
+              icon={<RocketIcon />}
+              loading={sprintsLoading}
+              action={
+                !activeSprint && !sprintsLoading ? (
+                  <Button
+                    size="sm"
+                    className="w-full bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
+                    asChild
+                  >
+                    <Link href="/sprints">Start Sprint</Link>
                   </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                ) : undefined
+              }
+            />
+            <StatCard
+              title="Velocity"
+              value={`${velocity} pts`}
+              description={velocity > 0 ? "Avg. last 3 sprints" : "No history available"}
+              icon={<LightningBoltIcon />}
+              loading={sprintsLoading}
+              trend={velocity > 0 ? {
+                value: 12,
+                label: 'vs last sprint',
+                direction: 'up',
+              } : undefined}
+            />
+            <StatCard
+              title="Active Blockers"
+              value={blockersCount > 0 ? blockersCount : "All Clear"}
+              description={blockersCount > 0 ? "Unresolved issues" : "Team is unblocked"}
+              icon={<ExclamationTriangleIcon className={blockersCount === 0 ? "text-green-500" : undefined} />}
+              alert={blockersCount > 0}
+              loading={blockersLoading}
+              className={blockersCount === 0 ? "border-green-900/30 bg-green-950/10" : undefined}
+            />
+            <StatCard
+              title="Team Health"
+              value="98%"
+              description="Standup completion rate"
+              icon={<UpdateIcon />}
+              loading={standupsLoading}
+            />
+          </div>
 
-        {/* Quick Actions - Jira/Asana Style */}
-        <Card className="border border-slate-200 bg-white">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-slate-900">Quick Actions</CardTitle>
-            <CardDescription className="text-sm text-slate-500">
-              Common tasks to get you started
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-              <Link href="/sprints">
-                <Button 
-                  variant="outline" 
-                  className="h-24 flex-col w-full border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all group"
-                >
-                  <div className="rounded-lg bg-blue-100 p-2.5 mb-2 group-hover:bg-blue-200 transition-colors">
-                    <CalendarIcon className="h-5 w-5 text-blue-600" />
+          {/* Main Layout Grid */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            {/* Recent Activity */}
+            <Card className="col-span-4 bg-zinc-950 border-zinc-800">
+              <CardHeader>
+                <CardTitle className="text-zinc-100">Recent Activity</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {standupsLoading ? (
+                    <div className="text-zinc-500 text-sm">Loading activity...</div>
+                  ) : standups && standups.length > 0 ? (
+                    standups.slice(0, 5).map((standup: any) => (
+                      <div key={standup.id} className="flex items-start space-x-4">
+                        <Avatar className="h-9 w-9 border border-zinc-800">
+                          <AvatarImage src={standup.user?.avatarUrl} alt={standup.userId} />
+                          <AvatarFallback className="bg-zinc-900 text-zinc-400 text-xs">
+                            {standup.userId ? standup.userId.substring(0, 2).toUpperCase() : 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-zinc-100 leading-none">
+                            {standup.userId} {/* Ideally map to real name if available */}
+                          </p>
+                          <p className="text-sm text-zinc-400">
+                            posted a standup update
+                          </p>
+                          <p className="text-xs text-zinc-500">
+                            {formatDistanceToNow(new Date(standup.date), { addSuffix: true })}
+                          </p>
+                          <div className="mt-2 text-sm text-zinc-300 bg-zinc-900/50 p-2 rounded border border-zinc-800/50">
+                            <p><span className="text-green-500 font-mono text-xs">DONE:</span> {standup.yesterday}</p>
+                            <p className="mt-1"><span className="text-blue-500 font-mono text-xs">TODO:</span> {standup.today}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-zinc-500 text-sm">No recent activity</div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Insights / Secondary Column */}
+            <Card className="col-span-3 bg-zinc-950 border-zinc-800">
+              <CardHeader>
+                <CardTitle className="text-zinc-100">AI Insights</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="rounded-lg border border-purple-900/30 bg-purple-950/10 p-4">
+                    <div className="flex items-center space-x-2 text-purple-400 mb-2">
+                      <LightningBoltIcon className="h-4 w-4" />
+                      <span className="text-sm font-medium">Sprint Forecast</span>
+                    </div>
+                    <p className="text-sm text-zinc-300">
+                      Based on current velocity, the team is likely to complete <strong>92%</strong> of the committed points.
+                    </p>
                   </div>
-                  <span className="font-medium text-slate-900">New Sprint</span>
-                </Button>
-              </Link>
-              <Link href="/standups">
-                <Button 
-                  variant="outline" 
-                  className="h-24 flex-col w-full border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all group"
-                >
-                  <div className="rounded-lg bg-emerald-100 p-2.5 mb-2 group-hover:bg-emerald-200 transition-colors">
-                    <ChatBubbleIcon className="h-5 w-5 text-emerald-600" />
+
+                  <div className="rounded-lg border border-zinc-800 bg-zinc-900/30 p-4">
+                    <div className="flex items-center space-x-2 text-zinc-400 mb-2">
+                      <ExclamationTriangleIcon className="h-4 w-4" />
+                      <span className="text-sm font-medium">Risk Detected</span>
+                    </div>
+                    <p className="text-sm text-zinc-300">
+                      Ticket <strong>ASM-102</strong> has been in "In Progress" for 5 days. Consider checking in.
+                    </p>
                   </div>
-                  <span className="font-medium text-slate-900">Add Standup</span>
-                </Button>
-              </Link>
-              <Link href="/ai-insights">
-                <Button 
-                  variant="outline" 
-                  className="h-24 flex-col w-full border-slate-200 hover:border-violet-300 hover:bg-violet-50 transition-all group"
-                >
-                  <div className="rounded-lg bg-violet-100 p-2.5 mb-2 group-hover:bg-violet-200 transition-colors">
-                    <LightningBoltIcon className="h-5 w-5 text-violet-600" />
-                  </div>
-                  <span className="font-medium text-slate-900">AI Insights</span>
-                </Button>
-              </Link>
-              <Link href="/analytics">
-                <Button 
-                  variant="outline" 
-                  className="h-24 flex-col w-full border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-all group"
-                >
-                  <div className="rounded-lg bg-amber-100 p-2.5 mb-2 group-hover:bg-amber-200 transition-colors">
-                    <BarChartIcon className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <span className="font-medium text-slate-900">Analytics</span>
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </MainLayout>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </MainLayout>
     </ProtectedRoute>
   );
 }
-

@@ -19,7 +19,7 @@ export function MainLayout({ children, title }: MainLayoutProps) {
       {/* Sidebar */}
       <div className={cn(
         'hidden lg:block transition-all duration-300',
-        sidebarOpen ? 'w-64' : 'w-16'
+        sidebarOpen ? 'w-60' : 'w-16'
       )}>
         <Sidebar />
       </div>
