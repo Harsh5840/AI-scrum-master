@@ -49,6 +49,16 @@ export const blockersApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Blocker'],
     }),
+
+    // Update blocker status
+    updateBlocker: builder.mutation<Blocker, { id: number; status: string }>({
+      query: ({ id, status }) => ({
+        url: `/blockers/${id}`,
+        method: 'PATCH',
+        body: { status },
+      }),
+      invalidatesTags: ['Blocker'],
+    }),
   }),
 })
 
@@ -58,4 +68,5 @@ export const {
   useCreateBlockerMutation,
   useResolveBlockerMutation,
   useDeleteBlockerMutation,
+  useUpdateBlockerMutation,
 } = blockersApi

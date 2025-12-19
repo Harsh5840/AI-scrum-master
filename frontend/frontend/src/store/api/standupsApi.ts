@@ -19,10 +19,13 @@ export const standupsApi = apiSlice.injectEndpoints({
 
     // Create new standup
     createStandup: builder.mutation<Standup, {
-      userId: number
+      userId?: number
       sprintId?: number
-      summary: string
+      summary?: string
       description?: string
+      yesterday?: string
+      today?: string
+      blockers?: string
     }>({
       query: (newStandup) => ({
         url: '/standups',

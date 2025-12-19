@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { useGetStandupsQuery } from '@/store/api/standupsApi'
 import { useGetSprintsQuery } from '@/store/api/sprintsApi'
 import { format, parseISO, startOfWeek, endOfWeek, isWithinInterval } from 'date-fns'
-import { 
+import {
   CalendarIcon,
   PersonIcon,
   ExclamationTriangleIcon,
@@ -27,8 +27,8 @@ export default function TeamDashboardPage() {
   // Filter standups for selected week
   const weekStart = startOfWeek(parseISO(selectedWeek), { weekStartsOn: 1 }) // Monday
   const weekEnd = endOfWeek(parseISO(selectedWeek), { weekStartsOn: 1 }) // Sunday
-  
-  const weeklyStandups = standups?.filter(standup => 
+
+  const weeklyStandups = standups?.filter(standup =>
     isWithinInterval(parseISO(standup.createdAt), { start: weekStart, end: weekEnd })
   ) || []
 
@@ -40,13 +40,13 @@ export default function TeamDashboardPage() {
         id: userId,
         name: standup?.user?.name || `User ${userId}`,
         standups: weeklyStandups.filter(s => s.userId === userId),
-        blockers: weeklyStandups.filter(s => s.userId === userId && s.blockers && s.blockers.length > 0)
+        blockers: weeklyStandups.filter(s => s.userId === userId && s.blockers && s.blockers.length > 0 && s.blockers !== 'No blockers today!')
       }
     })
 
   // Calculate team metrics
   const totalStandups = weeklyStandups.length
-  const activeBlockers = weeklyStandups.filter(s => s.blockers && s.blockers.some(b => !b.resolved)).length
+  const activeBlockers = weeklyStandups.filter(s => s.blockers && s.blockers.length > 0 && s.blockers !== 'No blockers today!').length
   const participationRate = teamMembers.length > 0 ? Math.round((totalStandups / (teamMembers.length * 5)) * 100) : 0 // Assuming 5 working days
   const avgStandupsPerMember = teamMembers.length > 0 ? Math.round(totalStandups / teamMembers.length) : 0
 
@@ -77,7 +77,7 @@ export default function TeamDashboardPage() {
               Weekly overview of team standup participation and progress
             </p>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <Label htmlFor="weekSelect">Week of:</Label>
             <Input
@@ -121,7 +121,7 @@ export default function TeamDashboardPage() {
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Team Members</CardTitle>
@@ -134,7 +134,7 @@ export default function TeamDashboardPage() {
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Active Blockers</CardTitle>
@@ -147,7 +147,7 @@ export default function TeamDashboardPage() {
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Participation</CardTitle>
@@ -205,7 +205,7 @@ export default function TeamDashboardPage() {
                           <span className="text-xs text-muted-foreground">
                             {format(parseISO(standup.createdAt), 'MMM dd, h:mm a')}
                           </span>
-                          {standup.blockers && standup.blockers.length > 0 && (
+                          {standup.blockers && standup.blockers.length > 0 && standup.blockers !== 'No blockers today!' && (
                             <ExclamationTriangleIcon className="h-3 w-3 text-red-500" />
                           )}
                         </div>
@@ -222,26 +222,15 @@ export default function TeamDashboardPage() {
                     <div>
                       <h4 className="font-medium text-sm mb-2 text-red-600">Active Blockers</h4>
                       {member.blockers.slice(0, 2).map((standup) => (
-                        <div key={standup.id}>
-                          {standup.blockers?.filter(b => !b.resolved).map((blocker) => (
-                            <div key={blocker.id} className="bg-red-50 dark:bg-red-950/20 rounded p-2 mb-2">
-                              <div className="flex items-center space-x-2 mb-1">
-                                <Badge 
-                                  variant={blocker.severity === 'high' ? 'destructive' : 
-                                         blocker.severity === 'medium' ? 'default' : 'secondary'}
-                                  className="text-xs"
-                                >
-                                  {blocker.severity}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">
-                                  {format(parseISO(blocker.createdAt), 'MMM dd')}
-                                </span>
-                              </div>
-                              <p className="text-sm text-red-700 dark:text-red-300">
-                                {blocker.description}
-                              </p>
-                            </div>
-                          ))}
+                        <div key={standup.id} className="bg-red-50 dark:bg-red-950/20 rounded p-2 mb-2">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="text-xs text-muted-foreground">
+                              {format(parseISO(standup.createdAt), 'MMM dd')}
+                            </span>
+                          </div>
+                          <p className="text-sm text-red-700 dark:text-red-300">
+                            {standup.blockers}
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -254,18 +243,17 @@ export default function TeamDashboardPage() {
                       {Array.from({ length: 5 }, (_, i) => {
                         const dayDate = new Date(weekStart)
                         dayDate.setDate(dayDate.getDate() + i)
-                        const hasStandup = member.standups.some(s => 
+                        const hasStandup = member.standups.some(s =>
                           format(parseISO(s.createdAt), 'yyyy-MM-dd') === format(dayDate, 'yyyy-MM-dd')
                         )
-                        
+
                         return (
                           <div
                             key={i}
-                            className={`w-8 h-8 rounded flex items-center justify-center text-xs ${
-                              hasStandup 
-                                ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' 
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
-                            }`}
+                            className={`w-8 h-8 rounded flex items-center justify-center text-xs ${hasStandup
+                              ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
+                              }`}
                             title={format(dayDate, 'EEE MMM dd')}
                           >
                             {hasStandup ? <CheckCircledIcon className="h-3 w-3" /> : <ClockIcon className="h-3 w-3" />}

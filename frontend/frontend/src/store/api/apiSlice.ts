@@ -13,6 +13,7 @@ export interface User {
   name: string
   email: string
   avatarUrl?: string
+  avatar?: string
   createdAt: string
 }
 
@@ -23,6 +24,7 @@ export interface Sprint {
   endDate: string
   status?: 'active' | 'completed' | 'planned'
   completedPoints?: number
+  totalPoints?: number
   backlogItems?: BacklogItem[]
   standups?: Standup[]
 }
@@ -32,9 +34,12 @@ export interface Standup {
   userId: number
   sprintId?: number
   summary: string
+  yesterday?: string
+  today?: string
+  blockers?: string
+  date?: string
   createdAt: string
   user?: User
-  blockers?: Blocker[]
 }
 
 export interface Blocker {
@@ -42,7 +47,8 @@ export interface Blocker {
   standupId?: number
   description: string
   severity: 'low' | 'medium' | 'high' | 'critical'
-  status?: 'active' | 'resolved'
+  type?: 'dependency' | 'technical' | 'resource' | 'external'
+  status?: 'active' | 'resolved' | 'investigating' | 'in_progress'
   resolved: boolean
   createdAt: string
 }

@@ -35,8 +35,10 @@ import aiRoutes from "./src/routes/ai.js";
 import workflowRoutes from "./src/routes/workflows.js";
 import organizationRoutes from "./src/routes/organizations.js";
 import inviteRoutes from "./src/routes/invites.js";
+import reportRoutes from "./src/routes/reports.js";
 import { vectorStore } from "./src/services/vectorServices.js";
 import { queueManager } from "./src/services/queueServices.js";
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -104,6 +106,8 @@ app.use("/api/ai", authMiddleware, aiRoutes);
 app.use("/api/workflows", authMiddleware, workflowRoutes);
 app.use("/api/organizations", authMiddleware, organizationRoutes);
 app.use("/api/invites", inviteRoutes); // Partially public
+app.use("/api/reports", reportRoutes); // Partially public
+
 
 // Root route
 app.get("/", (_req, res) => {

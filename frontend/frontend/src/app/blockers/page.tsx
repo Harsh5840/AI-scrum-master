@@ -1,256 +1,422 @@
 'use client'
 
-import { useState } from 'react';
-import { MainLayout } from "@/components/layout/MainLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState, useMemo } from 'react'
+import { MainLayout } from '@/components/layout/MainLayout'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog'
+import { useGetBlockersQuery, useUpdateBlockerMutation } from '@/store/api/blockersApi'
+import { formatDistanceToNow } from 'date-fns'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { ExclamationTriangleIcon, CheckCircledIcon, PlusIcon } from "@radix-ui/react-icons";
-import { useGetBlockersQuery, useCreateBlockerMutation, useResolveBlockerMutation } from "@/store/api/blockersApi";
+  ExclamationTriangleIcon,
+  CheckCircledIcon,
+  LightningBoltIcon,
+  PersonIcon,
+  ClockIcon,
+  CrossCircledIcon,
+  ArrowUpIcon,
+  ArrowRightIcon,
+  MagicWandIcon,
+  ChatBubbleIcon,
+} from '@radix-ui/react-icons'
+
+// Severity indicator
+const SeverityBadge = ({ severity }: { severity: string }) => {
+  const styles: Record<string, string> = {
+    critical: 'bg-red-500/20 text-red-400 border-red-500/30',
+    high: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    medium: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    low: 'bg-white/10 text-white/60 border-white/10',
+  };
+
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${styles[severity] || styles.medium}`}>
+      {severity}
+    </span>
+  );
+};
+
+// Type badge
+const TypeBadge = ({ type }: { type: string }) => {
+  const styles: Record<string, string> = {
+    dependency: 'bg-purple-500/20 text-purple-400',
+    technical: 'bg-cyan-500/20 text-cyan-400',
+    resource: 'bg-emerald-500/20 text-emerald-400',
+    external: 'bg-amber-500/20 text-amber-400',
+  };
+
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs ${styles[type] || styles.technical}`}>
+      {type}
+    </span>
+  );
+};
+
+// Blocker card for kanban
+const BlockerCard = ({ blocker, onClick }: { blocker: any, onClick: () => void }) => {
+  const severityColors: Record<string, string> = {
+    critical: 'border-l-red-500',
+    high: 'border-l-orange-500',
+    medium: 'border-l-amber-500',
+    low: 'border-l-white/20',
+  };
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      whileHover={{ scale: 1.02 }}
+      onClick={onClick}
+      className={`p-4 rounded-lg bg-white/[0.02] border border-white/5 border-l-4 ${severityColors[blocker.severity] || severityColors.medium} cursor-pointer hover:bg-white/[0.04] transition-colors`}
+    >
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <SeverityBadge severity={blocker.severity} />
+        <TypeBadge type={blocker.type} />
+      </div>
+
+      <p className="text-sm text-white font-medium line-clamp-2 mb-3">
+        {blocker.description}
+      </p>
+
+      <div className="flex items-center justify-between text-xs text-white/40">
+        <span className="flex items-center gap-1">
+          <ClockIcon className="h-3 w-3" />
+          {formatDistanceToNow(new Date(blocker.createdAt), { addSuffix: true })}
+        </span>
+        <span className="flex items-center gap-1">
+          <PersonIcon className="h-3 w-3" />
+          Team
+        </span>
+      </div>
+    </motion.div>
+  );
+};
 
 export default function BlockersPage() {
-  const { data: blockers = [], isLoading } = useGetBlockersQuery();
-  const [createBlocker] = useCreateBlockerMutation();
-  const [resolveBlocker] = useResolveBlockerMutation();
-  const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState<{
-    description: string;
-    severity: 'low' | 'medium' | 'high' | 'critical';
-    type: string;
-  }>({
-    description: '',
-    severity: 'medium',
-    type: 'technical'
-  });
+  const { data: blockers, isLoading, refetch } = useGetBlockersQuery()
+  const [updateBlocker] = useUpdateBlockerMutation()
 
-  const handleCreate = async () => {
+  const [selectedBlocker, setSelectedBlocker] = useState<any>(null)
+  const [view, setView] = useState<'kanban' | 'list'>('kanban')
+
+  // Group blockers by status
+  const groupedBlockers = useMemo(() => {
+    if (!blockers) return { active: [], investigating: [], resolved: [] };
+
+    return {
+      active: blockers.filter((b: any) => b.status === 'active'),
+      investigating: blockers.filter((b: any) => b.status === 'investigating' || b.status === 'in_progress'),
+      resolved: blockers.filter((b: any) => b.status === 'resolved'),
+    };
+  }, [blockers]);
+
+  // Stats
+  const stats = useMemo(() => {
+    if (!blockers) return { total: 0, critical: 0, avgResolutionTime: 0 };
+
+    const critical = blockers.filter((b: any) => b.severity === 'critical' || b.severity === 'high').length;
+    const resolved = blockers.filter((b: any) => b.status === 'resolved');
+
+    return {
+      total: blockers.filter((b: any) => b.status !== 'resolved').length,
+      critical,
+      resolvedThisWeek: resolved.length,
+      avgResolutionTime: 2.4, // placeholder
+    };
+  }, [blockers]);
+
+  // Change blocker status
+  const handleStatusChange = async (blockerId: number, newStatus: string) => {
     try {
-      await createBlocker(formData).unwrap();
-      setIsOpen(false);
-      setFormData({ description: '', severity: 'medium' as const, type: 'technical' });
+      await updateBlocker({ id: blockerId, status: newStatus }).unwrap();
+      refetch();
+      setSelectedBlocker(null);
     } catch (error) {
-      console.error('Failed to create blocker:', error);
+      console.error('Failed to update blocker:', error);
     }
   };
 
-  const handleResolve = async (id: number) => {
-    try {
-      await resolveBlocker(id).unwrap();
-    } catch (error) {
-      console.error('Failed to resolve blocker:', error);
-    }
-  };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical': return 'bg-red-500/20 text-red-400';
-      case 'high': return 'bg-orange-500/20 text-orange-400';
-      case 'medium': return 'bg-amber-500/20 text-amber-400';
-      case 'low': return 'bg-white/10 text-white/60';
-      default: return 'bg-white/10 text-white/60';
-    }
+  // AI suggestions for resolution
+  const getAISuggestion = (blocker: any) => {
+    const suggestions: Record<string, string> = {
+      dependency: "Try reaching out to the blocking team directly. Consider a temporary workaround if available.",
+      technical: "Check recent deployments or changes. Consider rolling back if this is a regression.",
+      resource: "Review team capacity. Consider delegating lower priority tasks.",
+      external: "Escalate to stakeholders. Document impact for future planning.",
+    };
+    return suggestions[blocker?.type] || "Investigate the root cause and document findings for the team.";
   };
 
   return (
     <MainLayout title="Blockers">
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-white">Blockers</h2>
-            <p className="text-white/40 text-sm mt-1">Track and resolve team blockers</p>
-          </div>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-4 gap-4">
+          <Card className={`border-white/5 ${stats.total > 0 ? 'bg-gradient-to-br from-amber-500/10 to-transparent border-amber-500/20' : 'bg-gradient-to-br from-emerald-500/10 to-transparent border-emerald-500/20'}`}>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className={`w-12 h-12 rounded-xl ${stats.total > 0 ? 'bg-amber-500/20' : 'bg-emerald-500/20'} flex items-center justify-center`}>
+                {stats.total > 0 ? (
+                  <ExclamationTriangleIcon className="h-6 w-6 text-amber-400" />
+                ) : (
+                  <CheckCircledIcon className="h-6 w-6 text-emerald-400" />
+                )}
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-white">{stats.total}</p>
+                <p className="text-xs text-white/40">Active Blockers</p>
+              </div>
+            </CardContent>
+          </Card>
 
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white">
-                <PlusIcon className="mr-2 h-4 w-4" />
-                Report Blocker
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-[#0a0a0f] border-white/10">
-              <DialogHeader>
-                <DialogTitle className="text-white">Report a Blocker</DialogTitle>
-                <DialogDescription className="text-white/50">
-                  Describe the issue blocking your progress.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="description" className="text-white/70">Description</Label>
-                  <Input
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="e.g., API endpoint returning 500 error"
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="severity" className="text-white/70">Severity</Label>
-                  <select
-                    id="severity"
-                    className="flex h-10 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-purple-500/50 focus:outline-none"
-                    value={formData.severity}
-                    onChange={(e) => setFormData({ ...formData, severity: e.target.value as 'low' | 'medium' | 'high' | 'critical' })}
-                  >
-                    <option value="low" className="bg-[#0a0a0f]">Low</option>
-                    <option value="medium" className="bg-[#0a0a0f]">Medium</option>
-                    <option value="high" className="bg-[#0a0a0f]">High</option>
-                    <option value="critical" className="bg-[#0a0a0f]">Critical</option>
-                  </select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="type" className="text-white/70">Type</Label>
-                  <select
-                    id="type"
-                    className="flex h-10 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-purple-500/50 focus:outline-none"
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  >
-                    <option value="technical" className="bg-[#0a0a0f]">Technical</option>
-                    <option value="dependency" className="bg-[#0a0a0f]">Dependency</option>
-                    <option value="resource" className="bg-[#0a0a0f]">Resource</option>
-                    <option value="external" className="bg-[#0a0a0f]">External</option>
-                  </select>
+          <Card className="bg-white/[0.02] border-white/5">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
+                <CrossCircledIcon className="h-6 w-6 text-red-400" />
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-white">{stats.critical}</p>
+                <p className="text-xs text-white/40">High Priority</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/[0.02] border-white/5">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <CheckCircledIcon className="h-6 w-6 text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-white">{stats.resolvedThisWeek}</p>
+                <p className="text-xs text-white/40">Resolved</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/[0.02] border-white/5">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                <ClockIcon className="h-6 w-6 text-cyan-400" />
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-white">{stats.avgResolutionTime}d</p>
+                <p className="text-xs text-white/40">Avg Resolution</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* View Toggle */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white">Blocker Board</h2>
+          <div className="flex items-center gap-2 bg-white/[0.02] rounded-lg p-1">
+            <button
+              onClick={() => setView('kanban')}
+              className={`px-3 py-1.5 rounded text-sm transition-colors ${view === 'kanban' ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white/70'}`}
+            >
+              Kanban
+            </button>
+            <button
+              onClick={() => setView('list')}
+              className={`px-3 py-1.5 rounded text-sm transition-colors ${view === 'list' ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white/70'}`}
+            >
+              List
+            </button>
+          </div>
+        </div>
+
+        {/* Kanban Board */}
+        {isLoading ? (
+          <div className="grid grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="space-y-3">
+                <div className="h-8 bg-white/5 rounded animate-pulse" />
+                <div className="h-32 bg-white/5 rounded animate-pulse" />
+                <div className="h-32 bg-white/5 rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-4">
+            {/* Active Column */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between px-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <span className="text-sm font-medium text-white">Active</span>
+                  <span className="text-xs text-white/40 bg-white/5 px-2 py-0.5 rounded-full">
+                    {groupedBlockers.active.length}
+                  </span>
                 </div>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsOpen(false)} className="border-white/10 text-white hover:bg-white/5">
-                  Cancel
-                </Button>
-                <Button onClick={handleCreate} className="bg-gradient-to-r from-red-500 to-orange-500 text-white">
-                  Report Blocker
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="bg-white/[0.02] border-white/5">
-            <CardHeader className="pb-3">
-              <CardDescription className="text-white/50">Active Blockers</CardDescription>
-              <CardTitle className="text-3xl text-white">
-                {blockers.filter(b => !b.resolved).length}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card className="bg-white/[0.02] border-white/5">
-            <CardHeader className="pb-3">
-              <CardDescription className="text-white/50">Resolved This Week</CardDescription>
-              <CardTitle className="text-3xl text-emerald-400">
-                {blockers.filter(b => b.resolved).length}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card className="bg-white/[0.02] border-white/5">
-            <CardHeader className="pb-3">
-              <CardDescription className="text-white/50">High Priority</CardDescription>
-              <CardTitle className="text-3xl text-red-400">
-                {blockers.filter(b => (b.severity === 'high' || b.severity === 'critical') && !b.resolved).length}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
+              <div className="space-y-3 min-h-[200px] p-2 rounded-xl bg-white/[0.01] border border-white/5">
+                <AnimatePresence>
+                  {groupedBlockers.active.map((blocker: any) => (
+                    <BlockerCard
+                      key={blocker.id}
+                      blocker={blocker}
+                      onClick={() => setSelectedBlocker(blocker)}
+                    />
+                  ))}
+                </AnimatePresence>
 
-        {/* Blockers Table */}
-        <Card className="bg-white/[0.02] border-white/5">
-          <CardHeader>
-            <CardTitle className="text-white">All Blockers</CardTitle>
-            <CardDescription className="text-white/40">
-              Current and resolved blockers from your team
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow className="border-white/5 hover:bg-transparent">
-                  <TableHead className="text-white/50">Description</TableHead>
-                  <TableHead className="text-white/50">Severity</TableHead>
-                  <TableHead className="text-white/50">Status</TableHead>
-                  <TableHead className="text-white/50">Source</TableHead>
-                  <TableHead className="text-white/50">Date</TableHead>
-                  <TableHead className="text-white/50">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow className="border-white/5">
-                    <TableCell colSpan={6} className="text-center text-white/40">Loading blockers...</TableCell>
-                  </TableRow>
-                ) : blockers.length === 0 ? (
-                  <TableRow className="border-white/5">
-                    <TableCell colSpan={6} className="text-center py-12">
-                      <div className="text-center">
-                        <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-white/20 mb-4" />
-                        <h3 className="text-lg font-semibold text-white mb-2">No blockers</h3>
-                        <p className="text-white/40 mb-4">No blockers have been reported yet.</p>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  blockers.map((blocker) => (
-                    <TableRow key={blocker.id} className="border-white/5 hover:bg-white/[0.02]">
-                      <TableCell className="font-medium text-white">{blocker.description}</TableCell>
-                      <TableCell>
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getSeverityColor(blocker.severity)}`}>
-                          {blocker.severity.toUpperCase()}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {blocker.resolved ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">
-                            <CheckCircledIcon className="h-3 w-3" />
-                            Resolved
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400">
-                            Active
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-white/60">Standup #{blocker.standupId || 'Manual'}</TableCell>
-                      <TableCell className="text-white/60">{new Date(blocker.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        {!blocker.resolved && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleResolve(blocker.id)}
-                            className="border-white/10 text-white/70 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/30"
-                          >
-                            Resolve
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
+                {groupedBlockers.active.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-8 text-white/30">
+                    <CheckCircledIcon className="h-8 w-8 mb-2" />
+                    <p className="text-sm">No active blockers</p>
+                  </div>
                 )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+              </div>
+            </div>
+
+            {/* Investigating Column */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between px-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-amber-500" />
+                  <span className="text-sm font-medium text-white">Investigating</span>
+                  <span className="text-xs text-white/40 bg-white/5 px-2 py-0.5 rounded-full">
+                    {groupedBlockers.investigating.length}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3 min-h-[200px] p-2 rounded-xl bg-white/[0.01] border border-white/5">
+                <AnimatePresence>
+                  {groupedBlockers.investigating.map((blocker: any) => (
+                    <BlockerCard
+                      key={blocker.id}
+                      blocker={blocker}
+                      onClick={() => setSelectedBlocker(blocker)}
+                    />
+                  ))}
+                </AnimatePresence>
+
+                {groupedBlockers.investigating.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-8 text-white/30">
+                    <ArrowRightIcon className="h-8 w-8 mb-2" />
+                    <p className="text-sm">Drag blockers here</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Resolved Column */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between px-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                  <span className="text-sm font-medium text-white">Resolved</span>
+                  <span className="text-xs text-white/40 bg-white/5 px-2 py-0.5 rounded-full">
+                    {groupedBlockers.resolved.length}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3 min-h-[200px] p-2 rounded-xl bg-white/[0.01] border border-white/5">
+                <AnimatePresence>
+                  {groupedBlockers.resolved.slice(0, 5).map((blocker: any) => (
+                    <BlockerCard
+                      key={blocker.id}
+                      blocker={blocker}
+                      onClick={() => setSelectedBlocker(blocker)}
+                    />
+                  ))}
+                </AnimatePresence>
+
+                {groupedBlockers.resolved.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-8 text-white/30">
+                    <CheckCircledIcon className="h-8 w-8 mb-2" />
+                    <p className="text-sm">Resolved blockers appear here</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Blocker Detail Dialog */}
+        <Dialog open={!!selectedBlocker} onOpenChange={() => setSelectedBlocker(null)}>
+          <DialogContent className="bg-[#0a0a0f] border-white/10 max-w-2xl">
+            <DialogHeader>
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedBlocker?.severity === 'critical' || selectedBlocker?.severity === 'high' ? 'bg-red-500/20' : 'bg-amber-500/20'}`}>
+                  <ExclamationTriangleIcon className={`h-5 w-5 ${selectedBlocker?.severity === 'critical' || selectedBlocker?.severity === 'high' ? 'text-red-400' : 'text-amber-400'}`} />
+                </div>
+                <div>
+                  <DialogTitle className="text-white">Blocker Details</DialogTitle>
+                  <DialogDescription className="text-white/40">
+                    Review and manage this blocker
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+
+            {selectedBlocker && (
+              <div className="space-y-6">
+                {/* Badges */}
+                <div className="flex items-center gap-2">
+                  <SeverityBadge severity={selectedBlocker.severity} />
+                  <TypeBadge type={selectedBlocker.type} />
+                  <span className="text-xs text-white/30 ml-auto">
+                    Created {formatDistanceToNow(new Date(selectedBlocker.createdAt), { addSuffix: true })}
+                  </span>
+                </div>
+
+                {/* Description */}
+                <div className="p-4 rounded-lg bg-white/[0.02] border border-white/5">
+                  <p className="text-white">{selectedBlocker.description}</p>
+                </div>
+
+                {/* AI Suggestion */}
+                <div className="p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-cyan-500/10 border border-purple-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <MagicWandIcon className="h-4 w-4 text-purple-400" />
+                    <span className="text-sm font-medium text-purple-400">AI Suggestion</span>
+                  </div>
+                  <p className="text-sm text-white/60">{getAISuggestion(selectedBlocker)}</p>
+                </div>
+
+                {/* Status Actions */}
+                <div className="space-y-2">
+                  <p className="text-sm text-white/40">Change Status</p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleStatusChange(selectedBlocker.id, 'investigating')}
+                      disabled={selectedBlocker.status === 'investigating'}
+                      className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10 disabled:opacity-50"
+                    >
+                      <ArrowRightIcon className="mr-2 h-4 w-4" />
+                      Investigate
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleStatusChange(selectedBlocker.id, 'resolved')}
+                      disabled={selectedBlocker.status === 'resolved'}
+                      className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 disabled:opacity-50"
+                    >
+                      <CheckCircledIcon className="mr-2 h-4 w-4" />
+                      Mark Resolved
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </MainLayout>
-  );
+  )
 }
