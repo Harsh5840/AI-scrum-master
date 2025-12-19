@@ -58,6 +58,10 @@ export const getOrganizationBySlug = async (req: Request, res: Response) => {
     const { slug } = req.params;
     const userId = (req as any).user?.id;
 
+    if (!slug) {
+      return res.status(400).json({ error: "Slug is required" });
+    }
+
     const org = await orgService.getOrganizationBySlug(slug);
     if (!org) {
       return res.status(404).json({ error: "Organization not found" });
@@ -159,6 +163,11 @@ export const sendInvite = async (req: Request, res: Response) => {
 export const getInvite = async (req: Request, res: Response) => {
   try {
     const { token } = req.params;
+
+    if (!token) {
+      return res.status(400).json({ error: "Token is required" });
+    }
+
     const invite = await orgService.getInviteByToken(token);
 
     if (!invite) {
@@ -185,6 +194,10 @@ export const acceptInvite = async (req: Request, res: Response) => {
   try {
     const { token } = req.params;
     const userId = (req as any).user?.id;
+
+    if (!token) {
+      return res.status(400).json({ error: "Token is required" });
+    }
 
     const org = await orgService.acceptInvite(token, userId);
     res.json({ message: "Invite accepted", organization: org });

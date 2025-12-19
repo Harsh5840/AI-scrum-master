@@ -163,7 +163,7 @@ export const createStandupFromSlack = async (
   const standup = await prisma.standup.create({
     data: {
       userId: 1, // TODO: Map Slack user to app user
-      orgId,
+      orgId: orgId ?? null,
       summary,
     },
   });
@@ -173,7 +173,7 @@ export const createStandupFromSlack = async (
     await prisma.blocker.create({
       data: {
         standupId: standup.id,
-        orgId,
+        orgId: orgId ?? null,
         description: blockers,
         type: "technical",
         severity: "medium",
