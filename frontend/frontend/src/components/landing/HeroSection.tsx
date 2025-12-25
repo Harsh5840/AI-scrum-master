@@ -369,7 +369,7 @@ export function HeroSection() {
                     className="flex flex-col sm:flex-row items-center justify-center gap-4"
                 >
                     <Link
-                        href="/auth/register"
+                        href="/auth/signup"
                         className="group relative px-6 py-3 rounded-lg bg-white text-black font-medium text-sm overflow-hidden transition-all hover:bg-white/90"
                     >
                         <span className="relative z-10 flex items-center gap-2">

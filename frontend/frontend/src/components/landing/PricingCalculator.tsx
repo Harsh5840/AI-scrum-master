@@ -19,7 +19,7 @@ const plans = [
             'Community support',
         ],
         cta: 'Get Started',
-        ctaLink: '/auth/register',
+        ctaLink: '/auth/signup',
     },
     {
         name: 'Pro',
@@ -37,7 +37,7 @@ const plans = [
             'Custom dashboards',
         ],
         cta: 'Start Free Trial',
-        ctaLink: '/auth/register',
+        ctaLink: '/auth/signup',
     },
     {
         name: 'Enterprise',
@@ -111,8 +111,8 @@ export function PricingCalculator() {
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 }}
                             className={`relative rounded-2xl p-6 lg:p-8 ${plan.highlight
-                                    ? 'border-2 border-purple-500/50 bg-gradient-to-b from-purple-500/10 to-transparent'
-                                    : 'border border-white/10 bg-white/[0.02]'
+                                ? 'border-2 border-purple-500/50 bg-gradient-to-b from-purple-500/10 to-transparent'
+                                : 'border border-white/10 bg-white/[0.02]'
                                 }`}
                         >
                             {/* Popular badge */}
@@ -157,8 +157,8 @@ export function PricingCalculator() {
                             <Link
                                 href={plan.ctaLink}
                                 className={`flex items-center justify-center gap-2 w-full py-3 rounded-lg font-medium transition-all ${plan.highlight
-                                        ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white hover:opacity-90'
-                                        : 'border border-white/20 text-white hover:bg-white/5'
+                                    ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white hover:opacity-90'
+                                    : 'border border-white/20 text-white hover:bg-white/5'
                                     }`}
                             >
                                 {plan.highlight && <RocketIcon className="w-4 h-4" />}

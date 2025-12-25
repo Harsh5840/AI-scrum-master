@@ -68,7 +68,7 @@ export function FooterCTA() {
                             <span className="text-white/30 text-sm">or</span>
 
                             <Link
-                                href="/auth/register"
+                                href="/auth/signup"
                                 className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
                             >
                                 Sign up with email →

@@ -131,7 +131,7 @@ export function CommandPalette() {
                                             <span>Sign In</span>
                                         </Command.Item>
                                         <Command.Item
-                                            onSelect={() => runCommand(() => router.push('/auth/register'))}
+                                            onSelect={() => runCommand(() => router.push('/auth/signup'))}
                                             className="flex items-center gap-3 px-3 py-3 rounded-lg text-white cursor-pointer hover:bg-white/5 aria-selected:bg-white/10 transition-colors"
                                         >
                                             <RocketIcon className="w-4 h-4 text-emerald-400" />
