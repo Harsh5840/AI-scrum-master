@@ -8,7 +8,7 @@ COPY package*.json ./
 COPY tsconfig.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm ci || (sleep 5 && npm ci)
 
 # Copy prisma schema
 COPY prisma ./prisma/
@@ -29,7 +29,7 @@ WORKDIR /app
 
 # Install production dependencies only
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --omit=dev || (sleep 5 && npm ci --omit=dev) && npm cache clean --force
 
 # Copy Prisma schema and generate client
 COPY prisma ./prisma/

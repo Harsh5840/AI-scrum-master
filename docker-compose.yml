@@ -54,8 +54,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-scrummaster}:${POSTGRES_PASSWORD:-scrumpassword}@postgres:5432/${POSTGRES_DB:-scrum_db}?schema=public
       REDIS_URL: redis://redis:6379
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-local-dev-jwt-secret-change-me}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-local-dev-refresh-secret-change-me}
+      SESSION_SECRET: ${SESSION_SECRET:-local-dev-session-secret-change-me}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
