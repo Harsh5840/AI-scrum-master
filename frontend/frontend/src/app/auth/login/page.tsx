@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -10,9 +10,12 @@ import { Label } from '@/components/ui/label'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { loginUser, clearError } from '@/store/slices/authSlice'
 import { EyeOpenIcon, EyeNoneIcon, ArrowRightIcon } from '@radix-ui/react-icons'
+import { SignalWave } from '@/components/brand/SignalWave'
+import { GoogleButton } from '@/components/brand/GoogleButton'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const dispatch = useAppDispatch()
   const { isLoading, error } = useAppSelector((state) => state.auth)
   const [showPassword, setShowPassword] = useState(false)
@@ -23,26 +26,30 @@ export default function LoginPage() {
     dispatch(clearError())
     const result = await dispatch(loginUser(formData))
     if (loginUser.fulfilled.match(result)) {
-      router.push('/dashboard')
+      router.push(searchParams.get('redirect') || '/blockers')
     }
   }
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
-      <div className="hidden lg:flex flex-col justify-between p-12 border-r border-border brand-wash relative">
-        <div className="flex items-center gap-2 relative z-10">
-          <div className="w-9 h-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-display">
+      <div className="hidden lg:flex flex-col justify-between p-12 border-r border-border brand-wash brand-grain relative overflow-hidden">
+        <div className="aurora-orb pointer-events-none absolute -top-16 right-0 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+        <Link href="/" className="flex items-center gap-2 relative z-10">
+          <div className="w-9 h-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-display shadow-[0_0_24px_hsl(var(--primary)/0.4)]">
             S
           </div>
           <span className="font-display text-xl">Signal</span>
-        </div>
-        <div className="relative z-10 max-w-md">
-          <h2 className="font-display text-4xl leading-tight mb-4">
-            Typed blockers from messy standups.
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Sign in to run the loop: submit a standup, extract blockers, ask grounded questions.
-          </p>
+        </Link>
+        <div className="relative z-10 space-y-8">
+          <div className="max-w-md">
+            <h2 className="font-display text-4xl leading-tight mb-4">
+              Risk inbox from messy standups.
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Sign in to run the loop: submit a standup, extract blockers, ask grounded questions.
+            </p>
+          </div>
+          <SignalWave className="h-40 rounded-xl border border-primary/20 bg-background/40" />
         </div>
         <p className="text-xs text-muted-foreground relative z-10">
           Demo: demo@scrum.signal / demo1234 (after seed)
@@ -51,15 +58,22 @@ export default function LoginPage() {
 
       <div className="flex items-center justify-center p-6 sm:p-12">
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 16, filter: 'blur(8px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           className="w-full max-w-md space-y-8"
         >
           <div>
             <h1 className="font-display text-3xl mb-2">Welcome back</h1>
-            <p className="text-sm text-muted-foreground">
-              Use your registered account credentials
-            </p>
+            <p className="text-sm text-muted-foreground">Google or your registered email</p>
+          </div>
+
+          <GoogleButton label="Continue with Google" />
+
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            or email
+            <span className="h-px flex-1 bg-border" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -122,5 +136,13 @@ export default function LoginPage() {
         </motion.div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <LoginForm />
+    </Suspense>
   )
 }

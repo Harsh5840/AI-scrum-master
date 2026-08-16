@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { getApiBase, getAuthToken } from '@/lib/session'
 
 // Forward declaration - will be properly imported from store
 interface RootState {
@@ -14,6 +15,7 @@ export interface User {
   email: string
   avatarUrl?: string
   avatar?: string
+  currentOrgId?: number
   createdAt: string
 }
 
@@ -88,25 +90,14 @@ export interface WorkflowJob {
 
 // Base query with auth token
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
-  credentials: 'include', // Important: send cookies for session-based auth
+  baseUrl: getApiBase(),
+  credentials: 'include',
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as RootState
-    const token = state.auth.token
-    
-    // Also check localStorage as fallback
-    if (!token && typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('token')
-      if (storedToken) {
-        headers.set('authorization', `Bearer ${storedToken}`)
-        return headers
-      }
-    }
-    
+    const token = state.auth.token || getAuthToken()
     if (token) {
       headers.set('authorization', `Bearer ${token}`)
     }
-    
     return headers
   },
 })

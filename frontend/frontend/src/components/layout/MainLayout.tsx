@@ -3,6 +3,7 @@
 import React from 'react'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { toggleSidebar } from '@/store/slices/uiSlice'
 import { cn } from '@/lib/utils'
@@ -17,11 +18,12 @@ export function MainLayout({ children, title }: MainLayoutProps) {
   const sidebarOpen = useAppSelector((state) => state.ui.sidebarOpen)
 
   return (
+    <ProtectedRoute>
     <div className="flex h-screen bg-background">
       <div
         className={cn(
           'hidden lg:block transition-all duration-300 border-r border-border',
-          sidebarOpen ? 'w-60' : 'w-16'
+          sidebarOpen ? 'w-56' : 'w-16'
         )}
       >
         <Sidebar />
@@ -49,5 +51,6 @@ export function MainLayout({ children, title }: MainLayoutProps) {
         <main className="flex-1 overflow-auto p-4 lg:p-6 brand-wash">{children}</main>
       </div>
     </div>
+    </ProtectedRoute>
   )
 }

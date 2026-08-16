@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckIcon, Cross2Icon, PersonIcon } from '@radix-ui/react-icons'
 import { motion } from 'framer-motion'
+import { apiUrl, authHeaders, getAuthToken } from '@/lib/session'
 
 interface InviteData {
     id: number
@@ -42,7 +43,7 @@ export default function AcceptInvitePage() {
 
     const fetchInvite = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/invites/${token}`)
+            const res = await fetch(apiUrl(`/invites/${token}`))
 
             if (!res.ok) {
                 const data = await res.json()
@@ -59,10 +60,7 @@ export default function AcceptInvitePage() {
     }
 
     const handleAccept = async () => {
-        const authToken = localStorage.getItem('accessToken')
-
-        if (!authToken) {
-            // Redirect to login with return URL
+        if (!getAuthToken()) {
             router.push(`/auth/login?redirect=/invite/${token}`)
             return
         }
@@ -71,11 +69,9 @@ export default function AcceptInvitePage() {
         setError('')
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/invites/${token}/accept`, {
+            const res = await fetch(apiUrl(`/invites/${token}/accept`), {
                 method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${authToken}`,
-                },
+                headers: authHeaders(),
             })
 
             if (!res.ok) {
@@ -89,7 +85,7 @@ export default function AcceptInvitePage() {
 
             // Redirect to dashboard after 2 seconds
             setTimeout(() => {
-                router.push('/dashboard')
+                router.push('/blockers')
             }, 2000)
         } catch (err: any) {
             setError(err.message || 'Failed to accept invite')

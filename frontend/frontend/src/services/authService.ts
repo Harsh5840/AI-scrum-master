@@ -1,7 +1,16 @@
 import axios from 'axios'
 import Cookies from 'js-cookie'
+import { clearSession, getApiBase, getAuthToken, persistSession } from '@/lib/session'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+const API_BASE_URL = getApiBase()
+
+function cookieOptions(days: number) {
+  return {
+    expires: days,
+    sameSite: 'lax' as const,
+    secure: typeof window !== 'undefined' && window.location.protocol === 'https:',
+  }
+}
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -12,7 +21,7 @@ const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = Cookies.get('auth_token')
+    const token = Cookies.get('auth_token') || getAuthToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -27,10 +36,11 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid
+    const url = String(error.config?.url || '')
+    if (error.response?.status === 401 && !url.includes('/auth/login') && !url.includes('/auth/register')) {
       Cookies.remove('auth_token')
       Cookies.remove('refresh_token')
+      clearSession()
       window.location.href = '/auth/login'
     }
     return Promise.reject(error)
@@ -64,13 +74,11 @@ export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await apiClient.post('/auth/login', credentials)
     const { user, token, refreshToken } = response.data
-    
-    // Store tokens in cookies
-    Cookies.set('auth_token', token, { expires: 7, secure: true, sameSite: 'strict' })
+    Cookies.set('auth_token', token, cookieOptions(7))
     if (refreshToken) {
-      Cookies.set('refresh_token', refreshToken, { expires: 30, secure: true, sameSite: 'strict' })
+      Cookies.set('refresh_token', refreshToken, cookieOptions(30))
     }
-    
+    persistSession(token, refreshToken, (user as { currentOrgId?: number }).currentOrgId)
     return response.data
   },
 
@@ -78,13 +86,11 @@ export const authService = {
   async signup(userData: SignupData): Promise<AuthResponse> {
     const response = await apiClient.post('/auth/register', userData)
     const { user, token, refreshToken } = response.data
-    
-    // Store tokens in cookies
-    Cookies.set('auth_token', token, { expires: 7, secure: true, sameSite: 'strict' })
+    Cookies.set('auth_token', token, cookieOptions(7))
     if (refreshToken) {
-      Cookies.set('refresh_token', refreshToken, { expires: 30, secure: true, sameSite: 'strict' })
+      Cookies.set('refresh_token', refreshToken, cookieOptions(30))
     }
-    
+    persistSession(token, refreshToken, (user as { currentOrgId?: number }).currentOrgId)
     return response.data
   },
 
@@ -99,20 +105,11 @@ export const authService = {
   async handleOAuthCallback(code: string, state?: string): Promise<AuthResponse> {
     const response = await apiClient.post('/auth/google/callback', { code, state })
     const { user, token, refreshToken } = response.data
-    
-    // Store tokens in cookies
-    Cookies.set('auth_token', token, { expires: 7, secure: true, sameSite: 'strict' })
+    Cookies.set('auth_token', token, cookieOptions(7))
     if (refreshToken) {
-      Cookies.set('refresh_token', refreshToken, { expires: 30, secure: true, sameSite: 'strict' })
+      Cookies.set('refresh_token', refreshToken, cookieOptions(30))
     }
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('token', token)
-      if (refreshToken) {
-        localStorage.setItem('refresh_token', refreshToken)
-      }
-    }
-    
+    persistSession(token, refreshToken, (user as { currentOrgId?: number }).currentOrgId)
     return response.data
   },
 
@@ -127,10 +124,11 @@ export const authService = {
     const { user, token: newToken, refreshToken: newRefreshToken } = response.data
     
     // Update tokens
-    Cookies.set('auth_token', newToken, { expires: 7, secure: true, sameSite: 'strict' })
+    Cookies.set('auth_token', newToken, cookieOptions(7))
     if (newRefreshToken) {
-      Cookies.set('refresh_token', newRefreshToken, { expires: 30, secure: true, sameSite: 'strict' })
+      Cookies.set('refresh_token', newRefreshToken, cookieOptions(30))
     }
+    persistSession(newToken, newRefreshToken)
     
     return response.data
   },
@@ -152,17 +150,17 @@ export const authService = {
       // Remove tokens from cookies
       Cookies.remove('auth_token')
       Cookies.remove('refresh_token')
+      clearSession()
     }
   },
 
   // Check if user is authenticated
   isAuthenticated(): boolean {
-    return !!Cookies.get('auth_token')
+    return !!(Cookies.get('auth_token') || getAuthToken())
   },
 
-  // Get stored token
   getToken(): string | undefined {
-    return Cookies.get('auth_token')
+    return Cookies.get('auth_token') || getAuthToken() || undefined
   }
 }
 

@@ -1,133 +1,130 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { logout } from '@/store/slices/authSlice'
+import { useGetQueueStatusQuery } from '@/store/api/workflowsApi'
+import { PageEnter } from '@/components/brand/PageEnter'
 
-const sections = [
+const tabs = [
   { id: 'account', label: 'Account' },
-  { id: 'notifications', label: 'Notifications' },
-  { id: 'integrations', label: 'Integrations' },
+  { id: 'slack', label: 'Slack' },
+  { id: 'workers', label: 'Workers' },
 ] as const
 
-export default function SettingsPage() {
+function SettingsBody() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
-  const [activeSection, setActiveSection] = useState<(typeof sections)[number]['id']>('account')
-  const [notifications, setNotifications] = useState({
-    standupReminders: true,
-    blockerAlerts: true,
+  const initial = (searchParams.get('tab') as (typeof tabs)[number]['id']) || 'account'
+  const [tab, setTab] = useState<(typeof tabs)[number]['id']>(
+    tabs.some((t) => t.id === initial) ? initial : 'account'
+  )
+
+  const { data, isLoading, refetch, isFetching } = useGetQueueStatusQuery(undefined, {
+    pollingInterval: tab === 'workers' ? 10000 : 0,
   })
+  const ai = data?.queues?.aiWorkflows
+  const waiting = ai?.waiting ?? data?.waiting ?? 0
+  const active = ai?.active ?? data?.active ?? 0
+  const completed = ai?.completed ?? data?.completed ?? 0
+  const failed = ai?.failed ?? data?.failed ?? 0
 
   return (
     <MainLayout title="Settings">
-      <div className="flex flex-col md:flex-row gap-6">
-        <nav className="md:w-48 shrink-0 space-y-1" aria-label="Settings sections">
-          {sections.map((item) => (
+      <PageEnter className="max-w-2xl mx-auto space-y-8">
+        <h2 className="font-display text-3xl">Settings</h2>
+        <div className="flex gap-1" role="tablist" aria-label="Settings">
+          {tabs.map((item) => (
             <button
               key={item.id}
               type="button"
-              onClick={() => setActiveSection(item.id)}
-              className={`w-full text-left min-h-10 px-3 rounded-lg text-sm ${
-                activeSection === item.id
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+              role="tab"
+              aria-selected={tab === item.id}
+              onClick={() => setTab(item.id)}
+              className={`px-3 min-h-9 rounded-full text-sm ${
+                tab === item.id
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {item.label}
             </button>
           ))}
-        </nav>
-
-        <div className="flex-1 space-y-5 min-w-0">
-          {activeSection === 'account' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base font-display">Account</CardTitle>
-                <CardDescription>Signed-in identity from auth. Profile edits are not persisted yet.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-xs text-muted-foreground">Name</p>
-                  <p className="text-sm mt-1">{user?.name || '—'}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Email</p>
-                  <p className="text-sm mt-1">{user?.email || '—'}</p>
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    dispatch(logout())
-                    router.push('/')
-                  }}
-                >
-                  Log out
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeSection === 'notifications' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base font-display">Notifications</CardTitle>
-                <CardDescription>
-                  These toggles stay in this browser. Server-side notification prefs are not shipped.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between gap-4 rounded-xl border border-border p-3">
-                  <Label htmlFor="standup-reminders" className="text-sm font-normal">
-                    Standup reminders
-                  </Label>
-                  <Switch
-                    id="standup-reminders"
-                    checked={notifications.standupReminders}
-                    onCheckedChange={(checked) =>
-                      setNotifications({ ...notifications, standupReminders: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between gap-4 rounded-xl border border-border p-3">
-                  <Label htmlFor="blocker-alerts" className="text-sm font-normal">
-                    Blocker alerts
-                  </Label>
-                  <Switch
-                    id="blocker-alerts"
-                    checked={notifications.blockerAlerts}
-                    onCheckedChange={(checked) =>
-                      setNotifications({ ...notifications, blockerAlerts: checked })
-                    }
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeSection === 'integrations' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base font-display">Integrations</CardTitle>
-                <CardDescription>Slack OAuth is the only connector with a live status check.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Link href="/settings/integrations" className="text-sm text-primary hover:underline">
-                  Open Slack connection
-                </Link>
-              </CardContent>
-            </Card>
-          )}
         </div>
-      </div>
+
+        {tab === 'account' && (
+          <div className="space-y-6">
+            <div>
+              <p className="text-xs text-muted-foreground">Name</p>
+              <p className="mt-1">{user?.name || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Email</p>
+              <p className="mt-1">{user?.email || '—'}</p>
+            </div>
+            <Link href="/settings/team" className="text-sm text-primary hover:underline inline-block">
+              Team members
+            </Link>
+            <div>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  dispatch(logout())
+                  router.push('/')
+                }}
+              >
+                Log out
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {tab === 'slack' && (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Slack is the only connector with a live OAuth check.
+            </p>
+            <Link href="/settings/integrations" className="text-sm text-primary hover:underline">
+              Open Slack connection
+            </Link>
+          </div>
+        )}
+
+        {tab === 'workers' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm text-muted-foreground tabular-nums">
+                {isLoading
+                  ? 'Loading queue counts…'
+                  : `${waiting} waiting · ${active} active · ${completed} completed · ${failed} failed`}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+                {isFetching ? 'Refreshing…' : 'Refresh'}
+              </Button>
+            </div>
+            <pre className="rounded-xl border border-border p-4 font-mono text-xs overflow-x-auto">
+              {`ai-workflows: ${JSON.stringify(ai || {}, null, 2)}`}
+            </pre>
+            <p className="text-sm text-muted-foreground">
+              If REDIS_URL is unset, jobs run inline and counts may stay at zero.
+            </p>
+          </div>
+        )}
+      </PageEnter>
     </MainLayout>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={<MainLayout title="Settings"><p className="text-sm text-muted-foreground">Loading…</p></MainLayout>}>
+      <SettingsBody />
+    </Suspense>
   )
 }

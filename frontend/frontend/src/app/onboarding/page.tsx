@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { RocketIcon, PersonIcon, PlusIcon, ArrowRightIcon } from '@radix-ui/react-icons'
 import { motion } from 'framer-motion'
+import { apiUrl, authHeaders } from '@/lib/session'
 
 export default function OnboardingPage() {
     const router = useRouter()
@@ -27,12 +28,11 @@ export default function OnboardingPage() {
         setError('')
 
         try {
-            const token = localStorage.getItem('accessToken')
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/organizations`, {
+            const res = await fetch(apiUrl('/organizations'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
+                    ...authHeaders(),
                 },
                 body: JSON.stringify({ name: orgName }),
             })
@@ -43,7 +43,7 @@ export default function OnboardingPage() {
 
             const org = await res.json()
             localStorage.setItem('currentOrgId', org.id.toString())
-            router.push('/dashboard')
+            router.push('/blockers')
         } catch (err) {
             setError('Failed to create organization. Please try again.')
         } finally {
@@ -61,12 +61,9 @@ export default function OnboardingPage() {
         setError('')
 
         try {
-            const token = localStorage.getItem('accessToken')
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/invites/${inviteCode}/accept`, {
+            const res = await fetch(apiUrl(`/invites/${inviteCode}/accept`), {
                 method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: authHeaders(),
             })
 
             if (!res.ok) {
@@ -76,7 +73,7 @@ export default function OnboardingPage() {
 
             const { organization } = await res.json()
             localStorage.setItem('currentOrgId', organization.id.toString())
-            router.push('/dashboard')
+            router.push('/blockers')
         } catch (err: any) {
             setError(err.message || 'Failed to join organization')
         } finally {
@@ -85,7 +82,7 @@ export default function OnboardingPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#09090B] relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-background brand-wash relative overflow-hidden">
             {/* Background */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 opacity-[0.03]" style={{

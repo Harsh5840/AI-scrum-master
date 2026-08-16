@@ -3,35 +3,31 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppSelector } from '@/store/hooks'
+import { getAuthToken } from '@/lib/session'
 
-interface ProtectedRouteProps {
-  children: React.ReactNode
-}
-
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth)
+  const hasToken = typeof window !== 'undefined' && !!getAuthToken()
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/')
+    if (!isLoading && !isAuthenticated && !hasToken) {
+      router.push('/auth/login')
     }
-  }, [isAuthenticated, isLoading, router])
+  }, [isAuthenticated, isLoading, hasToken, router])
 
-  // Show loading state while checking auth
-  if (isLoading) {
+  if (isLoading || (!isAuthenticated && hasToken)) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Checking session…</p>
       </div>
     )
   }
 
-  // Show loading state while redirecting
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Redirecting to login…</p>
       </div>
     )
   }
@@ -39,7 +35,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   return <>{children}</>
 }
 
-// Higher-order component version for easier use
 export function withAuth<P extends object>(Component: React.ComponentType<P>) {
   return function AuthenticatedComponent(props: P) {
     return (

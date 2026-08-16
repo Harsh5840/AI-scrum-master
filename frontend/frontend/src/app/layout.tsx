@@ -19,9 +19,9 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "Signal — AI Scrum Master",
+  title: "Signal — Risk inbox",
   description:
-    "Standup in, structured blockers out. Signal turns messy agile updates into typed team state.",
+    "Paste a standup. Signal extracts typed blockers and answers grounded questions from team history.",
 };
 
 export default function RootLayout({

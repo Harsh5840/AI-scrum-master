@@ -120,9 +120,86 @@
 @layer utilities {
   .brand-wash {
     background:
-      radial-gradient(ellipse 70% 42% at 50% -18%, hsl(var(--primary) / 0.16), transparent 62%),
+      radial-gradient(ellipse 80% 50% at 12% -10%, hsl(var(--primary) / 0.22), transparent 58%),
+      radial-gradient(ellipse 55% 40% at 92% 8%, hsl(168 42% 40% / 0.12), transparent 55%),
       hsl(var(--background));
   }
+
+  .brand-grain {
+    position: relative;
+  }
+
+  .brand-grain::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    opacity: 0.09;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .signal-grid {
+    stroke: hsl(var(--primary) / 0.12);
+    stroke-width: 1;
+  }
+
+  .signal-line {
+    fill: none;
+    stroke: url(#signalStroke);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-dasharray: 1400;
+    stroke-dashoffset: 1400;
+    animation: signal-draw 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    filter: drop-shadow(0 0 10px hsl(var(--primary) / 0.45));
+  }
+
+  .signal-fill {
+    fill: url(#signalFill);
+    opacity: 0;
+    animation: signal-fade 1.2s 0.4s ease forwards;
+  }
+
+  .signal-pip {
+    fill: hsl(var(--primary));
+    animation: signal-pulse 2.4s ease-in-out infinite;
+  }
+
+  .signal-sweep {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.18), transparent);
+    transform: translateX(-100%);
+    animation: signal-sweep 4.5s 1s ease-in-out infinite;
+  }
+}
+
+@keyframes signal-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes signal-fade {
+  to { opacity: 1; }
+}
+
+@keyframes signal-pulse {
+  0%, 100% { opacity: 0.4; r: 4; }
+  50% { opacity: 1; r: 6; }
+}
+
+@keyframes signal-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes aurora {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(4%, 3%, 0) scale(1.06); }
+}
+
+.aurora-orb {
+  animation: aurora 12s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -130,5 +207,9 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .signal-line {
+    stroke-dashoffset: 0;
   }
 }

@@ -3,174 +3,207 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+const hoursAgo = (h: number) => new Date(Date.now() - h * 60 * 60 * 1000);
+
+async function upsertUser(email: string, name: string, password: string) {
+  return prisma.user.upsert({
+    where: { email },
+    update: { name, password },
+    create: { email, name, password },
+  });
+}
+
 async function main() {
   const password = await bcrypt.hash('demo1234', 12);
 
-  const demoUser = await prisma.user.upsert({
-    where: { email: 'demo@scrum.signal' },
-    update: {},
-    create: {
-      name: 'Demo Engineer',
-      email: 'demo@scrum.signal',
-      password,
-    },
-  });
-
-  const pmUser = await prisma.user.upsert({
-    where: { email: 'pm@scrum.signal' },
-    update: {},
-    create: {
-      name: 'Demo PM',
-      email: 'pm@scrum.signal',
-      password,
-    },
-  });
+  const engineer = await upsertUser('demo@scrum.signal', 'Avery Lin', password);
+  const pm = await upsertUser('pm@scrum.signal', 'Sam Rivera', password);
+  const frontend = await upsertUser('maya@scrum.signal', 'Maya Chen', password);
+  const platform = await upsertUser('jordan@scrum.signal', 'Jordan Hale', password);
 
   const org = await prisma.organization.upsert({
     where: { slug: 'signal-lab' },
-    update: {},
+    update: { name: 'Signal Lab' },
     create: {
       name: 'Signal Lab',
       slug: 'signal-lab',
       plan: 'pro',
-      members: {
-        create: [
-          { userId: demoUser.id, role: 'owner' },
-          { userId: pmUser.id, role: 'admin' },
-        ],
-      },
     },
   });
 
-  await prisma.user.update({
-    where: { id: demoUser.id },
-    data: { currentOrgId: org.id },
-  });
-  await prisma.user.update({
-    where: { id: pmUser.id },
-    data: { currentOrgId: org.id },
-  });
+  const members = [
+    { userId: engineer.id, role: 'owner' },
+    { userId: pm.id, role: 'admin' },
+    { userId: frontend.id, role: 'member' },
+    { userId: platform.id, role: 'member' },
+  ];
 
-  // Ensure memberships exist if org already did
-  await prisma.member.upsert({
-    where: { userId_orgId: { userId: demoUser.id, orgId: org.id } },
-    update: {},
-    create: { userId: demoUser.id, orgId: org.id, role: 'owner' },
-  });
-  await prisma.member.upsert({
-    where: { userId_orgId: { userId: pmUser.id, orgId: org.id } },
-    update: {},
-    create: { userId: pmUser.id, orgId: org.id, role: 'admin' },
-  });
-
-  const start = new Date();
-  start.setDate(start.getDate() - 5);
-  const end = new Date();
-  end.setDate(end.getDate() + 9);
-
-  let sprint = await prisma.sprint.findFirst({
-    where: { orgId: org.id, name: 'Sprint 24 — Signal Pipeline' },
-  });
-
-  if (!sprint) {
-    sprint = await prisma.sprint.create({
-      data: {
-        name: 'Sprint 24 — Signal Pipeline',
-        orgId: org.id,
-        startDate: start,
-        endDate: end,
-        backlogItems: {
-          create: [
-            {
-              title: 'Standup ingest API',
-              description: 'Accept standup text and persist summary',
-              storyPoints: 5,
-              priority: 'high',
-              status: 'done',
-              completed: true,
-              assignee: 'Demo Engineer',
-            },
-            {
-              title: 'Blocker extraction',
-              description: 'Regex + Gemini typed blockers',
-              storyPoints: 8,
-              priority: 'high',
-              status: 'in-progress',
-              completed: false,
-              assignee: 'Demo Engineer',
-            },
-            {
-              title: 'Dashboard health cards',
-              storyPoints: 3,
-              priority: 'medium',
-              status: 'todo',
-              completed: false,
-              assignee: 'Demo PM',
-            },
-          ],
-        },
-      },
+  for (const m of members) {
+    await prisma.member.upsert({
+      where: { userId_orgId: { userId: m.userId, orgId: org.id } },
+      update: { role: m.role },
+      create: { userId: m.userId, orgId: org.id, role: m.role },
+    });
+    await prisma.user.update({
+      where: { id: m.userId },
+      data: { currentOrgId: org.id },
     });
   }
 
-  const existingStandups = await prisma.standup.count({ where: { orgId: org.id } });
-  if (existingStandups === 0) {
-    const standup1 = await prisma.standup.create({
-      data: {
-        userId: demoUser.id,
-        orgId: org.id,
-        sprintId: sprint.id,
-        summary:
-          'Finished standup ingest. Today working on blocker extraction. Blocked waiting on API credentials from platform team.',
-      },
-    });
+  await prisma.blocker.deleteMany({ where: { orgId: org.id } });
+  await prisma.standup.deleteMany({ where: { orgId: org.id } });
+  await prisma.backlogItem.deleteMany({
+    where: { sprint: { orgId: org.id } },
+  });
+  await prisma.sprint.deleteMany({ where: { orgId: org.id } });
 
-    await prisma.blocker.create({
-      data: {
-        standupId: standup1.id,
+  const start = new Date();
+  start.setDate(start.getDate() - 4);
+  const end = new Date();
+  end.setDate(end.getDate() + 10);
+
+  const sprint = await prisma.sprint.create({
+    data: {
+      name: 'Window — checkout reliability',
+      orgId: org.id,
+      startDate: start,
+      endDate: end,
+    },
+  });
+
+  const s1 = await prisma.standup.create({
+    data: {
+      userId: engineer.id,
+      orgId: org.id,
+      sprintId: sprint.id,
+      createdAt: hoursAgo(46),
+      summary:
+        'Yesterday: Finished standup ingest. Today: Blocker extraction. Blockers: Blocked waiting on API credentials from platform team.',
+    },
+  });
+
+  const s2 = await prisma.standup.create({
+    data: {
+      userId: frontend.id,
+      orgId: org.id,
+      sprintId: sprint.id,
+      createdAt: hoursAgo(28),
+      summary:
+        'Yesterday: Checkout empty-state polish. Today: Payment error copy. Blockers: Stuck waiting on brand tokens from design — buttons still use the old green.',
+    },
+  });
+
+  const s3 = await prisma.standup.create({
+    data: {
+      userId: platform.id,
+      orgId: org.id,
+      sprintId: sprint.id,
+      createdAt: hoursAgo(22),
+      summary:
+        'Yesterday: Rotated staging secrets. Today: Webhook replay. Blockers: Stripe webhook signing secret is missing in staging — payments fail the signature check.',
+    },
+  });
+
+  const s4 = await prisma.standup.create({
+    data: {
+      userId: engineer.id,
+      orgId: org.id,
+      sprintId: sprint.id,
+      createdAt: hoursAgo(8),
+      summary:
+        'Yesterday: Merged RAG ask endpoint. Today: Inbox list. Blockers: Staging build is failing due to missing credentials — still blocked on platform.',
+    },
+  });
+
+  const s5 = await prisma.standup.create({
+    data: {
+      userId: pm.id,
+      orgId: org.id,
+      sprintId: sprint.id,
+      createdAt: hoursAgo(6),
+      summary:
+        'Yesterday: Risk review with eng. Today: Triage inbox. No personal blockers. Watching staging credentials and Stripe webhook.',
+    },
+  });
+
+  const s6 = await prisma.standup.create({
+    data: {
+      userId: frontend.id,
+      orgId: org.id,
+      sprintId: sprint.id,
+      createdAt: hoursAgo(3),
+      summary:
+        'Yesterday: Flaky Playwright suite. Today: Quarantine the search spec. Blockers: CI e2e is flaky on docs search — not blocking checkout.',
+    },
+  });
+
+  await prisma.blocker.createMany({
+    data: [
+      {
+        standupId: s1.id,
         orgId: org.id,
         type: 'dependency',
         severity: 'high',
         description: 'Waiting on API credentials from platform team',
         status: 'active',
+        detectedAt: hoursAgo(46),
       },
-    });
-
-    await prisma.standup.create({
-      data: {
-        userId: pmUser.id,
+      {
+        standupId: s4.id,
         orgId: org.id,
-        sprintId: sprint.id,
-        summary:
-          'Reviewed burndown with eng. Planning risk check on open blockers. No personal blockers.',
+        type: 'technical',
+        severity: 'critical',
+        description: 'Staging build failing due to missing credentials',
+        status: 'active',
+        detectedAt: hoursAgo(8),
       },
-    });
-
-    await prisma.standup.create({
-      data: {
-        userId: demoUser.id,
+      {
+        standupId: s3.id,
         orgId: org.id,
-        sprintId: sprint.id,
-        summary:
-          'Merged RAG ask endpoint. Still blocked on credentials — build is failing in staging environment.',
-        blockers: {
-          create: {
-            orgId: org.id,
-            type: 'technical',
-            severity: 'critical',
-            description: 'Staging build failing due to missing credentials',
-            status: 'active',
-          },
-        },
+        type: 'external',
+        severity: 'high',
+        description: 'Stripe webhook signing secret missing in staging',
+        status: 'active',
+        detectedAt: hoursAgo(22),
       },
-    });
-  }
+      {
+        standupId: s2.id,
+        orgId: org.id,
+        type: 'dependency',
+        severity: 'medium',
+        description: 'Waiting on brand tokens from design',
+        status: 'active',
+        detectedAt: hoursAgo(28),
+      },
+      {
+        standupId: s6.id,
+        orgId: org.id,
+        type: 'technical',
+        severity: 'low',
+        description: 'CI e2e flaky on docs search',
+        status: 'active',
+        detectedAt: hoursAgo(3),
+      },
+      {
+        standupId: s5.id,
+        orgId: org.id,
+        type: 'resource',
+        severity: 'medium',
+        description: 'Need help reviewing weekend on-call handoff notes',
+        status: 'resolved',
+        detectedAt: hoursAgo(30),
+        resolvedAt: hoursAgo(12),
+      },
+    ],
+  });
 
-  console.log('Seed complete');
-  console.log('  Demo login: demo@scrum.signal / demo1234');
-  console.log('  PM login:    pm@scrum.signal / demo1234');
-  console.log(`  Org: ${org.name} (${org.slug})`);
-  console.log(`  Sprint: ${sprint.name}`);
+  console.log('Seed complete — Signal Lab risk inbox');
+  console.log('  PM (interview):     pm@scrum.signal / demo1234');
+  console.log('  Engineer:           demo@scrum.signal / demo1234');
+  console.log('  Frontend:           maya@scrum.signal / demo1234');
+  console.log('  Platform:           jordan@scrum.signal / demo1234');
+  console.log(`  Org: ${org.name} · ${sprint.name}`);
+  console.log('  Open inbox: staging credentials (critical), Stripe webhook (high), API creds (high)');
 }
 
 main()

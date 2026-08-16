@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { signupUser, clearError } from '@/store/slices/authSlice'
 import { ArrowRightIcon, EyeNoneIcon, EyeOpenIcon } from '@radix-ui/react-icons'
+import { SignalWave } from '@/components/brand/SignalWave'
+import { GoogleButton } from '@/components/brand/GoogleButton'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -50,39 +52,52 @@ export default function SignupPage() {
       })
     )
     if (signupUser.fulfilled.match(result)) {
-      router.push('/dashboard')
+      router.push('/blockers')
     }
   }
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
-      <div className="hidden lg:flex flex-col justify-between p-12 border-r border-border brand-wash">
-        <div className="flex items-center gap-2">
+      <div className="hidden lg:flex flex-col justify-between p-12 border-r border-border brand-wash brand-grain relative overflow-hidden">
+        <div className="aurora-orb pointer-events-none absolute -top-16 right-0 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+        <Link href="/" className="flex items-center gap-2 relative z-10">
           <div className="w-9 h-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-display">
             S
           </div>
           <span className="font-display text-xl">Signal</span>
-        </div>
-        <div className="max-w-md">
-          <h2 className="font-display text-4xl leading-tight mb-4">
-            Your org starts with the first standup.
-          </h2>
-          <p className="text-muted-foreground">
-            Signup creates a personal organization so sprints, standups, and blockers stay tenant-scoped.
-          </p>
+        </Link>
+        <div className="relative z-10 space-y-8">
+          <div className="max-w-md">
+            <h2 className="font-display text-4xl leading-tight mb-4">
+              Your org starts with the first standup.
+            </h2>
+            <p className="text-muted-foreground">
+              Signup creates a personal organization so sprints, standups, and blockers stay tenant-scoped.
+            </p>
+          </div>
+          <SignalWave className="h-40 rounded-xl border border-primary/20 bg-background/40" />
         </div>
         <div />
       </div>
 
       <div className="flex items-center justify-center p-6 sm:p-12">
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 16, filter: 'blur(8px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           className="w-full max-w-md space-y-8"
         >
           <div>
             <h1 className="font-display text-3xl mb-2">Create account</h1>
-            <p className="text-sm text-muted-foreground">Start the standup → blocker loop</p>
+            <p className="text-sm text-muted-foreground">Google or email — then the standup loop</p>
+          </div>
+
+          <GoogleButton label="Sign up with Google" />
+
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            or email
+            <span className="h-px flex-1 bg-border" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

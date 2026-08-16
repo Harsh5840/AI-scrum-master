@@ -11,10 +11,14 @@ router.post('/register', AuthController.register)
 router.post('/refresh', AuthController.refresh)
 router.post('/logout', AuthController.logout)
 
-// Google OAuth routes
-router.get('/google', 
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-)
+router.get('/google', (req, res, next) => {
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    return res.status(501).json({
+      message: 'Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.',
+    })
+  }
+  return passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next)
+})
 
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),

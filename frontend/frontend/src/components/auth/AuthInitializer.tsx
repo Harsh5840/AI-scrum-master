@@ -1,46 +1,28 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { getCurrentUser } from '@/store/slices/authSlice'
-import { authService } from '@/services/authService'
+import { getAuthToken } from '@/lib/session'
 
-interface AuthInitializerProps {
-  children: React.ReactNode
-}
-
-export function AuthInitializer({ children }: AuthInitializerProps) {
+export function AuthInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch()
-  const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth)
+  const { isAuthenticated } = useAppSelector((state) => state.auth)
+  const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    // Check if user is authenticated on app load
-    const initializeAuth = async () => {
-      const token = authService.getToken()
-      if (token && !isAuthenticated) {
-        try {
-          await dispatch(getCurrentUser())
-        } catch (error) {
-          // If getCurrentUser fails, the token is likely expired
-          // The auth service will handle logout automatically via interceptor
-          console.error('Failed to initialize auth:', error)
-        }
-      }
+    const token = getAuthToken()
+    if (token && !isAuthenticated) {
+      dispatch(getCurrentUser()).finally(() => setHydrated(true))
+      return
     }
-
-    initializeAuth()
+    setHydrated(true)
   }, [dispatch, isAuthenticated])
 
-  // Show loading screen while checking authentication
-  if (isLoading && !isAuthenticated) {
+  if (!hydrated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-            Loading...
-          </p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-background brand-wash">
+        <p className="text-sm text-muted-foreground">Loading Signal…</p>
       </div>
     )
   }

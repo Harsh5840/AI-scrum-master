@@ -2,6 +2,7 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
+import { ensurePersonalOrg } from '../utils/ensurePersonalOrg.js';
 
 dotenv.config();
 
@@ -47,7 +48,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           });
 
           if (!user) {
-            // Create new user
             user = await prisma.user.create({
               data: {
                 email,
@@ -56,13 +56,13 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
               },
             });
           } else if (!user.googleId) {
-            // Link Google account to existing user
             user = await prisma.user.update({
               where: { id: user.id },
               data: { googleId: profile.id },
             });
           }
 
+          user = await ensurePersonalOrg(prisma, user);
           return done(null, user);
         } catch (error) {
           return done(error as Error, undefined);

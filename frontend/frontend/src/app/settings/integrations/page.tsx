@@ -6,6 +6,7 @@ import { MainLayout } from '@/components/layout/MainLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CheckCircledIcon, LinkBreak2Icon, RocketIcon, ChatBubbleIcon } from '@radix-ui/react-icons'
+import { apiUrl, authHeaders } from '@/lib/session'
 
 interface SlackStatus {
     connected: boolean
@@ -36,7 +37,6 @@ function IntegrationsContent() {
 
     const checkSlackStatus = async () => {
         try {
-            const token = localStorage.getItem('accessToken')
             const orgId = localStorage.getItem('currentOrgId')
 
             if (!orgId) {
@@ -44,8 +44,8 @@ function IntegrationsContent() {
                 return
             }
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/slack/status?orgId=${orgId}`, {
-                headers: { Authorization: `Bearer ${token}` },
+            const res = await fetch(apiUrl(`/slack/status?orgId=${orgId}`), {
+                headers: authHeaders(),
             })
 
             if (res.ok) {
@@ -59,7 +59,7 @@ function IntegrationsContent() {
         }
     }
 
-    const handleConnectSlack = () => {
+    const handleConnectSlack = async () => {
         const orgId = localStorage.getItem('currentOrgId')
         if (!orgId) {
             setMessage('Please select an organization first')
@@ -67,21 +67,34 @@ function IntegrationsContent() {
         }
 
         setIsConnecting(true)
-        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/slack/oauth/install?orgId=${orgId}`
+        try {
+            const res = await fetch(apiUrl(`/slack/oauth/install?orgId=${orgId}`), {
+                headers: authHeaders(),
+            })
+            const data = await res.json()
+            if (data.url) {
+                window.location.href = data.url
+                return
+            }
+            setMessage(data.message || data.error || 'Could not start Slack OAuth')
+        } catch {
+            setMessage('Could not start Slack OAuth')
+        } finally {
+            setIsConnecting(false)
+        }
     }
 
     const handleDisconnectSlack = async () => {
         if (!confirm('Disconnect Slack integration?')) return
 
         try {
-            const token = localStorage.getItem('accessToken')
             const orgId = localStorage.getItem('currentOrgId')
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/slack/disconnect`, {
+            const res = await fetch(apiUrl('/slack/disconnect'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
+                    ...authHeaders(),
                 },
                 body: JSON.stringify({ orgId: parseInt(orgId || '0') }),
             })
@@ -98,14 +111,13 @@ function IntegrationsContent() {
     const handleTestSlack = async () => {
         setIsTesting(true)
         try {
-            const token = localStorage.getItem('accessToken')
             const orgId = localStorage.getItem('currentOrgId')
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/slack/test`, {
+            const res = await fetch(apiUrl('/slack/test'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
+                    ...authHeaders(),
                 },
                 body: JSON.stringify({ orgId: parseInt(orgId || '0') }),
             })

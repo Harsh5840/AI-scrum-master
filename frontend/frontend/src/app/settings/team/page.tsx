@@ -25,6 +25,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { PersonIcon, PlusIcon, TrashIcon, EnvelopeClosedIcon, CheckIcon } from '@radix-ui/react-icons'
+import { apiUrl, authHeaders } from '@/lib/session'
 
 interface Member {
     id: number
@@ -63,7 +64,6 @@ export default function TeamSettingsPage() {
 
     const fetchTeamData = async () => {
         try {
-            const token = localStorage.getItem('accessToken')
             const orgId = localStorage.getItem('currentOrgId')
 
             if (!orgId) {
@@ -73,8 +73,8 @@ export default function TeamSettingsPage() {
             }
 
             // Fetch members
-            const membersRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/organizations/${orgId}/members`, {
-                headers: { Authorization: `Bearer ${token}` },
+            const membersRes = await fetch(apiUrl(`/organizations/${orgId}/members`), {
+                headers: authHeaders(),
             })
             if (membersRes.ok) {
                 const membersData = await membersRes.json()
@@ -82,8 +82,8 @@ export default function TeamSettingsPage() {
             }
 
             // Fetch pending invites
-            const invitesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/organizations/${orgId}/invites`, {
-                headers: { Authorization: `Bearer ${token}` },
+            const invitesRes = await fetch(apiUrl(`/organizations/${orgId}/invites`), {
+                headers: authHeaders(),
             })
             if (invitesRes.ok) {
                 const invitesData = await invitesRes.json()
@@ -106,14 +106,13 @@ export default function TeamSettingsPage() {
         setError('')
 
         try {
-            const token = localStorage.getItem('accessToken')
             const orgId = localStorage.getItem('currentOrgId')
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/organizations/${orgId}/invite`, {
+            const res = await fetch(apiUrl(`/organizations/${orgId}/invite`), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
+                    ...authHeaders(),
                 },
                 body: JSON.stringify({ email: inviteEmail, role: inviteRole }),
             })
@@ -138,12 +137,11 @@ export default function TeamSettingsPage() {
         if (!confirm('Remove this member from the team?')) return
 
         try {
-            const token = localStorage.getItem('accessToken')
             const orgId = localStorage.getItem('currentOrgId')
 
-            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/organizations/${orgId}/members/${userId}`, {
+            await fetch(apiUrl(`/organizations/${orgId}/members/${userId}`), {
                 method: 'DELETE',
-                headers: { Authorization: `Bearer ${token}` },
+                headers: authHeaders(),
             })
 
             fetchTeamData()
@@ -154,12 +152,11 @@ export default function TeamSettingsPage() {
 
     const handleCancelInvite = async (inviteId: number) => {
         try {
-            const token = localStorage.getItem('accessToken')
             const orgId = localStorage.getItem('currentOrgId')
 
-            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/organizations/${orgId}/invites/${inviteId}`, {
+            await fetch(apiUrl(`/organizations/${orgId}/invites/${inviteId}`), {
                 method: 'DELETE',
-                headers: { Authorization: `Bearer ${token}` },
+                headers: authHeaders(),
             })
 
             fetchTeamData()
@@ -170,9 +167,9 @@ export default function TeamSettingsPage() {
 
     const getRoleBadgeColor = (role: string) => {
         switch (role) {
-            case 'owner': return 'bg-purple-500/20 text-purple-400'
-            case 'admin': return 'bg-cyan-500/20 text-cyan-400'
-            default: return 'bg-white/10 text-white/60'
+            case 'owner': return 'bg-primary/20 text-primary'
+            case 'admin': return 'bg-primary/10 text-primary'
+            default: return 'bg-secondary text-muted-foreground'
         }
     }
 

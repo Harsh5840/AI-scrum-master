@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import type { User } from '../api/apiSlice'
 import { authService, type LoginCredentials, type SignupData } from '@/services/authService'
+import { persistSession } from '@/lib/session'
 
 interface AuthState {
   user: User | null
@@ -163,6 +164,9 @@ const authSlice = createSlice({
         state.user = action.payload.user
         state.token = action.payload.token || null
         state.error = null
+        if (typeof window !== 'undefined' && action.payload.token) {
+          persistSession(action.payload.token, undefined, action.payload.user?.currentOrgId)
+        }
       })
       .addCase(getCurrentUser.rejected, (state) => {
         state.isLoading = false

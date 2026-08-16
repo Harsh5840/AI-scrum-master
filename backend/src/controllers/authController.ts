@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
 import { JWTService } from '../services/jwtService.js'
 import { GoogleOAuthService } from '../services/googleOAuthService.js'
+import { ensurePersonalOrg } from '../utils/ensurePersonalOrg.js'
 
 const prisma = new PrismaClient()
 const googleOAuth = new GoogleOAuthService()
@@ -16,13 +17,15 @@ export class AuthController {
         return res.status(400).json({ message: 'Email and password are required' })
       }
 
-      const user = await prisma.user.findUnique({
+      let user = await prisma.user.findUnique({
         where: { email }
       })
 
       if (!user || !user.password || !await bcrypt.compare(password, user.password)) {
         return res.status(401).json({ message: 'Invalid credentials' })
       }
+
+      user = await ensurePersonalOrg(prisma, user)
 
       const accessToken = JWTService.generateAccessToken({
         userId: user.id,
@@ -37,6 +40,7 @@ export class AuthController {
           id: user.id,
           name: user.name,
           email: user.email,
+          currentOrgId: user.currentOrgId,
           createdAt: user.createdAt.toISOString()
         },
         token: accessToken,
@@ -66,30 +70,14 @@ export class AuthController {
 
       const hashedPassword = await bcrypt.hash(password, 12)
 
-      const user = await prisma.user.create({
+      const created = await prisma.user.create({
         data: {
           name,
           email,
           password: hashedPassword
         }
       })
-
-      // Create a personal org so data is tenant-scoped from day one
-      const slugBase = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'team'
-      const slug = `${slugBase}-${user.id}`
-      const org = await prisma.organization.create({
-        data: {
-          name: `${name}'s Team`,
-          slug,
-          members: {
-            create: { userId: user.id, role: 'owner' },
-          },
-        },
-      })
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { currentOrgId: org.id },
-      })
+      const user = await ensurePersonalOrg(prisma, created)
 
       const accessToken = JWTService.generateAccessToken({
         userId: user.id,
@@ -104,7 +92,7 @@ export class AuthController {
           id: user.id,
           name: user.name,
           email: user.email,
-          currentOrgId: org.id,
+          currentOrgId: user.currentOrgId,
           createdAt: user.createdAt.toISOString()
         },
         token: accessToken,
@@ -157,6 +145,8 @@ export class AuthController {
         })
       }
 
+      user = await ensurePersonalOrg(prisma, user)
+
       const accessToken = JWTService.generateAccessToken({
         userId: user.id,
         email: user.email
@@ -170,6 +160,7 @@ export class AuthController {
           id: user.id,
           name: user.name,
           email: user.email,
+          currentOrgId: user.currentOrgId,
           createdAt: user.createdAt.toISOString()
         },
         token: accessToken,
@@ -237,6 +228,8 @@ export class AuthController {
         id: user.id,
         name: user.name,
         email: user.email,
+        currentOrgId: user.currentOrgId,
+        avatar: user.avatar,
         createdAt: user.createdAt.toISOString()
       })
     } catch (error) {

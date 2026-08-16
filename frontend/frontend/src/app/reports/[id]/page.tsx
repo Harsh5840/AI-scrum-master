@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import { apiUrl } from '@/lib/session'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -52,7 +53,7 @@ export default function ReportPage() {
 
     const fetchReport = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reports/${reportId}`)
+            const res = await fetch(apiUrl(`/reports/${reportId}`))
 
             if (!res.ok) {
                 throw new Error('Report not found')

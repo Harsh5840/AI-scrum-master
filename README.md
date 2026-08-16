@@ -1,18 +1,19 @@
-# Signal — AI Scrum Master
+# Signal — Risk inbox
 
-> Standup in → structured blockers out. A signal pipeline for agile teams, not a chat toy glued to a model.
+> Capture a standup → typed blockers land in an inbox → ask grounded questions. Not a Jira clone.
 
 ## Pitch
 
-Most “AI scrum” demos are chat UIs. Signal turns messy standup text into **typed, queryable team state**: summaries, blockers (type + severity), optional Pinecone RAG, and a Next.js dashboard. Heavier analysis runs on **BullMQ + Redis** so the API stays responsive.
+Most “AI scrum” demos are chat UIs. Signal is a **risk inbox**: messy updates become typed, severity-ranked blockers. Ask the inbox a question (Gemini + optional Pinecone). Heavier analysis runs on **BullMQ + Redis**.
 
 **Demo script (≈2 min)**
 
-1. Log in as `demo@scrum.signal` / `demo1234` (after seed)
-2. Open **Standups** → submit an update that says you’re *blocked waiting on credentials*
-3. Open **Blockers** → see the structured card
-4. Open **AI Insights** → ask “what’s blocking the current sprint?”
-5. Open **Dashboard** / **Jobs** → health + BullMQ counts
+1. Seed, then log in as `pm@scrum.signal` / `demo1234`
+2. **Inbox** — critical staging credentials, high Stripe webhook, high API creds
+3. **Capture** — submit “Blocked waiting on legal review for the DPA”
+4. Watch the new row appear in Inbox
+5. **Ask** — “What blockers need attention?”
+6. **Settings → Workers** — BullMQ counts (if Redis is up)
 
 ## Stack
 
@@ -33,7 +34,7 @@ Most “AI scrum” demos are chat UIs. Signal turns messy standup text into **t
 | Auth (email/password, JWT) | Real |
 | Org membership + org-scoped sprints/standups/blockers | Real |
 | Standup create → summary + blocker detection | Real (regex + Gemini when keyed) |
-| AI Insights chat → `POST /api/ai/ask` | Real (needs `GEMINI_API_KEY`) |
+| Ask → `POST /api/ai/ask` | Real (needs `GEMINI_API_KEY`) |
 | BullMQ workers | Real when `REDIS_URL` is set; otherwise jobs run inline |
 | Pinecone RAG | Optional — soft-fails without keys |
 | Slack / Jira | Thin real clients — need tokens |
@@ -110,8 +111,10 @@ AI Insights UI → POST /api/ai/ask → RAG (optional) → Gemini
 
 | Email | Password | Role |
 |-------|----------|------|
+| pm@scrum.signal | demo1234 | PM (use this in interviews) |
 | demo@scrum.signal | demo1234 | Engineer |
-| pm@scrum.signal | demo1234 | PM |
+| maya@scrum.signal | demo1234 | Frontend |
+| jordan@scrum.signal | demo1234 | Platform |
 
 ## Interview talking points
 
@@ -119,7 +122,7 @@ AI Insights UI → POST /api/ai/ask → RAG (optional) → Gemini
 - **Tenant scoping** via `Organization` / `Member` / `currentOrgId`
 - **Async boundary**: BullMQ workers call `workflowServices` for sentiment / health
 - **Honest RAG**: Pinecone optional; UI shows sources when present
-- **UI**: Watermelon-inspired dark charcoal + green — product tool, not purple SaaS cliché
+- **UI**: Four screens — Inbox, Capture, Ask, Settings. Dark charcoal + watermelon green.
 
 ## License
 

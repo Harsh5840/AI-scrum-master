@@ -13,7 +13,7 @@ interface HeaderProps {
   title?: string
 }
 
-export function Header({ title = 'Dashboard' }: HeaderProps) {
+export function Header({ title = 'Inbox' }: HeaderProps) {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)

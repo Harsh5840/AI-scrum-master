@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { CheckIcon, ChevronDownIcon, PlusIcon, GearIcon } from '@radix-ui/react-icons'
 import { cn } from '@/lib/utils'
+import { apiUrl, authHeaders } from '@/lib/session'
 
 interface Organization {
   id: number
@@ -41,9 +42,8 @@ export function OrgSwitcher({ collapsed = false }: OrgSwitcherProps) {
 
   const fetchOrganizations = async () => {
     try {
-      const token = localStorage.getItem('accessToken')
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/organizations`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await fetch(apiUrl('/organizations'), {
+        headers: authHeaders(),
       })
 
       if (res.ok) {

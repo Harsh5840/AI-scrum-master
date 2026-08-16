@@ -21,7 +21,7 @@ export const startOAuth = async (req: Request, res: Response) => {
       `${process.env.BACKEND_URL}/api/slack/oauth/callback`
     )}&state=${orgId}`;
 
-    res.redirect(slackAuthUrl);
+    res.json({ url: slackAuthUrl });
   } catch (error) {
     console.error("Error starting Slack OAuth:", error);
     res.status(500).json({ error: "Failed to start OAuth" });

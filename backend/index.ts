@@ -99,7 +99,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/standups", authMiddleware, standupRoutes);
 app.use("/api/backlog", authMiddleware, backlogRoutes);
 app.use("/api/sprints", authMiddleware, sprintRoutes);
-app.use("/api/slack", authMiddleware, slackRoutes);
+app.use("/api/slack", slackRoutes);
 app.use("/api/jira", authMiddleware, jiraRoutes);
 app.use("/api/blockers", authMiddleware, blockerRoutes);
 app.use("/api/ai", authMiddleware, aiRoutes);

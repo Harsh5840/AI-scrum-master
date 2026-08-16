@@ -2,46 +2,30 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { MainLayout } from '@/components/layout/MainLayout'
+import { PageEnter } from '@/components/brand/PageEnter'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { useGetSprintsQuery } from '@/store/api/sprintsApi'
 import { useAskAIMutation } from '@/store/api/aiApi'
-import {
-  PaperPlaneIcon,
-  LightningBoltIcon,
-  PersonIcon,
-  RocketIcon,
-  ExclamationTriangleIcon,
-  BarChartIcon,
-  ReloadIcon,
-  CopyIcon,
-} from '@radix-ui/react-icons'
+import { PaperPlaneIcon, ReloadIcon, CopyIcon } from '@radix-ui/react-icons'
 
 interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
-  timestamp: Date
   sources?: Array<{ type: string; id: number; relevanceScore: number }>
 }
 
 const suggestions = [
-  { icon: <RocketIcon className="h-4 w-4" />, text: 'How is the current sprint progressing?' },
-  { icon: <PersonIcon className="h-4 w-4" />, text: 'What blockers need attention?' },
-  { icon: <BarChartIcon className="h-4 w-4" />, text: 'What risks show up in recent standups?' },
-  { icon: <LightningBoltIcon className="h-4 w-4" />, text: 'Summarize open blockers this sprint' },
+  'What blockers need attention?',
+  'What is blocking staging?',
+  'Summarize open risk this week',
 ]
 
-const TypingIndicator = () => (
-  <p className="text-sm text-muted-foreground">Retrieving standup context…</p>
-)
-
-export default function AIInsightsPage() {
+export default function AskPage() {
   const { data: sprints } = useGetSprintsQuery({})
   const [askAI] = useAskAIMutation()
-
-  const activeSprint = sprints?.find((s: any) => {
+  const activeSprint = sprints?.find((s: { startDate: string; endDate: string }) => {
     const now = Date.now()
     return new Date(s.startDate).getTime() <= now && new Date(s.endDate).getTime() >= now
   })
@@ -51,8 +35,7 @@ export default function AIInsightsPage() {
       id: '1',
       role: 'assistant',
       content:
-        "I'm your AI Scrum Master. Ask about sprint progress, blockers, or risks — answers are grounded in your standup history when RAG is configured.",
-      timestamp: new Date(),
+        'Ask the inbox. Answers use standup history — Gemini plus optional Pinecone, not a keyword script.',
     },
   ])
   const [input, setInput] = useState('')
@@ -66,16 +49,8 @@ export default function AIInsightsPage() {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return
-
     const question = input.trim()
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: question,
-      timestamp: new Date(),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
+    setMessages((prev) => [...prev, { id: Date.now().toString(), role: 'user', content: question }])
     setInput('')
     setIsLoading(true)
 
@@ -86,15 +61,15 @@ export default function AIInsightsPage() {
         includeTypes: ['standup', 'sprint', 'blocker', 'backlog'],
       }).unwrap()
 
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: result.response || result.answer || 'No response generated.',
-        timestamp: new Date(),
-        sources: result.sources,
-      }
-
-      setMessages((prev) => [...prev, assistantMessage])
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: result.response || result.answer || 'No response generated.',
+          sources: result.sources,
+        },
+      ])
     } catch (error: any) {
       setMessages((prev) => [
         ...prev,
@@ -104,8 +79,7 @@ export default function AIInsightsPage() {
           content:
             error?.data?.message ||
             error?.data?.error ||
-            'Could not reach the AI service. Check that the backend is running and GEMINI_API_KEY is set.',
-          timestamp: new Date(),
+            'Could not reach the AI service. Check the backend and GEMINI_API_KEY.',
         },
       ])
     } finally {
@@ -113,150 +87,103 @@ export default function AIInsightsPage() {
     }
   }
 
-  const handleSuggestionClick = (text: string) => {
-    setInput(text)
-    inputRef.current?.focus()
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
-  }
-
   return (
-    <MainLayout title="AI Insights">
-      <div className="flex gap-6 h-[calc(100vh-140px)]">
-        <div className="flex-1 flex flex-col min-w-0">
-          <Card className="flex-1 flex flex-col bg-card/80 border-border overflow-hidden">
-            <CardHeader className="border-b border-border py-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <CardTitle className="text-base font-display">Grounded Q&amp;A</CardTitle>
-                  <CardDescription className="text-xs">
-                    Gemini + optional Pinecone RAG
-                    {activeSprint ? ` · ${activeSprint.name}` : ''}
-                  </CardDescription>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setMessages([messages[0]])}
-                  className="text-muted-foreground"
-                >
-                  <ReloadIcon className="h-4 w-4 mr-1" />
-                  Clear
-                </Button>
-              </div>
-            </CardHeader>
+    <MainLayout title="Ask">
+      <PageEnter className="max-w-2xl mx-auto flex flex-col h-[calc(100vh-140px)]">
+        <div className="flex items-end justify-between gap-3 mb-6">
+          <div>
+            <h2 className="font-display text-3xl">Ask the inbox</h2>
+            <p className="text-sm text-muted-foreground mt-1.5">
+              Grounded in captured updates{activeSprint ? ` · ${activeSprint.name}` : ''}
+            </p>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => setMessages([messages[0]])}>
+            <ReloadIcon className="h-4 w-4" />
+            Clear
+          </Button>
+        </div>
 
-            <CardContent className="flex-1 overflow-y-auto py-4 space-y-4">
-              {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap ${
-                        message.role === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-secondary text-foreground border border-border'
-                      }`}
-                    >
-                      {message.content}
-                      {message.sources && message.sources.length > 0 && (
-                        <div className="mt-3 pt-2 border-t border-border/50 flex flex-wrap gap-1.5">
-                          {message.sources.map((s, i) => (
-                            <span
-                              key={`${s.type}-${s.id}-${i}`}
-                              className="text-[10px] px-2 py-0.5 rounded-md bg-background/50 text-muted-foreground"
-                            >
-                              {s.type} #{s.id}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      {message.role === 'assistant' && (
-                        <button
-                          type="button"
-                          onClick={() => navigator.clipboard.writeText(message.content)}
-                          aria-label="Copy answer"
-                          className="mt-2 text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs min-h-8"
-                        >
-                          <CopyIcon className="h-3 w-3" /> Copy
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="rounded-2xl px-4 py-3 bg-secondary border border-border">
-                    <TypingIndicator />
-                  </div>
+        <div className="flex-1 overflow-y-auto space-y-5 pr-1">
+          {messages.map((message) => (
+            <div key={message.id} className={message.role === 'user' ? 'text-right' : ''}>
+              <div
+                className={`inline-block max-w-[90%] text-left text-sm leading-relaxed whitespace-pre-wrap ${
+                  message.role === 'user' ? 'text-primary' : 'text-foreground'
+                }`}
+              >
+                {message.content}
+              </div>
+              {message.sources && message.sources.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {message.sources.map((s, i) => (
+                    <span key={`${s.type}-${s.id}-${i}`} className="text-[11px] text-muted-foreground">
+                      {s.type} #{s.id}
+                    </span>
+                  ))}
                 </div>
               )}
-              <div ref={messagesEndRef} />
-            </CardContent>
-
-            <div className="p-4 border-t border-border space-y-3">
-              <div className="flex flex-wrap gap-2">
-                {suggestions.map((s) => (
-                  <button
-                    key={s.text}
-                    type="button"
-                    onClick={() => handleSuggestionClick(s.text)}
-                    className="text-xs px-3 min-h-8 rounded-lg border border-border bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
-                  >
-                    {s.icon}
-                    {s.text}
-                  </button>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <label htmlFor="ai-question" className="sr-only">
-                  Question for the AI scrum master
-                </label>
-                <Textarea
-                  id="ai-question"
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ask about blockers, sprint risk, or standup history…"
-                  className="min-h-12 max-h-32 resize-none"
-                  rows={2}
-                />
-                <Button
-                  onClick={handleSend}
-                  disabled={!input.trim() || isLoading}
-                  className="self-end"
-                  aria-label="Send question"
+              {message.role === 'assistant' && message.id !== '1' && (
+                <button
+                  type="button"
+                  onClick={() => navigator.clipboard.writeText(message.content)}
+                  aria-label="Copy answer"
+                  className="mt-2 text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs min-h-8"
                 >
-                  <PaperPlaneIcon className="h-4 w-4" />
-                </Button>
-              </div>
+                  <CopyIcon className="h-3 w-3" /> Copy
+                </button>
+              )}
             </div>
-          </Card>
+          ))}
+          {isLoading && <p className="text-sm text-muted-foreground">Retrieving standup context…</p>}
+          <div ref={messagesEndRef} />
         </div>
 
-        <div className="hidden lg:block w-72 space-y-4">
-          <Card className="border-border bg-card/80">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <ExclamationTriangleIcon className="h-4 w-4 text-amber-500" />
-                How this works
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground space-y-3 leading-relaxed">
-              <p>Standups land in Postgres and optionally Pinecone.</p>
-              <p>Your question retrieves similar history.</p>
-              <p>Gemini answers with that context — not a keyword script.</p>
-            </CardContent>
-          </Card>
+        <div className="pt-4 space-y-3">
+          <div className="flex flex-wrap gap-2">
+            {suggestions.map((text) => (
+              <button
+                key={text}
+                type="button"
+                onClick={() => {
+                  setInput(text)
+                  inputRef.current?.focus()
+                }}
+                className="text-xs px-3 min-h-8 rounded-full border border-border text-muted-foreground hover:text-foreground"
+              >
+                {text}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <label htmlFor="ai-question" className="sr-only">
+              Question for the inbox
+            </label>
+            <Textarea
+              id="ai-question"
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  handleSend()
+                }
+              }}
+              placeholder="What’s blocking staging?"
+              className="min-h-12 max-h-32 resize-none"
+              rows={2}
+            />
+            <Button
+              onClick={handleSend}
+              disabled={!input.trim() || isLoading}
+              className="self-end"
+              aria-label="Send question"
+            >
+              <PaperPlaneIcon className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-      </div>
+      </PageEnter>
     </MainLayout>
   )
 }

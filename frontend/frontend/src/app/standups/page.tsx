@@ -1,25 +1,24 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { useGetStandupsQuery, useCreateStandupMutation } from '@/store/api/standupsApi'
 import { useGetSprintsQuery } from '@/store/api/sprintsApi'
 import { useAppSelector } from '@/store/hooks'
 import { formatDistanceToNow } from 'date-fns'
-import { PaperPlaneIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/hooks/use-toast'
+import { PageEnter } from '@/components/brand/PageEnter'
 
-export default function StandupsPage() {
+export default function CapturePage() {
   const { user } = useAppSelector((state) => state.auth)
   const { toast } = useToast()
   const { data: standups, isLoading, refetch } = useGetStandupsQuery({})
   const { data: sprints } = useGetSprintsQuery({})
   const [createStandup, { isLoading: isSubmitting }] = useCreateStandupMutation()
-
   const [formData, setFormData] = useState({
     yesterday: '',
     today: '',
@@ -29,7 +28,7 @@ export default function StandupsPage() {
   const activeSprint = useMemo(() => {
     const now = Date.now()
     return sprints?.find(
-      (s: any) =>
+      (s: { startDate: string; endDate: string }) =>
         new Date(s.startDate).getTime() <= now && new Date(s.endDate).getTime() >= now
     )
   }, [sprints])
@@ -53,120 +52,109 @@ export default function StandupsPage() {
       setFormData({ yesterday: '', today: '', blockers: '' })
       refetch()
 
-      const detected = (result as any)?.blockers?.length || 0
+      const detected = (result as { blockers?: unknown[] })?.blockers?.length || 0
       toast({
-        title: 'Standup logged',
+        title: detected > 0 ? 'Update captured — risk extracted' : 'Update captured',
         description:
           detected > 0
-            ? `Detected ${detected} blocker(s). Check the Blockers page.`
-            : 'Summary saved. AI jobs queued when Redis is available.',
+            ? `${detected} item(s) landed in Inbox.`
+            : 'Saved. Mention blocked or waiting to extract risk.',
       })
     } catch (err: any) {
       toast({
-        title: 'Failed to save standup',
+        title: 'Could not save',
         description: err?.data?.error || 'Try again',
       })
     }
   }
 
   return (
-    <MainLayout title="Standups">
-      <div className="grid lg:grid-cols-5 gap-6">
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-display text-lg">Log standup</CardTitle>
-              <CardDescription>
-                {activeSprint
-                  ? `Linked to ${activeSprint.name}`
-                  : 'No active sprint — still saved to your org'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="yesterday">Yesterday</Label>
-                  <Textarea
-                    id="yesterday"
-                    value={formData.yesterday}
-                    onChange={(e) => setFormData((f) => ({ ...f, yesterday: e.target.value }))}
-                    placeholder="Shipped standup ingest…"
-                    rows={3}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="today">Today</Label>
-                  <Textarea
-                    id="today"
-                    value={formData.today}
-                    onChange={(e) => setFormData((f) => ({ ...f, today: e.target.value }))}
-                    placeholder="Working on blocker extraction…"
-                    rows={3}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="blockers" className="flex items-center gap-1.5">
-                    <ExclamationTriangleIcon className="h-3.5 w-3.5 text-[hsl(var(--warning))]" />
-                    Blockers
-                  </Label>
-                  <Textarea
-                    id="blockers"
-                    value={formData.blockers}
-                    onChange={(e) => setFormData((f) => ({ ...f, blockers: e.target.value }))}
-                    placeholder="Blocked waiting on API credentials from platform…"
-                    rows={3}
-                  />
-                  <p className="text-[11px] text-muted-foreground">
-                    Mentions of blocked/waiting/stuck trigger structured detection.
-                  </p>
-                </div>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  <PaperPlaneIcon className="mr-2 h-4 w-4" />
-                  {isSubmitting ? 'Saving…' : 'Submit standup'}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+    <MainLayout title="Capture">
+      <PageEnter className="grid lg:grid-cols-[minmax(0,22rem)_1fr] gap-10 max-w-5xl mx-auto">
+        <form onSubmit={handleSubmit} className="space-y-5 lg:sticky lg:top-2 self-start">
+          <div>
+            <h2 className="font-display text-3xl">Capture</h2>
+            <p className="text-sm text-muted-foreground mt-1.5">
+              {activeSprint
+                ? `Scoped to ${activeSprint.name}`
+                : 'Paste the update. Risk phrases become inbox items.'}
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="yesterday">Yesterday</Label>
+            <Textarea
+              id="yesterday"
+              value={formData.yesterday}
+              onChange={(e) => setFormData((f) => ({ ...f, yesterday: e.target.value }))}
+              placeholder="Shipped the ingest path…"
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="today">Today</Label>
+            <Textarea
+              id="today"
+              value={formData.today}
+              onChange={(e) => setFormData((f) => ({ ...f, today: e.target.value }))}
+              placeholder="Extraction + inbox polish…"
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="blockers">Stuck on</Label>
+            <Textarea
+              id="blockers"
+              value={formData.blockers}
+              onChange={(e) => setFormData((f) => ({ ...f, blockers: e.target.value }))}
+              placeholder="Blocked waiting on staging credentials from platform…"
+              rows={3}
+            />
+            <p className="text-xs text-muted-foreground">
+              “Blocked”, “waiting”, or “stuck” extracts a typed inbox row.
+            </p>
+          </div>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving…' : 'Send to inbox'}
+          </Button>
+        </form>
 
-        <div className="lg:col-span-3 space-y-3">
-          <h3 className="font-display text-lg">Recent</h3>
-          {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+        <div>
+          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground mb-4">Feed</p>
+          {isLoading && <p className="text-sm text-muted-foreground">Loading updates…</p>}
           {!isLoading && (!standups || standups.length === 0) && (
-            <Card>
-              <CardContent className="py-8 text-sm text-muted-foreground text-center">
-                No standups yet. Submit one with a real blocker phrase to demo detection.
-              </CardContent>
-            </Card>
+            <p className="text-sm text-muted-foreground">No captures yet.</p>
           )}
-          {(standups || []).map((s: any) => (
-              <Card key={s.id}>
-                <CardContent className="py-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">{s.user?.name || 'Teammate'}</span>
-                    <span className="text-xs text-muted-foreground tabular-nums">
-                      {formatDistanceToNow(new Date(s.createdAt), { addSuffix: true })}
-                    </span>
+          <ul className="divide-y divide-border">
+            {(standups || []).map((s: any) => (
+              <li key={s.id} className="py-5 first:pt-0">
+                <div className="flex items-baseline justify-between gap-3 mb-1.5">
+                  <span className="text-sm font-medium">{s.user?.name || 'Teammate'}</span>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {formatDistanceToNow(new Date(s.createdAt), { addSuffix: true })}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {s.summary}
+                </p>
+                {s.blockers?.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {s.blockers.map((b: any) => (
+                      <Link
+                        key={b.id}
+                        href="/blockers"
+                        className="text-xs text-primary hover:underline"
+                      >
+                        {b.severity}: {b.description.slice(0, 48)}
+                        {b.description.length > 48 ? '…' : ''}
+                      </Link>
+                    ))}
                   </div>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{s.summary}</p>
-                  {s.blockers?.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {s.blockers.map((b: any) => (
-                        <span
-                          key={b.id}
-                          className="text-[11px] px-2 py-0.5 rounded-md border border-[hsl(var(--warning))]/35 text-[hsl(var(--warning))]"
-                        >
-                          {b.severity}: {b.description.slice(0, 40)}
-                          {b.description.length > 40 ? '…' : ''}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-          ))}
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
+      </PageEnter>
     </MainLayout>
   )
 }
