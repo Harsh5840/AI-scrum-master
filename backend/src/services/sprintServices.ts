@@ -1,11 +1,19 @@
-// Get sprint with standups and backlog summary
-export const getSprintWithSummary = async (id: number) => {
-  const sprint = await prisma.sprint.findUnique({
-    where: { id },
+import { PrismaClient } from '@prisma/client';
+import { queueManager } from './queueServices.js';
+import { vectorStore } from './vectorServices.js';
+
+const prisma = new PrismaClient();
+
+export const getSprintWithSummary = async (id: number, orgId?: number | null) => {
+  const sprint = await prisma.sprint.findFirst({
+    where: {
+      id,
+      ...(orgId ? { orgId } : {}),
+    },
     include: { standups: true, backlogItems: true },
   });
   if (!sprint) return null;
-  const completed = sprint.backlogItems.filter(item => item.completed).length;
+  const completed = sprint.backlogItems.filter((item: { completed: boolean }) => item.completed).length;
   const total = sprint.backlogItems.length;
   const velocity = completed / (total || 1);
   return {
@@ -14,19 +22,19 @@ export const getSprintWithSummary = async (id: number) => {
     velocity,
   };
 };
-import { PrismaClient } from '@prisma/client';
-import { queueManager } from './queueServices.js';
-import { vectorStore } from './vectorServices.js';
 
-const prisma = new PrismaClient();
-
-export const getSprints = async (filter?: 'active' | 'completed') => {
+export const getSprints = async (
+  filter?: 'active' | 'completed',
+  orgId?: number | null
+) => {
   const now = new Date();
-  let where = {};
+  const where: Record<string, unknown> = {};
+  if (orgId) where.orgId = orgId;
   if (filter === 'active') {
-    where = { startDate: { lte: now }, endDate: { gte: now } };
+    where.startDate = { lte: now };
+    where.endDate = { gte: now };
   } else if (filter === 'completed') {
-    where = { endDate: { lt: now } };
+    where.endDate = { lt: now };
   }
   return prisma.sprint.findMany({
     where,
@@ -34,15 +42,24 @@ export const getSprints = async (filter?: 'active' | 'completed') => {
   });
 };
 
-export const createSprint = async (data: { name: string; startDate: Date; endDate: Date }) => {
-  const sprint = await prisma.sprint.create({ data });
-  
-  // Trigger initial sprint analysis workflows
+export const createSprint = async (data: {
+  name: string;
+  startDate: Date;
+  endDate: Date;
+  orgId?: number | null;
+}) => {
+  const sprint = await prisma.sprint.create({
+    data: {
+      name: data.name,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      ...(data.orgId ? { orgId: data.orgId } : {}),
+    },
+  });
+
   try {
-    // Schedule initial health check after 24 hours
     await queueManager.scheduleSprintAnalysis(sprint.id, 'health', 24 * 60 * 60 * 1000);
-    
-    // Store sprint information in vector database
+
     await vectorStore.addDocument(
       `Sprint: ${sprint.name}. Duration: ${sprint.startDate.toISOString()} to ${sprint.endDate.toISOString()}`,
       {
@@ -54,36 +71,51 @@ export const createSprint = async (data: { name: string; startDate: Date; endDat
   } catch (error) {
     console.error('❌ Failed to schedule sprint workflows:', error);
   }
-  
+
   return sprint;
 };
 
-export const updateSprint = async (id: number, data: { endDate?: Date }) => {
-  const existingSprint = await prisma.sprint.findUnique({ where: { id } });
+export const updateSprint = async (id: number, data: { endDate?: Date }, orgId?: number | null) => {
+  const existingSprint = await prisma.sprint.findFirst({
+    where: { id, ...(orgId ? { orgId } : {}) },
+  });
+  if (!existingSprint) {
+    throw new Error('Sprint not found');
+  }
+
   const updatedSprint = await prisma.sprint.update({ where: { id }, data });
-  
-  // Check if sprint is being completed (end date moved to past)
-  if (data.endDate && data.endDate <= new Date() && existingSprint && existingSprint.endDate > new Date()) {
+
+  if (
+    data.endDate &&
+    data.endDate <= new Date() &&
+    existingSprint.endDate > new Date()
+  ) {
     try {
-      // Schedule sprint completion analysis
       await queueManager.scheduleSprintAnalysis(id, 'completion', 0);
-      
-      // Schedule final sprint summary and metrics
-      await queueManager.scheduleNotification({
-        type: 'slack',
-        recipient: '#sprint-updates',
-        message: `🏁 Sprint "${updatedSprint.name}" has been completed. Final analysis will be available shortly.`,
-        priority: 'medium',
-        metadata: { sprintId: id, type: 'completion' },
-      }, 60000); // 1 minute delay to allow analysis to complete
+      await queueManager.scheduleNotification(
+        {
+          type: 'slack',
+          recipient: '#sprint-updates',
+          message: `Sprint "${updatedSprint.name}" has been completed. Final analysis will be available shortly.`,
+          priority: 'medium',
+          metadata: { sprintId: id, type: 'completion' },
+        },
+        60000
+      );
     } catch (error) {
       console.error('❌ Failed to schedule sprint completion workflows:', error);
     }
   }
-  
+
   return updatedSprint;
 };
 
-export const deleteSprint = async (id: number) => {
+export const deleteSprint = async (id: number, orgId?: number | null) => {
+  const existing = await prisma.sprint.findFirst({
+    where: { id, ...(orgId ? { orgId } : {}) },
+  });
+  if (!existing) {
+    throw new Error('Sprint not found');
+  }
   return prisma.sprint.delete({ where: { id } });
 };

@@ -130,7 +130,7 @@ async function initializeServices() {
   try {
     console.log('🚀 Initializing optional services...');
     
-    // Queue manager (simple in-memory, no external dependencies)
+    // BullMQ workers (requires REDIS_URL)
     await queueManager.initializeWorkers();
     
     // Vector store (requires PINECONE_API_KEY and GEMINI_API_KEY)

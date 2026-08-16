@@ -27,11 +27,29 @@ export const standupsApi = apiSlice.injectEndpoints({
       today?: string
       blockers?: string
     }>({
-      query: (newStandup) => ({
-        url: '/standups',
-        method: 'POST',
-        body: newStandup,
-      }),
+      query: (newStandup) => {
+        const description =
+          newStandup.description ||
+          [
+            newStandup.yesterday && `Yesterday: ${newStandup.yesterday}`,
+            newStandup.today && `Today: ${newStandup.today}`,
+            newStandup.blockers && `Blockers: ${newStandup.blockers}`,
+            newStandup.summary,
+          ]
+            .filter(Boolean)
+            .join('\n')
+
+        return {
+          url: '/standups',
+          method: 'POST',
+          body: {
+            userId: newStandup.userId,
+            sprintId: newStandup.sprintId,
+            description,
+            summary: newStandup.summary || description,
+          },
+        }
+      },
       invalidatesTags: ['Standup', 'Blocker'],
     }),
 

@@ -36,7 +36,7 @@ export const blockersApi = apiSlice.injectEndpoints({
     resolveBlocker: builder.mutation<Blocker, number>({
       query: (id) => ({
         url: `/blockers/${id}/resolve`,
-        method: 'POST',
+        method: 'PATCH',
       }),
       invalidatesTags: ['Blocker'],
     }),

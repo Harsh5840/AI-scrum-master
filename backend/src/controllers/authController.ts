@@ -74,6 +74,23 @@ export class AuthController {
         }
       })
 
+      // Create a personal org so data is tenant-scoped from day one
+      const slugBase = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'team'
+      const slug = `${slugBase}-${user.id}`
+      const org = await prisma.organization.create({
+        data: {
+          name: `${name}'s Team`,
+          slug,
+          members: {
+            create: { userId: user.id, role: 'owner' },
+          },
+        },
+      })
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { currentOrgId: org.id },
+      })
+
       const accessToken = JWTService.generateAccessToken({
         userId: user.id,
         email: user.email
@@ -87,6 +104,7 @@ export class AuthController {
           id: user.id,
           name: user.name,
           email: user.email,
+          currentOrgId: org.id,
           createdAt: user.createdAt.toISOString()
         },
         token: accessToken,

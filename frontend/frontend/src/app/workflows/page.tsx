@@ -1,90 +1,73 @@
 'use client'
 
-import { MainLayout } from "@/components/layout/MainLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { RocketIcon, ClockIcon, CheckCircledIcon } from "@radix-ui/react-icons";
-import { useGetQueueStatusQuery } from "@/store/api/workflowsApi";
+import { MainLayout } from '@/components/layout/MainLayout'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useGetQueueStatusQuery } from '@/store/api/workflowsApi'
 
 export default function WorkflowsPage() {
-  const { data: queueStatus, isLoading } = useGetQueueStatusQuery();
+  const { data, isLoading, refetch, isFetching } = useGetQueueStatusQuery(undefined, {
+    pollingInterval: 10000,
+  })
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-300">
-          <ClockIcon className="mr-1 h-3 w-3" /> Running
-        </Badge>;
-      case 'completed':
-        return <Badge className="bg-green-100 text-green-800 border-green-300">
-          <CheckCircledIcon className="mr-1 h-3 w-3" /> Completed
-        </Badge>;
-      case 'failed':
-        return <Badge className="bg-red-100 text-red-800 border-red-300">Failed</Badge>;
-      default:
-        return <Badge>Unknown</Badge>;
-    }
-  };
+  const ai = data?.queues?.aiWorkflows
+  const notifications = data?.queues?.notifications
 
-  const totalJobs = (queueStatus?.waiting || 0) + (queueStatus?.active || 0) + (queueStatus?.completed || 0) + (queueStatus?.failed || 0);
+  const cards = [
+    { label: 'Waiting', value: ai?.waiting ?? data?.waiting ?? 0 },
+    { label: 'Active', value: ai?.active ?? data?.active ?? 0 },
+    { label: 'Completed', value: ai?.completed ?? data?.completed ?? 0 },
+    { label: 'Failed', value: ai?.failed ?? data?.failed ?? 0 },
+  ]
 
   return (
-    <MainLayout title="Workflows">
+    <MainLayout title="Jobs">
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">AI Workflows</h2>
-            <p className="text-slate-600">Automated AI-powered task processing</p>
+            <h2 className="font-display text-2xl">BullMQ job status</h2>
+            <p className="text-sm text-muted-foreground">
+              Standup sentiment, blocker patterns, and sprint health run on Redis-backed workers
+            </p>
           </div>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground"
+          >
+            {isFetching ? 'Refreshing…' : 'Refresh'}
+          </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>Total Jobs</CardDescription>
-              <CardTitle className="text-3xl">{isLoading ? '...' : totalJobs}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>Active</CardDescription>
-              <CardTitle className="text-3xl text-blue-600">
-                {isLoading ? '...' : queueStatus?.active || 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>Completed</CardDescription>
-              <CardTitle className="text-3xl text-green-600">
-                {isLoading ? '...' : queueStatus?.completed || 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>Failed</CardDescription>
-              <CardTitle className="text-3xl text-red-600">
-                {isLoading ? '...' : queueStatus?.failed || 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {cards.map((c) => (
+            <Card key={c.label}>
+              <CardHeader className="pb-2">
+                <CardDescription>{c.label}</CardDescription>
+                <CardTitle className="font-display text-3xl">
+                  {isLoading ? '…' : c.value}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          ))}
         </div>
 
-        {/* Empty State */}
-        {!isLoading && totalJobs === 0 && (
-          <Card className="text-center py-12">
-            <CardContent>
-              <RocketIcon className="mx-auto h-12 w-12 text-slate-400 mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">No workflows yet</h3>
-              <p className="text-slate-600 mb-4">AI workflows will appear here when you enable AI features like sprint planning assistance, standup analysis, and risk assessment.</p>
-            </CardContent>
-          </Card>
-        )}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base font-display">Queues</CardTitle>
+            <CardDescription>Raw counts from the backend queue manager</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <div className="rounded-xl border border-border p-4 font-mono text-xs space-y-1">
+              <div>ai-workflows: {JSON.stringify(ai || {})}</div>
+              <div>notifications: {JSON.stringify(notifications || {})}</div>
+            </div>
+            <p className="text-muted-foreground text-xs">
+              If REDIS_URL is unset, jobs run inline and counts may stay at zero. Set REDIS_URL
+              (or docker-compose redis) for real BullMQ workers.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </MainLayout>
-  );
+  )
 }

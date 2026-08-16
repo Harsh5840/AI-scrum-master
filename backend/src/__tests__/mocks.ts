@@ -12,6 +12,7 @@ export const mockPrismaClient = {
   sprint: {
     findMany: jest.fn(),
     findUnique: jest.fn(),
+    findFirst: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -19,16 +20,27 @@ export const mockPrismaClient = {
   standup: {
     findMany: jest.fn(),
     findUnique: jest.fn(),
+    findFirst: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+    count: jest.fn(),
   },
   blocker: {
     findMany: jest.fn(),
     findUnique: jest.fn(),
+    findFirst: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+  },
+  member: {
+    findUnique: jest.fn(),
+    findFirst: jest.fn(),
+  },
+  organization: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
   },
   workflow: {
     findMany: jest.fn(),

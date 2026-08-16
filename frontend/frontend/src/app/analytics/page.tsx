@@ -112,10 +112,10 @@ const BarChart = ({ data, labels }: { data: { planned: number, completed: number
               initial={{ height: 0 }}
               animate={{ height: `${(d.completed / max) * 100}%` }}
               transition={{ delay: i * 0.1 + 0.1, duration: 0.5 }}
-              className="w-3 bg-gradient-to-t from-purple-500 to-cyan-500 rounded-t"
+              className="w-3 bg-gradient-to-t from-primary to-primary rounded-t"
             />
           </div>
-          <span className="text-[10px] text-white/30 mt-2">{labels[i]}</span>
+          <span className="text-[10px] text-foreground/30 mt-2">{labels[i]}</span>
         </div>
       ))}
     </div>
@@ -277,12 +277,12 @@ export default function AnalyticsPage() {
         {/* Key Metrics */}
         <div className="grid grid-cols-4 gap-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Card className="bg-gradient-to-br from-purple-500/10 to-transparent border-purple-500/20">
+            <Card className="bg-gradient-to-br from-primary/10 to-transparent border-primary">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-white/40 uppercase tracking-wider">Avg Velocity</p>
-                    <p className="text-3xl font-bold text-white mt-1">{metrics.avgVelocity}</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Avg Velocity</p>
+                    <p className="text-3xl font-bold text-foreground mt-1">{metrics.avgVelocity}</p>
                     <div className="flex items-center mt-2">
                       {velocityData.trend >= 0 ? (
                         <span className="flex items-center text-xs text-emerald-400">
@@ -297,8 +297,8 @@ export default function AnalyticsPage() {
                       )}
                     </div>
                   </div>
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                    <LightningBoltIcon className="h-6 w-6 text-purple-400" />
+                  <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
+                    <LightningBoltIcon className="h-6 w-6 text-primary" />
                   </div>
                 </div>
               </CardContent>
@@ -306,13 +306,13 @@ export default function AnalyticsPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <Card className="bg-white/[0.02] border-white/5">
+            <Card className="bg-card border-border">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-white/40 uppercase tracking-wider">Sprint Success</p>
-                    <p className="text-3xl font-bold text-white mt-1">{metrics.sprintSuccess}%</p>
-                    <p className="text-xs text-white/30 mt-2">Goals met on time</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Sprint Success</p>
+                    <p className="text-3xl font-bold text-foreground mt-1">{metrics.sprintSuccess}%</p>
+                    <p className="text-xs text-foreground/30 mt-2">Goals met on time</p>
                   </div>
                   <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
                     <TargetIcon className="h-6 w-6 text-emerald-400" />
@@ -323,16 +323,16 @@ export default function AnalyticsPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <Card className="bg-white/[0.02] border-white/5">
+            <Card className="bg-card border-border">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-white/40 uppercase tracking-wider">Standup Rate</p>
-                    <p className="text-3xl font-bold text-white mt-1">{metrics.standupRate}%</p>
-                    <p className="text-xs text-white/30 mt-2">Team participation</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Standup Rate</p>
+                    <p className="text-3xl font-bold text-foreground mt-1">{metrics.standupRate}%</p>
+                    <p className="text-xs text-foreground/30 mt-2">Team participation</p>
                   </div>
-                  <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center">
-                    <PersonIcon className="h-6 w-6 text-cyan-400" />
+                  <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
+                    <PersonIcon className="h-6 w-6 text-primary" />
                   </div>
                 </div>
               </CardContent>
@@ -340,13 +340,13 @@ export default function AnalyticsPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-            <Card className="bg-white/[0.02] border-white/5">
+            <Card className="bg-card border-border">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-white/40 uppercase tracking-wider">Blocker Avg</p>
-                    <p className="text-3xl font-bold text-white mt-1">{metrics.blockerResolution}d</p>
-                    <p className="text-xs text-white/30 mt-2">Resolution time</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Blocker Avg</p>
+                    <p className="text-3xl font-bold text-foreground mt-1">{metrics.blockerResolution}d</p>
+                    <p className="text-xs text-foreground/30 mt-2">Resolution time</p>
                   </div>
                   <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center">
                     <ExclamationTriangleIcon className="h-6 w-6 text-amber-400" />
@@ -366,19 +366,19 @@ export default function AnalyticsPage() {
             transition={{ delay: 0.5 }}
             className="col-span-8"
           >
-            <Card className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border-white/5 h-full">
+            <Card className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border-border h-full">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <LightningBoltIcon className="h-5 w-5 text-purple-400" />
+                    <CardTitle className="text-foreground flex items-center gap-2">
+                      <LightningBoltIcon className="h-5 w-5 text-primary" />
                       Velocity Trend
                     </CardTitle>
-                    <CardDescription className="text-white/40">Story points completed per sprint</CardDescription>
+                    <CardDescription className="text-muted-foreground">Story points completed per sprint</CardDescription>
                   </div>
                   <div className="flex items-center gap-4 text-xs">
-                    <span className="flex items-center gap-1 text-white/40">
-                      <div className="w-3 h-3 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500" />
+                    <span className="flex items-center gap-1 text-muted-foreground">
+                      <div className="w-3 h-3 rounded-full bg-gradient-to-r from-primary to-primary" />
                       Completed
                     </span>
                   </div>
@@ -388,7 +388,7 @@ export default function AnalyticsPage() {
                 <LineChart data={velocityData.history} color="purple" height={180} />
                 <div className="flex justify-between mt-4 px-2">
                   {['Sprint 18', 'Sprint 19', 'Sprint 20', 'Sprint 21', 'Sprint 22', 'Sprint 23'].map((label, i) => (
-                    <span key={i} className="text-xs text-white/30">{label}</span>
+                    <span key={i} className="text-xs text-foreground/30">{label}</span>
                   ))}
                 </div>
               </CardContent>
@@ -402,13 +402,13 @@ export default function AnalyticsPage() {
             transition={{ delay: 0.6 }}
             className="col-span-4"
           >
-            <Card className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border-white/5 h-full">
+            <Card className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border-border h-full">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <PersonIcon className="h-5 w-5 text-cyan-400" />
+                <CardTitle className="text-foreground flex items-center gap-2">
+                  <PersonIcon className="h-5 w-5 text-primary" />
                   Team Performance
                 </CardTitle>
-                <CardDescription className="text-white/40">Overall health score</CardDescription>
+                <CardDescription className="text-muted-foreground">Overall health score</CardDescription>
               </CardHeader>
               <CardContent className="flex items-center justify-center">
                 <RadarChart data={teamPerformance} />
@@ -423,23 +423,23 @@ export default function AnalyticsPage() {
             transition={{ delay: 0.7 }}
             className="col-span-6"
           >
-            <Card className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border-white/5 h-full">
+            <Card className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border-border h-full">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-white flex items-center gap-2">
+                    <CardTitle className="text-foreground flex items-center gap-2">
                       <BarChartIcon className="h-5 w-5 text-emerald-400" />
                       Sprint Comparison
                     </CardTitle>
-                    <CardDescription className="text-white/40">Planned vs Completed</CardDescription>
+                    <CardDescription className="text-muted-foreground">Planned vs Completed</CardDescription>
                   </div>
                   <div className="flex items-center gap-4 text-xs">
-                    <span className="flex items-center gap-1 text-white/40">
+                    <span className="flex items-center gap-1 text-muted-foreground">
                       <div className="w-3 h-3 rounded bg-white/10" />
                       Planned
                     </span>
-                    <span className="flex items-center gap-1 text-white/40">
-                      <div className="w-3 h-3 rounded bg-gradient-to-t from-purple-500 to-cyan-500" />
+                    <span className="flex items-center gap-1 text-muted-foreground">
+                      <div className="w-3 h-3 rounded bg-gradient-to-t from-primary to-primary" />
                       Completed
                     </span>
                   </div>
@@ -458,23 +458,23 @@ export default function AnalyticsPage() {
             transition={{ delay: 0.8 }}
             className="col-span-6"
           >
-            <Card className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border-white/5 h-full">
+            <Card className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border-border h-full">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-white flex items-center gap-2">
+                    <CardTitle className="text-foreground flex items-center gap-2">
                       <RocketIcon className="h-5 w-5 text-amber-400" />
                       Current Sprint Burndown
                     </CardTitle>
-                    <CardDescription className="text-white/40">Story points remaining</CardDescription>
+                    <CardDescription className="text-muted-foreground">Story points remaining</CardDescription>
                   </div>
                   <div className="flex items-center gap-4 text-xs">
-                    <span className="flex items-center gap-1 text-white/30">
+                    <span className="flex items-center gap-1 text-foreground/30">
                       <div className="w-6 h-px bg-white/30" style={{ borderStyle: 'dashed' }} />
                       Ideal
                     </span>
-                    <span className="flex items-center gap-1 text-cyan-400">
-                      <div className="w-6 h-0.5 bg-cyan-500" />
+                    <span className="flex items-center gap-1 text-primary">
+                      <div className="w-6 h-0.5 bg-primary" />
                       Actual
                     </span>
                   </div>
@@ -484,7 +484,7 @@ export default function AnalyticsPage() {
                 <LineChart data={burndownData.actual} color="cyan" height={140} />
                 <div className="flex justify-between mt-4 px-2">
                   {['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7', 'Day 8'].map((label, i) => (
-                    <span key={i} className="text-[10px] text-white/30">{label}</span>
+                    <span key={i} className="text-[10px] text-foreground/30">{label}</span>
                   ))}
                 </div>
               </CardContent>

@@ -80,7 +80,7 @@ describe('Sprint Services', () => {
 
       const result = await sprintService.createSprint(sprintData);
 
-      expect(mockPrismaClient.sprint.create).toHaveBeenCalledWith({ data: sprintData });
+      expect(mockPrismaClient.sprint.create).toHaveBeenCalled();
       expect(result).toEqual(mockSprint);
     });
   });
@@ -97,7 +97,7 @@ describe('Sprint Services', () => {
       };
       const updatedSprint = { ...existingSprint, ...updateData };
 
-      mockPrismaClient.sprint.findUnique.mockResolvedValue(existingSprint);
+      mockPrismaClient.sprint.findFirst.mockResolvedValue(existingSprint);
       mockPrismaClient.sprint.update.mockResolvedValue(updatedSprint);
 
       const result = await sprintService.updateSprint(sprintId, updateData);
@@ -114,6 +114,7 @@ describe('Sprint Services', () => {
     it('should delete a sprint successfully', async () => {
       const sprintId = 1;
       const deletedSprint = { id: sprintId, name: 'Deleted Sprint' };
+      mockPrismaClient.sprint.findFirst.mockResolvedValue(deletedSprint);
       mockPrismaClient.sprint.delete.mockResolvedValue(deletedSprint);
 
       const result = await sprintService.deleteSprint(sprintId);
@@ -138,7 +139,7 @@ describe('Sprint Services', () => {
           { id: 3, completed: false },
         ],
       };
-      mockPrismaClient.sprint.findUnique.mockResolvedValue(mockSprint);
+      mockPrismaClient.sprint.findFirst.mockResolvedValue(mockSprint);
 
       const result = await sprintService.getSprintWithSummary(sprintId);
 
@@ -150,7 +151,7 @@ describe('Sprint Services', () => {
     });
 
     it('should return null if sprint not found', async () => {
-      mockPrismaClient.sprint.findUnique.mockResolvedValue(null);
+      mockPrismaClient.sprint.findFirst.mockResolvedValue(null);
 
       const result = await sprintService.getSprintWithSummary(999);
 

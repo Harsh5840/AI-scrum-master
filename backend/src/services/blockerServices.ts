@@ -136,9 +136,13 @@ const deduplicateBlockers = (blockers: BlockerDetectionResult[]): BlockerDetecti
   return unique.sort((a, b) => b.confidence - a.confidence);
 };
 
-export const saveBlockers = async (standupId: number, blockers: BlockerDetectionResult[]) => {
+export const saveBlockers = async (
+  standupId: number,
+  blockers: BlockerDetectionResult[],
+  orgId?: number
+) => {
   const savedBlockers = [];
-  
+
   for (const blocker of blockers) {
     const saved = await prisma.blocker.create({
       data: {
@@ -146,34 +150,32 @@ export const saveBlockers = async (standupId: number, blockers: BlockerDetection
         type: blocker.type,
         severity: blocker.severity,
         description: blocker.description,
-        status: 'active'
-      }
+        status: 'active',
+        ...(orgId ? { orgId } : {}),
+      },
     });
     savedBlockers.push(saved);
   }
-  
+
   return savedBlockers;
 };
 
-export const getActiveBlockers = async (sprintId?: number) => {
-  const where = sprintId 
-    ? { standup: { sprintId }, status: 'active' }
-    : { status: 'active' };
-    
+export const getActiveBlockers = async (sprintId?: number, orgId?: number | null) => {
+  const where: Record<string, unknown> = { status: 'active' };
+  if (orgId) where.orgId = orgId;
+  if (sprintId) where.standup = { sprintId };
+
   return prisma.blocker.findMany({
     where,
     include: {
       standup: {
         include: {
           user: true,
-          sprint: true
-        }
-      }
+          sprint: true,
+        },
+      },
     },
-    orderBy: [
-      { severity: 'desc' },
-      { detectedAt: 'desc' }
-    ]
+    orderBy: [{ severity: 'desc' }, { detectedAt: 'desc' }],
   });
 };
 
@@ -192,19 +194,23 @@ export const createBlocker = async (data: {
   severity: string;
   type?: string;
   standupId?: number;
+  orgId?: number | null;
 }) => {
   const createData: any = {
     description: data.description,
     severity: data.severity,
     type: data.type || 'manual',
-    status: 'active'
+    status: 'active',
   };
 
   if (data.standupId !== undefined) {
     createData.standupId = data.standupId;
   }
+  if (data.orgId) {
+    createData.orgId = data.orgId;
+  }
 
   return prisma.blocker.create({
-    data: createData
+    data: createData,
   });
 };

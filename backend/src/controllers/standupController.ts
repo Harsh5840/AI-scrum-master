@@ -1,6 +1,7 @@
 import { type Request, type Response } from "express";
 import { summarizeStandup } from "../services/aiServices.js";
 import * as standupService from "../services/standupServices.js";
+import { resolveOrgId } from "../utils/orgContext.js";
 
 // GET /api/standups?sprintId=123
 export const getStandups = async (req: Request, res: Response) => {
@@ -9,7 +10,8 @@ export const getStandups = async (req: Request, res: Response) => {
     if (req.query.sprintId && isNaN(Number(req.query.sprintId))) {
       return res.status(400).json({ error: "Invalid sprintId" });
     }
-    const standups = await standupService.getStandups(sprintId);
+    const orgId = await resolveOrgId((req as any).user);
+    const standups = await standupService.getStandups(sprintId, orgId);
     res.json(standups);
   } catch (error) {
     console.error("Error fetching standups:", error);
@@ -20,17 +22,24 @@ export const getStandups = async (req: Request, res: Response) => {
 // POST /api/standups
 export const createStandup = async (req: Request, res: Response) => {
   try {
-    const { userId, sprintId, description } = req.body;
-    if (!userId || !description) {
+    const user = (req as any).user;
+    const { userId, sprintId, description, summary: clientSummary } = req.body;
+    const resolvedUserId = userId || user?.id;
+
+    if (!resolvedUserId || (!description && !clientSummary)) {
       return res.status(400).json({ error: "userId and description are required" });
     }
-    // Generate AI summary
-    const summary = await summarizeStandup(description);
-    // Save standup in DB
+
+    const orgId = await resolveOrgId(user);
+    const text = description || clientSummary;
+    const summary = await summarizeStandup(text);
+
     const standup = await standupService.createStandup({
-      userId,
+      userId: resolvedUserId,
       sprintId,
       summary,
+      description: text,
+      orgId,
     });
     res.status(201).json(standup);
   } catch (error) {

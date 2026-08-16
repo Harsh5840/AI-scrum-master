@@ -4,19 +4,27 @@ import { generateRAGResponse, generateSprintInsights } from '../services/ragServ
 // POST /api/ai/ask
 export const askAI = async (req: Request, res: Response) => {
   try {
-    const { question, sprintId, userId, includeTypes } = req.body;
-    
-    if (!question) {
+    const { question, query, sprintId, userId, includeTypes } = req.body;
+    const prompt = question || query;
+
+    if (!prompt) {
       return res.status(400).json({ error: 'Question is required' });
     }
 
-    const response = await generateRAGResponse(question, {
+    const response = await generateRAGResponse(prompt, {
       sprintId,
-      userId,
+      userId: userId || (req as any).user?.id,
       includeTypes,
     });
 
-    res.json(response);
+    res.json({
+      success: true,
+      response: response.answer,
+      answer: response.answer,
+      context: response.context,
+      sources: response.sources,
+      generatedAt: new Date().toISOString(),
+    });
   } catch (error: any) {
     console.error('Error generating AI response:', error);
     res.status(500).json({ 

@@ -146,14 +146,15 @@ export const getJobStatus = async (req: Request, res: Response) => {
   try {
     const { jobId } = req.params;
     const { queue = 'ai-workflows' } = req.query;
-    
-    // Note: This would require additional BullMQ API calls to get job status
-    // For now, return a simplified response
+
+    if (!jobId) {
+      return res.status(400).json({ error: 'Job ID is required' });
+    }
+
+    const status = await queueManager.getJobStatus(jobId, String(queue) as any);
     res.json({
       success: true,
-      jobId,
-      queue,
-      message: 'Job status checking not fully implemented yet',
+      ...status,
     });
   } catch (error) {
     console.error('❌ Failed to get job status:', error);

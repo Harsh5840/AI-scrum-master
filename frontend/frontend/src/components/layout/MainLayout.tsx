@@ -15,32 +15,26 @@ export function MainLayout({ children, title }: MainLayoutProps) {
   const sidebarOpen = useAppSelector((state) => state.ui.sidebarOpen)
 
   return (
-    <div className="flex h-screen bg-[#09090B]">
-      {/* Sidebar */}
-      <div className={cn(
-        'hidden lg:block transition-all duration-300',
-        sidebarOpen ? 'w-60' : 'w-16'
-      )}>
+    <div className="flex h-screen bg-background">
+      <div
+        className={cn(
+          'hidden lg:block transition-all duration-300 border-r border-border',
+          sidebarOpen ? 'w-60' : 'w-16'
+        )}
+      >
         <Sidebar />
       </div>
 
-      {/* Mobile sidebar overlay */}
-      <div className={cn(
-        'fixed inset-0 z-50 lg:hidden',
-        sidebarOpen ? 'block' : 'hidden'
-      )}>
+      <div className={cn('fixed inset-0 z-50 lg:hidden', sidebarOpen ? 'block' : 'hidden')}>
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-        <div className="relative w-64">
+        <div className="relative w-64 h-full border-r border-border bg-background">
           <Sidebar />
         </div>
       </div>
 
-      {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header title={title} />
-        <main className="flex-1 overflow-auto p-4 lg:p-6 bg-[#09090B]">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto p-4 lg:p-6 brand-wash">{children}</main>
       </div>
     </div>
   )
