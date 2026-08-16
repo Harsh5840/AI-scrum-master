@@ -10,7 +10,6 @@ import { useGetStandupsQuery, useCreateStandupMutation } from '@/store/api/stand
 import { useGetSprintsQuery } from '@/store/api/sprintsApi'
 import { useAppSelector } from '@/store/hooks'
 import { formatDistanceToNow } from 'date-fns'
-import { motion } from 'framer-motion'
 import { PaperPlaneIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/hooks/use-toast'
 
@@ -73,11 +72,7 @@ export default function StandupsPage() {
   return (
     <MainLayout title="Standups">
       <div className="grid lg:grid-cols-5 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="lg:col-span-2"
-        >
+        <div className="lg:col-span-2">
           <Card>
             <CardHeader>
               <CardTitle className="font-display text-lg">Log standup</CardTitle>
@@ -90,8 +85,9 @@ export default function StandupsPage() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Yesterday</Label>
+                  <Label htmlFor="yesterday">Yesterday</Label>
                   <Textarea
+                    id="yesterday"
                     value={formData.yesterday}
                     onChange={(e) => setFormData((f) => ({ ...f, yesterday: e.target.value }))}
                     placeholder="Shipped standup ingest…"
@@ -99,8 +95,9 @@ export default function StandupsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Today</Label>
+                  <Label htmlFor="today">Today</Label>
                   <Textarea
+                    id="today"
                     value={formData.today}
                     onChange={(e) => setFormData((f) => ({ ...f, today: e.target.value }))}
                     placeholder="Working on blocker extraction…"
@@ -108,11 +105,12 @@ export default function StandupsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5">
-                    <ExclamationTriangleIcon className="h-3.5 w-3.5 text-amber-500" />
+                  <Label htmlFor="blockers" className="flex items-center gap-1.5">
+                    <ExclamationTriangleIcon className="h-3.5 w-3.5 text-[hsl(var(--warning))]" />
                     Blockers
                   </Label>
                   <Textarea
+                    id="blockers"
                     value={formData.blockers}
                     onChange={(e) => setFormData((f) => ({ ...f, blockers: e.target.value }))}
                     placeholder="Blocked waiting on API credentials from platform…"
@@ -129,7 +127,7 @@ export default function StandupsPage() {
               </form>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         <div className="lg:col-span-3 space-y-3">
           <h3 className="font-display text-lg">Recent</h3>
@@ -141,18 +139,12 @@ export default function StandupsPage() {
               </CardContent>
             </Card>
           )}
-          {(standups || []).map((s: any, i: number) => (
-            <motion.div
-              key={s.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03 }}
-            >
-              <Card>
+          {(standups || []).map((s: any) => (
+              <Card key={s.id}>
                 <CardContent className="py-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium">{s.user?.name || 'Teammate'}</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground tabular-nums">
                       {formatDistanceToNow(new Date(s.createdAt), { addSuffix: true })}
                     </span>
                   </div>
@@ -162,7 +154,7 @@ export default function StandupsPage() {
                       {s.blockers.map((b: any) => (
                         <span
                           key={b.id}
-                          className="text-[10px] px-2 py-0.5 rounded-md border border-amber-500/30 text-amber-500"
+                          className="text-[11px] px-2 py-0.5 rounded-md border border-[hsl(var(--warning))]/35 text-[hsl(var(--warning))]"
                         >
                           {b.severity}: {b.description.slice(0, 40)}
                           {b.description.length > 40 ? '…' : ''}
@@ -172,7 +164,6 @@ export default function StandupsPage() {
                   )}
                 </CardContent>
               </Card>
-            </motion.div>
           ))}
         </div>
       </div>

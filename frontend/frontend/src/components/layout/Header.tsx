@@ -26,6 +26,7 @@ export function Header({ title = 'Dashboard' }: HeaderProps) {
           size="icon"
           className="lg:hidden text-muted-foreground"
           onClick={() => dispatch(toggleSidebar())}
+          aria-label="Open navigation"
         >
           <HamburgerMenuIcon className="h-4 w-4" />
         </Button>

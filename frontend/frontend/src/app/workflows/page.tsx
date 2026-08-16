@@ -1,6 +1,7 @@
 'use client'
 
 import { MainLayout } from '@/components/layout/MainLayout'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useGetQueueStatusQuery } from '@/store/api/workflowsApi'
 
@@ -12,44 +13,31 @@ export default function WorkflowsPage() {
   const ai = data?.queues?.aiWorkflows
   const notifications = data?.queues?.notifications
 
-  const cards = [
-    { label: 'Waiting', value: ai?.waiting ?? data?.waiting ?? 0 },
-    { label: 'Active', value: ai?.active ?? data?.active ?? 0 },
-    { label: 'Completed', value: ai?.completed ?? data?.completed ?? 0 },
-    { label: 'Failed', value: ai?.failed ?? data?.failed ?? 0 },
-  ]
+  const waiting = ai?.waiting ?? data?.waiting ?? 0
+  const active = ai?.active ?? data?.active ?? 0
+  const completed = ai?.completed ?? data?.completed ?? 0
+  const failed = ai?.failed ?? data?.failed ?? 0
 
   return (
     <MainLayout title="Jobs">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <h2 className="font-display text-2xl">BullMQ job status</h2>
-            <p className="text-sm text-muted-foreground">
-              Standup sentiment, blocker patterns, and sprint health run on Redis-backed workers
+            <h2 className="font-display text-2xl">BullMQ status</h2>
+            <p className="text-sm text-muted-foreground mt-1.5">
+              Standup sentiment, blocker patterns, and sprint health on Redis-backed workers
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground"
-          >
+          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
             {isFetching ? 'Refreshing…' : 'Refresh'}
-          </button>
+          </Button>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {cards.map((c) => (
-            <Card key={c.label}>
-              <CardHeader className="pb-2">
-                <CardDescription>{c.label}</CardDescription>
-                <CardTitle className="font-display text-3xl">
-                  {isLoading ? '…' : c.value}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
+        <p className="text-sm text-muted-foreground tabular-nums">
+          {isLoading
+            ? 'Loading queue counts…'
+            : `${waiting} waiting · ${active} active · ${completed} completed · ${failed} failed`}
+        </p>
 
         <Card>
           <CardHeader>
@@ -57,11 +45,10 @@ export default function WorkflowsPage() {
             <CardDescription>Raw counts from the backend queue manager</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <div className="rounded-xl border border-border p-4 font-mono text-xs space-y-1">
-              <div>ai-workflows: {JSON.stringify(ai || {})}</div>
-              <div>notifications: {JSON.stringify(notifications || {})}</div>
-            </div>
-            <p className="text-muted-foreground text-xs">
+            <pre className="rounded-xl border border-border p-4 font-mono text-xs overflow-x-auto">
+              {`ai-workflows: ${JSON.stringify(ai || {}, null, 2)}\nnotifications: ${JSON.stringify(notifications || {}, null, 2)}`}
+            </pre>
+            <p className="text-muted-foreground text-sm">
               If REDIS_URL is unset, jobs run inline and counts may stay at zero. Set REDIS_URL
               (or docker-compose redis) for real BullMQ workers.
             </p>

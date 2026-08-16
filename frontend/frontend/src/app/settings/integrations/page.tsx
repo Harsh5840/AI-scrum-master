@@ -125,32 +125,34 @@ function IntegrationsContent() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-semibold text-white">Integrations</h2>
-                <p className="text-white/40 text-sm mt-1">Connect your favorite tools</p>
+                <h2 className="font-display text-2xl">Slack</h2>
+                <p className="text-sm text-muted-foreground mt-1.5">
+                    The only connector with a live OAuth status check.
+                </p>
             </div>
 
             {message && (
-                <div className={`p-4 rounded-lg text-sm ${message.includes('success') || message.includes('sent') ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 border border-amber-500/20 text-amber-400'}`}>
+                <p
+                    role="status"
+                    className={`text-sm ${
+                        message.toLowerCase().includes('fail')
+                            ? 'text-destructive'
+                            : 'text-muted-foreground'
+                    }`}
+                >
                     {message}
-                </div>
+                </p>
             )}
 
-            <Card className="bg-white/[0.02] border-white/5">
+            <Card>
                 <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#4A154B] to-[#611f69] flex items-center justify-center">
-                                <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <CardTitle className="text-white">Slack</CardTitle>
-                                <CardDescription className="text-white/40">Automated standups and notifications</CardDescription>
-                            </div>
+                    <div className="flex items-center justify-between gap-3">
+                        <div>
+                            <CardTitle className="text-base font-display">Workspace</CardTitle>
+                            <CardDescription>Standups and blocker alerts via Slack OAuth</CardDescription>
                         </div>
                         {!isLoading && slackStatus?.connected && (
-                            <span className="flex items-center gap-1.5 text-sm text-emerald-400">
+                            <span className="inline-flex items-center gap-1.5 text-sm text-primary">
                                 <CheckCircledIcon className="h-4 w-4" />
                                 Connected
                             </span>
@@ -159,82 +161,40 @@ function IntegrationsContent() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {isLoading ? (
-                        <div className="h-20 bg-white/5 rounded-lg animate-pulse" />
+                        <p className="text-sm text-muted-foreground">Checking Slack status…</p>
                     ) : slackStatus?.connected ? (
-                        <>
-                            <div className="p-4 rounded-lg bg-white/[0.02] border border-white/5">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-white font-medium">{slackStatus.teamName}</p>
-                                        <p className="text-white/40 text-sm">Channel: #{slackStatus.channel}</p>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <Button size="sm" variant="outline" onClick={handleTestSlack} disabled={isTesting} className="border-white/10 text-white hover:bg-white/5">
-                                            {isTesting ? '...' : 'Test'}
-                                        </Button>
-                                        <Button size="sm" variant="ghost" onClick={handleDisconnectSlack} className="text-red-400 hover:bg-red-500/10">
-                                            <LinkBreak2Icon className="h-4 w-4 mr-1" />
-                                            Disconnect
-                                        </Button>
-                                    </div>
-                                </div>
+                        <div className="rounded-xl border border-border p-4 space-y-3">
+                            <div>
+                                <p className="font-medium">{slackStatus.teamName}</p>
+                                <p className="text-sm text-muted-foreground">#{slackStatus.channel}</p>
                             </div>
-                            <div className="grid gap-3 sm:grid-cols-2">
-                                <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5">
-                                    <div className="flex items-center gap-2 text-white mb-1">
-                                        <ChatBubbleIcon className="h-4 w-4 text-purple-400" />
-                                        <span className="font-medium text-sm">/standup Command</span>
-                                    </div>
-                                    <p className="text-white/40 text-xs">Team members can post standups from Slack</p>
-                                </div>
-                                <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5">
-                                    <div className="flex items-center gap-2 text-white mb-1">
-                                        <RocketIcon className="h-4 w-4 text-cyan-400" />
-                                        <span className="font-medium text-sm">Notifications</span>
-                                    </div>
-                                    <p className="text-white/40 text-xs">Blocker alerts and sprint updates</p>
-                                </div>
+                            <p className="text-sm text-muted-foreground">
+                                <ChatBubbleIcon className="inline h-3.5 w-3.5 mr-1" />
+                                /standup posts updates. <RocketIcon className="inline h-3.5 w-3.5 mx-1" />
+                                Notifications cover blockers and sprint events.
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                                <Button size="sm" variant="outline" onClick={handleTestSlack} disabled={isTesting}>
+                                    {isTesting ? 'Sending…' : 'Send test'}
+                                </Button>
+                                <Button size="sm" variant="ghost" onClick={handleDisconnectSlack}>
+                                    <LinkBreak2Icon className="h-4 w-4" />
+                                    Disconnect
+                                </Button>
                             </div>
-                        </>
+                        </div>
                     ) : (
-                        <div className="text-center py-6">
-                            <p className="text-white/40 text-sm mb-4">Connect Slack to enable automated standups and team notifications</p>
-                            <Button onClick={handleConnectSlack} disabled={isConnecting} className="bg-gradient-to-r from-[#4A154B] to-[#611f69] hover:from-[#611f69] hover:to-[#4A154B] text-white">
-                                {isConnecting ? 'Connecting...' : 'Add to Slack'}
+                        <div>
+                            <p className="text-sm text-muted-foreground mb-4">
+                                Connect Slack to post standups from the workspace and receive blocker alerts.
+                            </p>
+                            <Button onClick={handleConnectSlack} disabled={isConnecting}>
+                                {isConnecting ? 'Redirecting…' : 'Add to Slack'}
                             </Button>
                         </div>
                     )}
                 </CardContent>
             </Card>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-                <Card className="bg-white/[0.02] border-white/5 opacity-60">
-                    <CardHeader>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                                <span className="text-blue-400 font-bold">J</span>
-                            </div>
-                            <div>
-                                <CardTitle className="text-white text-base">Jira</CardTitle>
-                                <CardDescription className="text-white/40 text-xs">Coming Soon</CardDescription>
-                            </div>
-                        </div>
-                    </CardHeader>
-                </Card>
-                <Card className="bg-white/[0.02] border-white/5 opacity-60">
-                    <CardHeader>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-gray-500/20 flex items-center justify-center">
-                                <span className="text-white font-bold">G</span>
-                            </div>
-                            <div>
-                                <CardTitle className="text-white text-base">GitHub</CardTitle>
-                                <CardDescription className="text-white/40 text-xs">Coming Soon</CardDescription>
-                            </div>
-                        </div>
-                    </CardHeader>
-                </Card>
-            </div>
         </div>
     )
 }
@@ -242,7 +202,7 @@ function IntegrationsContent() {
 export default function IntegrationsPage() {
     return (
         <MainLayout title="Integrations">
-            <Suspense fallback={<div className="h-40 bg-white/5 rounded-lg animate-pulse" />}>
+            <Suspense fallback={<p className="text-sm text-muted-foreground">Loading integrations…</p>}>
                 <IntegrationsContent />
             </Suspense>
         </MainLayout>

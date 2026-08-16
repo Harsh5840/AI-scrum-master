@@ -6,72 +6,78 @@
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.35s;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-duration: 0.28s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @layer base {
   :root {
-    /* Light — calm product surfaces */
     --background: 140 10% 98%;
     --foreground: 150 20% 10%;
     --card: 0 0% 100%;
     --card-foreground: 150 20% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 150 20% 10%;
-    --primary: 145 63% 42%;
+    --primary: 145 63% 38%;
     --primary-foreground: 0 0% 100%;
     --secondary: 140 12% 94%;
     --secondary-foreground: 150 15% 20%;
     --muted: 140 10% 94%;
-    --muted-foreground: 150 8% 42%;
+    --muted-foreground: 150 12% 32%;
     --accent: 145 40% 94%;
     --accent-foreground: 145 50% 22%;
-    --destructive: 0 72% 51%;
+    --destructive: 0 72% 46%;
     --destructive-foreground: 0 0% 98%;
-    --border: 140 12% 88%;
-    --input: 140 12% 88%;
-    --ring: 145 63% 42%;
+    --border: 140 12% 86%;
+    --input: 140 12% 86%;
+    --ring: 145 63% 38%;
     --radius: 0.75rem;
-    --chart-1: 145 63% 42%;
+    --chart-1: 145 63% 38%;
     --chart-2: 168 50% 40%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 0 70% 55%;
-    --chart-5: 200 40% 45%;
+    --chart-3: 30 80% 48%;
+    --chart-4: 0 70% 50%;
+    --chart-5: 200 40% 42%;
+    --warning: 32 86% 42%;
+    --warning-foreground: 32 90% 18%;
   }
 
   .dark {
-    /* Watermelon dark charcoal + green */
-    --background: 150 12% 5%;
-    --foreground: 140 15% 94%;
-    --card: 150 10% 8%;
-    --card-foreground: 140 15% 94%;
-    --popover: 150 10% 8%;
-    --popover-foreground: 140 15% 94%;
-    --primary: 145 55% 48%;
-    --primary-foreground: 150 20% 6%;
+    --background: 150 14% 5%;
+    --foreground: 140 18% 94%;
+    --card: 150 12% 8%;
+    --card-foreground: 140 16% 94%;
+    --popover: 150 12% 8%;
+    --popover-foreground: 140 16% 94%;
+    --primary: 145 52% 52%;
+    --primary-foreground: 150 22% 7%;
     --secondary: 150 10% 12%;
-    --secondary-foreground: 140 12% 88%;
-    --muted: 150 8% 14%;
-    --muted-foreground: 140 8% 58%;
-    --accent: 145 30% 14%;
-    --accent-foreground: 145 50% 72%;
-    --destructive: 0 65% 48%;
+    --secondary-foreground: 140 14% 88%;
+    --muted: 150 10% 13%;
+    --muted-foreground: 145 12% 68%;
+    --accent: 145 28% 14%;
+    --accent-foreground: 145 48% 74%;
+    --destructive: 0 68% 58%;
     --destructive-foreground: 0 0% 98%;
-    --border: 150 8% 16%;
-    --input: 150 8% 14%;
-    --ring: 145 55% 48%;
-    --chart-1: 145 55% 48%;
-    --chart-2: 168 45% 50%;
-    --chart-3: 38 85% 55%;
-    --chart-4: 0 70% 55%;
-    --chart-5: 200 35% 55%;
+    --border: 150 10% 16%;
+    --input: 150 10% 14%;
+    --ring: 145 52% 52%;
+    --chart-1: 145 52% 52%;
+    --chart-2: 168 42% 52%;
+    --chart-3: 38 82% 56%;
+    --chart-4: 0 68% 58%;
+    --chart-5: 200 34% 58%;
+    --warning: 34 88% 58%;
+    --warning-foreground: 34 90% 12%;
   }
 }
 
 @layer base {
   * {
     border-color: hsl(var(--border));
+  }
+
+  html {
+    scrollbar-color: hsl(var(--primary) / 0.35) transparent;
   }
 
   body {
@@ -82,50 +88,47 @@
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    caret-color: hsl(var(--primary));
   }
 
   h1, h2, h3, .font-display {
     font-family: var(--font-syne), Syne, var(--font-dm-sans), sans-serif;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
     font-weight: 700;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.28);
+    color: hsl(var(--foreground));
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  a {
+    text-underline-offset: 3px;
+  }
+
+  table {
+    font-variant-numeric: tabular-nums;
   }
 }
 
 @layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.6s ease-out;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.55s ease-out;
-  }
-
-  .surface-grid {
-    background-image:
-      linear-gradient(hsl(var(--border) / 0.35) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.35) 1px, transparent 1px);
-    background-size: 48px 48px;
-  }
-
   .brand-wash {
     background:
-      radial-gradient(ellipse 80% 50% at 50% -20%, hsl(var(--primary) / 0.18), transparent),
+      radial-gradient(ellipse 70% 42% at 50% -18%, hsl(var(--primary) / 0.16), transparent 62%),
       hsl(var(--background));
   }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea'
 import { useGetSprintsQuery } from '@/store/api/sprintsApi'
 import { useAskAIMutation } from '@/store/api/aiApi'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   PaperPlaneIcon,
   LightningBoltIcon,
@@ -17,7 +16,6 @@ import {
   BarChartIcon,
   ReloadIcon,
   CopyIcon,
-  MagicWandIcon,
 } from '@radix-ui/react-icons'
 
 interface Message {
@@ -29,23 +27,14 @@ interface Message {
 }
 
 const suggestions = [
-  { icon: <RocketIcon className="h-4 w-4" />, text: 'How is the current sprint progressing?', category: 'Sprint' },
-  { icon: <PersonIcon className="h-4 w-4" />, text: 'What blockers need attention?', category: 'Team' },
-  { icon: <BarChartIcon className="h-4 w-4" />, text: 'Predict if we will meet our deadline', category: 'Forecast' },
-  { icon: <LightningBoltIcon className="h-4 w-4" />, text: 'Summarize team velocity trends', category: 'Analytics' },
+  { icon: <RocketIcon className="h-4 w-4" />, text: 'How is the current sprint progressing?' },
+  { icon: <PersonIcon className="h-4 w-4" />, text: 'What blockers need attention?' },
+  { icon: <BarChartIcon className="h-4 w-4" />, text: 'What risks show up in recent standups?' },
+  { icon: <LightningBoltIcon className="h-4 w-4" />, text: 'Summarize open blockers this sprint' },
 ]
 
 const TypingIndicator = () => (
-  <div className="flex items-center gap-1">
-    {[0, 0.2, 0.4].map((delay) => (
-      <motion.div
-        key={delay}
-        animate={{ opacity: [0.4, 1, 0.4] }}
-        transition={{ duration: 1, repeat: Infinity, delay }}
-        className="w-2 h-2 bg-primary rounded-full"
-      />
-    ))}
-  </div>
+  <p className="text-sm text-muted-foreground">Retrieving standup context…</p>
 )
 
 export default function AIInsightsPage() {
@@ -142,19 +131,13 @@ export default function AIInsightsPage() {
         <div className="flex-1 flex flex-col min-w-0">
           <Card className="flex-1 flex flex-col bg-card/80 border-border overflow-hidden">
             <CardHeader className="border-b border-border py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                    <MagicWandIcon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">Grounded Q&amp;A</CardTitle>
-                    <CardDescription className="text-xs flex items-center gap-1.5">
-                      <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                      Gemini + optional Pinecone RAG
-                      {activeSprint ? ` · ${activeSprint.name}` : ''}
-                    </CardDescription>
-                  </div>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base font-display">Grounded Q&amp;A</CardTitle>
+                  <CardDescription className="text-xs">
+                    Gemini + optional Pinecone RAG
+                    {activeSprint ? ` · ${activeSprint.name}` : ''}
+                  </CardDescription>
                 </div>
                 <Button
                   variant="ghost"
@@ -169,12 +152,9 @@ export default function AIInsightsPage() {
             </CardHeader>
 
             <CardContent className="flex-1 overflow-y-auto py-4 space-y-4">
-              <AnimatePresence initial={false}>
-                {messages.map((message) => (
-                  <motion.div
+              {messages.map((message) => (
+                  <div
                     key={message.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
@@ -201,15 +181,15 @@ export default function AIInsightsPage() {
                         <button
                           type="button"
                           onClick={() => navigator.clipboard.writeText(message.content)}
-                          className="mt-2 text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-[10px]"
+                          aria-label="Copy answer"
+                          className="mt-2 text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs min-h-8"
                         >
                           <CopyIcon className="h-3 w-3" /> Copy
                         </button>
                       )}
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
-              </AnimatePresence>
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="rounded-2xl px-4 py-3 bg-secondary border border-border">
@@ -227,27 +207,32 @@ export default function AIInsightsPage() {
                     key={s.text}
                     type="button"
                     onClick={() => handleSuggestionClick(s.text)}
-                    className="text-xs px-3 py-1.5 rounded-lg border border-border bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
+                    className="text-xs px-3 min-h-8 rounded-lg border border-border bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
                   >
                     {s.icon}
-                    {s.category}
+                    {s.text}
                   </button>
                 ))}
               </div>
               <div className="flex gap-2">
+                <label htmlFor="ai-question" className="sr-only">
+                  Question for the AI scrum master
+                </label>
                 <Textarea
+                  id="ai-question"
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask about blockers, sprint risk, velocity…"
-                  className="min-h-[48px] max-h-32 resize-none"
+                  placeholder="Ask about blockers, sprint risk, or standup history…"
+                  className="min-h-12 max-h-32 resize-none"
                   rows={2}
                 />
                 <Button
                   onClick={handleSend}
                   disabled={!input.trim() || isLoading}
                   className="self-end"
+                  aria-label="Send question"
                 >
                   <PaperPlaneIcon className="h-4 w-4" />
                 </Button>
@@ -264,10 +249,10 @@ export default function AIInsightsPage() {
                 How this works
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-xs text-muted-foreground space-y-2 leading-relaxed">
-              <p>1. Standups land in Postgres and optionally Pinecone.</p>
-              <p>2. Your question retrieves similar history.</p>
-              <p>3. Gemini answers with that context — not a keyword script.</p>
+            <CardContent className="text-sm text-muted-foreground space-y-3 leading-relaxed">
+              <p>Standups land in Postgres and optionally Pinecone.</p>
+              <p>Your question retrieves similar history.</p>
+              <p>Gemini answers with that context — not a keyword script.</p>
             </CardContent>
           </Card>
         </div>

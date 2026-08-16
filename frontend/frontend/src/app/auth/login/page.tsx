@@ -29,7 +29,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
-      <div className="hidden lg:flex flex-col justify-between p-12 border-r border-border brand-wash surface-grid relative">
+      <div className="hidden lg:flex flex-col justify-between p-12 border-r border-border brand-wash relative">
         <div className="flex items-center gap-2 relative z-10">
           <div className="w-9 h-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-display">
             S
@@ -64,7 +64,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2">
+              <div role="alert" className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2">
                 {error}
               </div>
             )}
@@ -99,7 +99,8 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground min-h-10 min-w-10 inline-flex items-center justify-center"
                   onClick={() => setShowPassword((s) => !s)}
                 >
                   {showPassword ? <EyeNoneIcon /> : <EyeOpenIcon />}

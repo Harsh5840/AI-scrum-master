@@ -3,7 +3,8 @@
 import React from 'react'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
-import { useAppSelector } from '@/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { toggleSidebar } from '@/store/slices/uiSlice'
 import { cn } from '@/lib/utils'
 
 interface MainLayoutProps {
@@ -12,6 +13,7 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ children, title }: MainLayoutProps) {
+  const dispatch = useAppDispatch()
   const sidebarOpen = useAppSelector((state) => state.ui.sidebarOpen)
 
   return (
@@ -25,8 +27,18 @@ export function MainLayout({ children, title }: MainLayoutProps) {
         <Sidebar />
       </div>
 
-      <div className={cn('fixed inset-0 z-50 lg:hidden', sidebarOpen ? 'block' : 'hidden')}>
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className={cn('fixed inset-0 z-50 lg:hidden', sidebarOpen ? 'block' : 'hidden')}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation"
+      >
+        <button
+          type="button"
+          className="absolute inset-0 bg-black/60"
+          aria-label="Close navigation"
+          onClick={() => dispatch(toggleSidebar())}
+        />
         <div className="relative w-64 h-full border-r border-border bg-background">
           <Sidebar />
         </div>

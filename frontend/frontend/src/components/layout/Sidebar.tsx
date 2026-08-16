@@ -75,7 +75,8 @@ export function Sidebar({ className }: SidebarProps) {
           variant="ghost"
           size="icon"
           onClick={() => dispatch(toggleSidebar())}
-          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+          className="h-10 w-10 text-muted-foreground hover:text-foreground"
+          aria-label={sidebarOpen ? 'Collapse navigation' : 'Expand navigation'}
         >
           <HamburgerMenuIcon className="h-4 w-4" />
         </Button>
@@ -101,7 +102,7 @@ export function Sidebar({ className }: SidebarProps) {
               )}
               asChild
             >
-              <Link href={item.href}>
+              <Link href={item.href} aria-label={item.label} aria-current={isActive ? 'page' : undefined}>
                 <Icon className={cn('h-4 w-4 flex-shrink-0', sidebarOpen && 'mr-2')} />
                 {sidebarOpen && <span className="flex-1 text-left text-sm">{item.label}</span>}
               </Link>
